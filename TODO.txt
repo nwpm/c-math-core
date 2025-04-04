@@ -1,0 +1,15 @@
+03.04.2025
+-Added files trignm.c and trignm.h.
+-In files implemented functions sml_to_deg, sml_to_rad,
+sml_is_angles_adjacent, sml_normalize_angle_signed,
+sml_normalize_rad_signed, sml_find_quadrant_deg and
+sml_find_quadrant_rad.
+
+04.04.2025
+-Added new files algebra.c and algebra.h which will contain
+all algebra functions.
+-In algebra files added and inplemented functions like sml_absolute_value,
+sml_pow. Added function sml_sqrt declaration.
+
+TODO
+-Remove all #define constant and replace them by const
