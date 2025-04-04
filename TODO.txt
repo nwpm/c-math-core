@@ -13,3 +13,6 @@ sml_pow. Added function sml_sqrt declaration.
 
 TODO
 -Remove all #define constant and replace them by const
+-Add folder Euclidean geometry and formula for Perimetr
+-In algebra, add functions for Least common miltiple and Least
+common divisor
