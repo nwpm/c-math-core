@@ -1,11 +1,5 @@
 #include "trignm.h"
-#include <stdio.h>
-
-#define PI 3.141592
-#define STRGHT_ANG 180.0
-#define FULL_TRN_DEG 360.0
-#define FULL_TRN_INT_DEG 360
-#define FULL_TRN_RAD (2 * PI)
+#include "../constants/constnts.h"
 
 /*Degrees and radians convertion*/
 float sml_to_deg(float rad) { return (rad * STRGHT_ANG / PI); }

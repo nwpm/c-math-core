@@ -1,3 +1,6 @@
+#ifndef TRIGNM_H
+#define TRIGNM_H
+
 /*Degrees and radians convertion*/
 float sml_to_deg(float rad);
 float sml_to_deg(float rad);
@@ -13,3 +16,5 @@ int sml_is_angles_adjacent(float first_angle, float second_angle);
 /*int is too large?*/
 int sml_find_quadrant_deg(float deg);
 int sml_find_quadrant_rad(float rad);
+
+#endif
