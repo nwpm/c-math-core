@@ -11,8 +11,14 @@ all algebra functions.
 -In algebra files added and inplemented functions like sml_absolute_value,
 sml_pow. Added function sml_sqrt declaration.
 
-TODO
+05.04.2025
 -Remove all #define constant and replace them by const
--Add folder Euclidean geometry and formula for Perimetr
--In algebra, add functions for Least common miltiple and Least
+-Add folder Euclidean geometry and formula for circumference.
+-Add header guards in all headers.
+
+TODO
+-In algebra, add functions for Least common miltiple and Greatest
 common divisor
+-Add function for calculate quadratic equation
+-Add function for calculate square root(and all decimal exponets)
+-Add separate files for all units constants
