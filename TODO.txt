@@ -1,24 +1,27 @@
-03.04.2025
+03.04.2025 #1
 -Added files trignm.c and trignm.h.
 -In files implemented functions sml_to_deg, sml_to_rad,
 sml_is_angles_adjacent, sml_normalize_angle_signed,
 sml_normalize_rad_signed, sml_find_quadrant_deg and
 sml_find_quadrant_rad.
 
-04.04.2025
+04.04.2025 #2
 -Added new files algebra.c and algebra.h which will contain
 all algebra functions.
 -In algebra files added and inplemented functions like sml_absolute_value,
 sml_pow. Added function sml_sqrt declaration.
 
-05.04.2025
+05.04.2025 #3
 -Remove all #define constant and replace them by const
 -Add folder Euclidean geometry and formula for circumference.
 -Add header guards in all headers.
 
-TODO
+06.04.2025 #4
 -In algebra, add functions for Least common miltiple and Greatest
 common divisor
+
+TODO
+-Check all fuctions in files. Fix if needed.
 -Add function for calculate quadratic equation
 -Add function for calculate square root(and all decimal exponets)
 -Add separate files for all units constants
