@@ -10,16 +10,21 @@ float sml_sqrt(float val);
 /*sml_pow for now find only integral exponents*/
 float sml_pow(float val, int exp);
 
+/*
 typedef struct equation_solution {
   float first_root = 0.f;
   float second_root = 0.f;
   int has_real_solution = 1;
 } equation_solution;
+*/
 
 /*Calculate quadratic equation*/
-equation_solution sml_quadrtc_equation(float a, float b, float c);
+// equation_solution sml_quadrtc_equation(float a, float b, float c);
 
 /*Square root*/
 float sml_decimal_pow(float num, float pow);
+
+int sml_least_common_divisor(int first, int second);
+int sml_greatest_common_divisor(int first, int second);
 
 #endif
