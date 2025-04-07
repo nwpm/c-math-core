@@ -27,4 +27,6 @@ float sml_decimal_pow(float num, float pow);
 int sml_least_common_divisor(int first, int second);
 int sml_greatest_common_divisor(int first, int second);
 
+float sml_distance(float first, float second);
+
 #endif

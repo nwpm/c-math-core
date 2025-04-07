@@ -1,5 +1,4 @@
 #include "algebra.h"
-#include <stdio.h>
 
 float sml_absolute_value(float val) { return val > 0.0 ? val : (-1.0 * val); }
 
@@ -84,9 +83,8 @@ int sml_greatest_common_divisor(int first, int second) {
   return greatest_val;
 }
 
-int main(void) {
-  printf("%d\n", sml_least_common_multiple(167, 3));
-  printf("%d\n", sml_greatest_common_divisor(167, 3));
-
-  return 0;
+// 0.f and 0.f gave -0 result
+float sml_distance(float first, float second) {
+  float result = sml_absolute_value(first - second);
+  return result;
 }
