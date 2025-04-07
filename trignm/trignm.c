@@ -6,13 +6,14 @@ float sml_to_deg(float rad) { return (rad * STRGHT_ANG / PI); }
 float sml_to_rad(float deg) { return (deg * PI / STRGHT_ANG); }
 
 /*Reduction of angles in (-2PI, 2PI)*/
-float sml_normalize_angle_signed(float deg) {
+float sml_normalize_angle(float deg) {
   int turns = (int)(deg / FULL_TRN_DEG);
   float result = deg - (turns * FULL_TRN_DEG);
   return result;
 }
 
 /*Simple check is angles adjacent*/
+/*FLOAT COMPARISON*/
 int sml_is_angles_adjacent(float first_angle, float second_angle) {
   return first_angle + second_angle == STRGHT_ANG;
 }
@@ -35,9 +36,9 @@ int sml_is_angles_adjacent(float first_angle, float second_angle) {
  And same but negative versions
 */
 /*For now functions correctly work only with integer values of angle*/
-int sml_find_quadrant_deg(float deg) {
+int sml_find_quadrant(float deg) {
   /*Get rid of decimal part*/
-  int normalized_angle = (int)sml_normalize_angle_signed(deg);
+  int normalized_angle = (int)sml_normalize_angle(deg);
   float decimal_part = deg - normalized_angle;
 
   decimal_part = decimal_part > 0.f ? decimal_part : -1.f * decimal_part;
