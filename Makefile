@@ -1,0 +1,2 @@
+TARGET = sml
+CC = gcc
