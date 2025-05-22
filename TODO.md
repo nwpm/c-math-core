@@ -8,51 +8,52 @@
 
 ## Modules
 
--[] graphics(console, OpenGL, Vulkan)
--[] math_parser
--[] UI(console, ???)
+- [] graphics(console, OpenGL, Vulkan)
+- [] math_parser
+- [] UI(console, ???)
 
 ## Data Types
 
--[] vector2d
--[] vector3d
+- [] vector2d
+- [] vector3d
 
 ## Functions
 
 ### Math Constants
 
--[] PI
--[] e
+- [] PI
+- [] e
 
 ### Algebra
 
--[] mc_pow
--[] mc_sqrt
--[] mc_abs
--[] mc_lcd
--[] mc_gcd
--[] mc_quad_equation
--[] mc_ln
--[] mc_lg
--[] mc_log
--[] mc_percent
+- [] mc_pow
+- [] mc_sqrt
+- [*] mc_abs
+- [*] mc_ipow
+- [] mc_lcd
+- [] mc_gcd
+- [] mc_quad_equation
+- [] mc_ln
+- [] mc_lg
+- [] mc_log
+- [] mc_percent
 
 ### Calculus
 
--[] mc_is_periodic
--[] mc_lim
+- [] mc_is_periodic
+- [] mc_lim
 
 ### Linear Algebra
 
--[] mc_distance
+- [] mc_distance
 
 ### Trigonometry
 
--[] mc_to_deg
--[] mc_to_rad
--[] mc_sin
--[] mc_cos
--[] mc_tan
--[] mc_atan
--[] mc_asin
--[] mc_acos
+- [] mc_to_deg
+- [] mc_to_rad
+- [] mc_sin
+- [] mc_cos
+- [] mc_tan
+- [] mc_atan
+- [] mc_asin
+- [] mc_acos
