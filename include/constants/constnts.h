@@ -10,4 +10,6 @@ const float STRGHT_ANG = 180.f;
 const float FULL_TRN_DEG = 360.f;
 const int FULL_TRN_INT_DEG = 360;
 
+const double E = 2.7182818284;
+
 #endif // !CONSTANTS_H
