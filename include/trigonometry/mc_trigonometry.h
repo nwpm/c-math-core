@@ -1,19 +1,34 @@
 #ifndef TRIGNM_H
 #define TRIGNM_H
 
-/*Degrees and radians convertion*/
-float sml_to_deg(float rad);
-float sml_to_rad(float deg);
+#include "../constants/constnts.h"
 
-/*Reduction of angles (-2PI, 2PI)*/
-float sml_normalize_angle(float rad);
+/**
+ * @brief Convert angle in radians to angle in degrees
+ * @param rad Decimal value of angle
+ * @return Decimal value of angle measure
+ */
+static inline float mc_to_deg_f(float rad) { return ((rad * 180.f) / PI); }
 
-/*Simple check is angles adjacent*/
-/*FLOAT COMPARISON*/
-int sml_is_angles_adjacent(float first_angle, float second_angle);
+/**
+ * @brief Convert angle in degrees to angle in radians
+ * @param deg Decimal value of angle
+ * @return Decimal value of angle measure
+ */
+static inline float mc_to_rad_f(float deg) { return ((deg * PI) / 180.f); }
 
-/*Check in what quarter of circle is angle*/
-/*int is too large?*/
-int sml_find_quadrant(float rad);
+/**
+ * @brief Convert angle in radians to angle in degrees
+ * @param rad Decimal value of angle
+ * @return Decimal value of angle measure
+ */
+static inline double mc_to_deg_d(double rad) { return ((rad * 180.) / PI); }
+
+/**
+ * @brief Convert angle in degrees to angle in radians
+ * @param deg Decimal value of angle
+ * @return Decimal value of angle measure
+ */
+static inline double mc_to_rad_d(double deg) { return ((deg * PI) / 180.); }
 
 #endif
