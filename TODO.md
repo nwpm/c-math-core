@@ -16,13 +16,14 @@
 
 - [] vector2d
 - [] vector3d
+- [] point
 
 ## Functions
 
 ### Math Constants
 
-- [] PI
-- [] e
+- [*] PI
+- [*] e
 
 ### Algebra
 
@@ -30,13 +31,15 @@
 - [] mc_sqrt
 - [*] mc_abs
 - [*] mc_ipow
-- [] mc_lcd
-- [] mc_gcd
+- [*] mc_lcd
+- [*] mc_gcd
 - [] mc_quad_equation
 - [] mc_ln
 - [] mc_lg
 - [] mc_log
-- [] mc_percent
+- [*] mc_percent
+- [*] mc_sum_ap
+- [] mc_product_gp
 
 ### Calculus
 
@@ -46,11 +49,12 @@
 ### Linear Algebra
 
 - [] mc_distance
+- [*] mc_dot2d_product_coord
 
 ### Trigonometry
 
-- [] mc_to_deg
-- [] mc_to_rad
+- [*] mc_to_deg
+- [*] mc_to_rad
 - [] mc_sin
 - [] mc_cos
 - [] mc_tan
