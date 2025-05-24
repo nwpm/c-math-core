@@ -1,11 +1,36 @@
-#include "euclide_geom.h"
-#include "../constants/constnts.h"
+#include "../../include/euclidean/mc_euclidean.h"
+#include "../../include/constants/constants.h"
 
-float sml_circumference(float rad) {
-  if (rad < 0) {
-    return -1;
+float mc_circumference_f(float radius) {
+  if (radius <= 0.f) {
+    return 0.f;
   }
 
-  float result = 2 * PI * rad;
-  return result;
+  return 2.f * radius * PI;
 }
+
+double mc_circumference_d(double radius) {
+  if (radius <= 0.) {
+    return 0.;
+  }
+
+  return 2. * radius * PI;
+}
+
+
+float mc_circle_area_f(float radius){
+  if(radius <= 0.f){
+    return 0.f;
+  }
+
+  return PI * radius * radius;
+}
+
+double mc_circle_area_d(double radius){
+  if(radius <= 0.){
+    return 0.;
+  }
+
+  return PI * radius * radius;
+}
+
