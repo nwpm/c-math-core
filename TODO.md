@@ -40,6 +40,12 @@
 - [*] mc_percent
 - [*] mc_sum_ap
 - [] mc_product_gp
+- [*] mc_factorial
+
+### Euclidean
+
+- [*] mc_circumference
+- [*] mc_circle_area
 
 ### Calculus
 
@@ -61,3 +67,7 @@
 - [] mc_atan
 - [] mc_asin
 - [] mc_acos
+
+### Other
+
+- [] Guards for macro
