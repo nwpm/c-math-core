@@ -1,0 +1,232 @@
+#include "cm_matrix_int.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+// TODO: make NULL check or not?
+// TODO: error handler
+// TODO: return codes only in debug build or return codes only in some
+// functiuons
+
+#ifdef DEBUG
+void _cm_matrix_int_printf(const CmMatrixInt *matrix) {
+
+  for (size_t i = 0; i < matrix->rows; ++i) {
+    for (size_t j = 0; j < matrix->columns; ++j) {
+      printf("%d ", matrix->data[i * matrix->columns + j]);
+    }
+    putchar('\n');
+  }
+}
+#else
+void _cm_matrix_int_printf(const CmMatrixInt *matrix) { (void)matrix; }
+#endif
+
+#define CM_CHECK_NULL(ptr)                                                     \
+  do {                                                                         \
+    if ((ptr) == NULL) {                                                       \
+      return CM_ERR_NULL_POINTER;                                              \
+    }                                                                          \
+  } while (0)
+
+#define CM_SQUARE_CHECK(matrix)                                                \
+  do {                                                                         \
+    if ((matrix->rows) != (matrix->columns)) {                                 \
+      return CM_ERR_NOT_SQUARE;                                                \
+    }                                                                          \
+  } while (0)
+
+CmMatrixInt *cm_matrix_int_alloc(size_t rows, size_t cols) {
+
+  CmMatrixInt *matrix = malloc(sizeof(CmMatrixInt));
+
+  if (!matrix)
+    return NULL;
+
+  int *data = malloc(sizeof(int) * rows * cols);
+
+  if (!data) {
+    free(matrix);
+    return NULL;
+  }
+
+  matrix->columns = cols;
+  matrix->rows = rows;
+  matrix->data = data;
+
+  return matrix;
+}
+
+CmMatrixInt *cm_matrix_int_calloc(size_t rows, size_t cols) {
+
+  CmMatrixInt *matrix = malloc(sizeof(CmMatrixInt));
+
+  if (!matrix)
+    return NULL;
+
+  int *data = calloc(rows * cols, sizeof(int));
+
+  if (!data) {
+    free(matrix);
+    return NULL;
+  }
+
+  matrix->columns = cols;
+  matrix->rows = rows;
+  matrix->data = data;
+
+  return matrix;
+}
+
+CmMatrixInt *cm_matrix_int_create_from_matrix(const CmMatrixInt *orig_matrix) {
+
+  CmMatrixInt *copy_matrix =
+      cm_matrix_int_alloc(orig_matrix->rows, orig_matrix->columns);
+
+  if (!copy_matrix) {
+    return NULL;
+  }
+
+  for (size_t i = 0; i < copy_matrix->rows; ++i) {
+    for (size_t j = 0; j < copy_matrix->columns; ++j) {
+      copy_matrix->data[i * copy_matrix->columns + j] =
+          orig_matrix->data[i * orig_matrix->columns + j];
+    }
+  }
+
+  return copy_matrix;
+}
+
+int cm_matrix_int_swap(CmMatrixInt **matrix_a, CmMatrixInt **matrix_b) {
+
+  CM_CHECK_NULL(matrix_a);
+  CM_CHECK_NULL(matrix_b);
+
+  CmMatrixInt *tmp = *matrix_a;
+  *matrix_a = *matrix_b;
+  *matrix_b = tmp;
+
+  return CM_SUCCESS;
+}
+
+int cm_matrix_int_set_identity(CmMatrixInt *matrix) {
+
+  CM_CHECK_NULL(matrix);
+  CM_SQUARE_CHECK(matrix);
+
+  for (size_t i = 0; i < matrix->rows; ++i) {
+    for (size_t j = 0; j < matrix->columns; ++j) {
+      if (i == j) {
+        matrix->data[i * matrix->columns + j] = 1;
+      } else {
+        matrix->data[i * matrix->columns + j] = 0;
+      }
+    }
+  }
+
+  return CM_SUCCESS;
+}
+
+int cm_matrix_int_set_zero(CmMatrixInt *matrix) {
+
+  CM_CHECK_NULL(matrix);
+
+  for (size_t i = 0; i < matrix->rows; ++i) {
+    for (size_t j = 0; j < matrix->columns; ++j) {
+      matrix->data[i * matrix->columns + j] = 0;
+    }
+  }
+
+  return CM_SUCCESS;
+}
+
+int cm_matrix_int_set_all(CmMatrixInt *matrix, int x) {
+
+  CM_CHECK_NULL(matrix);
+
+  for (size_t i = 0; i < matrix->rows; ++i) {
+    for (size_t j = 0; j < matrix->columns; ++j) {
+      matrix->data[i * matrix->columns + j] = x;
+    }
+  }
+
+  return CM_SUCCESS;
+}
+
+int cm_matrix_int_max(const CmMatrixInt *matrix, int *max_out) {
+
+  CM_CHECK_NULL(matrix);
+  CM_CHECK_NULL(max_out);
+
+  *max_out = matrix->data[0];
+
+  for (size_t i = 0; i < matrix->rows; ++i) {
+    for (size_t j = 0; j < matrix->columns; ++j) {
+      if (matrix->data[i * matrix->columns + j] > *max_out)
+        *max_out = matrix->data[i * matrix->columns + j];
+    }
+  }
+
+  return CM_SUCCESS;
+}
+
+int cm_matrix_int_min(const CmMatrixInt *matrix, int *min_out) {
+
+  CM_CHECK_NULL(matrix);
+  CM_CHECK_NULL(min_out);
+
+  *min_out = matrix->data[0];
+
+  for (size_t i = 0; i < matrix->rows; ++i) {
+    for (size_t j = 0; j < matrix->columns; ++j) {
+      if (matrix->data[i * matrix->columns + j] < *min_out)
+        *min_out = matrix->data[i * matrix->columns + j];
+    }
+  }
+
+  return CM_SUCCESS;
+}
+
+int cm_matrix_int_transpose(CmMatrixInt *matrix) {
+
+  CM_CHECK_NULL(matrix);
+
+  CmMatrixInt *tmp_matrix = cm_matrix_int_calloc(matrix->columns, matrix->rows);
+
+  // NOTE: separate macro?
+  if (!tmp_matrix) {
+    return CM_ERR_ALLOC_FAILED;
+  }
+
+  for (size_t i = 0; i < matrix->rows; ++i) {
+    for (size_t j = 0; j < matrix->columns; ++j) {
+      tmp_matrix->data[j * matrix->rows + i] =
+          matrix->data[i * matrix->columns + j];
+    }
+  }
+
+  return CM_SUCCESS;
+}
+
+int cm_matrix_int_trace(const CmMatrixInt *matrix, int *trace_out) {
+
+  CM_CHECK_NULL(matrix);
+  CM_CHECK_NULL(trace_out);
+  CM_SQUARE_CHECK(matrix);
+
+  for (size_t i = 0; i < matrix->rows; ++i) {
+    for (size_t j = 0; j < matrix->columns; ++j) {
+      if (i == j) {
+        *trace_out += matrix->data[i * matrix->columns + j];
+      }
+    }
+  }
+
+  return CM_SUCCESS;
+}
+
+int cm_matrix_int_det(const CmMatrixInt* matrix, int *det_out);
+
+void cm_matrix_int_free(CmMatrixInt *matrix) {
+  free(matrix->data);
+  free(matrix);
+}
