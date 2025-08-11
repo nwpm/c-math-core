@@ -224,7 +224,64 @@ int cm_matrix_int_trace(const CmMatrixInt *matrix, int *trace_out) {
   return CM_SUCCESS;
 }
 
-int cm_matrix_int_det(const CmMatrixInt* matrix, int *det_out);
+int cm_matrix_int_det(const CmMatrixInt *matrix, int *det_out);
+
+bool cm_matrix_int_is_null(const CmMatrixInt *matrix) {
+
+  if (!matrix)
+    return false;
+
+  for (size_t i = 0; i < matrix->rows; ++i) {
+    for (size_t j = 0; j < matrix->columns; ++j) {
+      if (matrix->data[i * matrix->columns + j] == 0) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+bool cm_matrix_int_is_identity(const CmMatrixInt *matrix) {
+
+  if (!matrix)
+    return false;
+
+  for (size_t i = 0; i < matrix->rows; ++i) {
+    for (size_t j = 0; j < matrix->columns; ++j) {
+      int current_elem = matrix->data[i * matrix->columns + j];
+      if (i == j && current_elem != 1) {
+        return false;
+      } else if (i != j && current_elem != 0) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+bool cm_matrix_int_is_equal(const CmMatrixInt *matrix_a,
+                            const CmMatrixInt *matrix_b) {
+
+  if (!matrix_a || !matrix_b)
+    return false;
+
+  if ((matrix_a->rows != matrix_b->rows) ||
+      (matrix_a->columns != matrix_b->columns))
+    return false;
+
+  for (size_t i = 0; i < matrix_a->rows; ++i) {
+    for (size_t j = 0; j < matrix_a->columns; ++j) {
+
+      if (matrix_a->data[i * matrix_a->columns + j] !=
+          matrix_b->data[i * matrix_b->columns + j])
+        return false;
+    }
+  }
+
+  return true;
+}
 
 void cm_matrix_int_free(CmMatrixInt *matrix) {
   free(matrix->data);

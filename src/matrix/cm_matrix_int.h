@@ -46,11 +46,10 @@ int cm_matrix_int_min(const CmMatrixInt *matrix, int *min_out);
 int cm_matrix_int_trace(const CmMatrixInt *matrix, int *trace_out);
 int cm_matrix_int_det(const CmMatrixInt *matrix, int *det_out);
 
-int cm_matrix_int_is_null(const CmMatrixInt *matrix, bool *out_result);
-int cm_matrix_int_is_identity(const CmMatrixInt *matrix, bool *out_result);
-int cm_matrix_int_is_equal(const CmMatrixInt *matrix_a,
-                            const CmMatrixInt *matrix_b, bool *out_result);
-
+bool cm_matrix_int_is_null(const CmMatrixInt *matrix);
+bool cm_matrix_int_is_identity(const CmMatrixInt *matrix);
+bool cm_matrix_int_is_equal(const CmMatrixInt *matrix_a,
+                            const CmMatrixInt *matrix_b);
 
 int cm_matrix_int_add(CmMatrixInt *matrix_a, const CmMatrixInt *matrix_b);
 int cm_matrix_int_sub(CmMatrixInt *matrix_a, const CmMatrixInt *matrix_b);
