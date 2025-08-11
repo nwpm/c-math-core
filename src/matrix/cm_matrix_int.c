@@ -31,7 +31,22 @@ void _cm_matrix_int_printf(const CmMatrixInt *matrix) { (void)matrix; }
 #define CM_SQUARE_CHECK(matrix)                                                \
   do {                                                                         \
     if ((matrix->rows) != (matrix->columns)) {                                 \
-      return CM_ERR_NOT_SQUARE;                                                \
+      return CM_ERR_MATRIX_NOT_SQUARE;                                         \
+    }                                                                          \
+  } while (0)
+
+#define CM_SIZE_MATCH(matrix_a, matrix_b)                                      \
+  do {                                                                         \
+    if (((matrix_a->rows) != (matrix_b->rows)) ||                              \
+        ((matrix_a->columns) != (matrix_b->columns))) {                        \
+      return CM_ERR_SIZE_MISMATCH;                                             \
+    }                                                                          \
+  } while (0)
+
+#define CM_MULT_SIZE_MATCH(matrix_a, matrix_b)                                 \
+  do {                                                                         \
+    if (((matrix_a->columns) != (matrix_b->rows))) {                           \
+      return CM_ERR_MULT_SIZE_MISMATCH;                                        \
     }                                                                          \
   } while (0)
 
@@ -273,7 +288,6 @@ bool cm_matrix_int_is_equal(const CmMatrixInt *matrix_a,
 
   for (size_t i = 0; i < matrix_a->rows; ++i) {
     for (size_t j = 0; j < matrix_a->columns; ++j) {
-
       if (matrix_a->data[i * matrix_a->columns + j] !=
           matrix_b->data[i * matrix_b->columns + j])
         return false;
@@ -281,6 +295,69 @@ bool cm_matrix_int_is_equal(const CmMatrixInt *matrix_a,
   }
 
   return true;
+}
+
+int cm_matrix_int_add(CmMatrixInt *matrix_a, const CmMatrixInt *matrix_b) {
+
+  CM_CHECK_NULL(matrix_a);
+  CM_CHECK_NULL(matrix_b);
+  CM_SIZE_MATCH(matrix_a, matrix_b);
+
+  for (size_t i = 0; i < matrix_a->rows; ++i) {
+    for (size_t j = 0; j < matrix_a->columns; ++j) {
+      matrix_a->data[i * matrix_a->columns + j] +=
+          matrix_b->data[i * matrix_b->columns + j];
+    }
+  }
+
+  return CM_SUCCESS;
+}
+
+int cm_matrix_int_sub(CmMatrixInt *matrix_a, const CmMatrixInt *matrix_b) {
+
+  CM_CHECK_NULL(matrix_a);
+  CM_CHECK_NULL(matrix_b);
+  CM_SIZE_MATCH(matrix_a, matrix_b);
+
+  for (size_t i = 0; i < matrix_a->rows; ++i) {
+    for (size_t j = 0; j < matrix_a->columns; ++j) {
+      matrix_a->data[i * matrix_a->columns + j] -=
+          matrix_b->data[i * matrix_b->columns + j];
+    }
+  }
+
+  return CM_SUCCESS;
+}
+
+int cm_matrix_int_scale(CmMatrixInt *matrix_a, int scale) {
+
+  CM_CHECK_NULL(matrix_a);
+
+  for (size_t i = 0; i < matrix_a->rows; ++i) {
+    for (size_t j = 0; j < matrix_a->columns; ++j) {
+      matrix_a->data[i * matrix_a->columns + j] *= scale;
+    }
+  }
+
+  return CM_SUCCESS;
+}
+
+CmMatrixInt *cm_matrix_int_mul(const CmMatrixInt *matrix_a, const CmMatrixInt *matrix_b) {
+
+  if(!matrix_a || !matrix_b) return NULL;
+  if(matrix_a->columns != matrix_b->rows) return NULL;
+
+  CmMatrixInt* result = cm_matrix_int_alloc(matrix_a->rows, matrix_b->columns);
+
+  if(!result) return NULL;
+
+  for (size_t i = 0; i < result->rows; ++i) {
+    for (size_t j = 0; j < result->columns; ++j) {
+
+    }
+  }
+
+  return NULL;
 }
 
 void cm_matrix_int_free(CmMatrixInt *matrix) {

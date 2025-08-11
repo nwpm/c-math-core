@@ -12,7 +12,8 @@ typedef enum {
   CM_SUCCESS = 0,
   CM_ERR_NULL_POINTER,
   CM_ERR_SIZE_MISMATCH,
-  CM_ERR_NOT_SQUARE,
+  CM_ERR_MULT_SIZE_MISMATCH,
+  CM_ERR_MATRIX_NOT_SQUARE,
   CM_ERR_ALLOC_FAILED,
   CM_ERR_INVALID_ARGUMENT,
 
@@ -54,12 +55,26 @@ bool cm_matrix_int_is_equal(const CmMatrixInt *matrix_a,
 int cm_matrix_int_add(CmMatrixInt *matrix_a, const CmMatrixInt *matrix_b);
 int cm_matrix_int_sub(CmMatrixInt *matrix_a, const CmMatrixInt *matrix_b);
 int cm_matrix_int_scale(CmMatrixInt *matrix_a, int scale);
-int cm_matrix_int_mul(CmMatrixInt *matrix_a, const CmMatrixInt *matrix_b);
+CmMatrixInt *cm_matrix_int_mul(const CmMatrixInt *matrix_a,
+                               const CmMatrixInt *matrix_b);
+
+CmMatrixInt *cm_matrix_int_pow(const CmMatrixInt* base_matrix, int exponent);
+
+/* Inverse */
+
+CmMatrixInt* cm_matrix_int_inverse(const CmMatrixInt* orig_matrix);
 
 /* Getter/Setter */
 
-int cm_matrix_int_get(const CmMatrixInt *matrix, size_t row, size_t col);
-int cm_matrix_int_set(CmMatrixInt *matrix, size_t row, size_t col, int x);
+static inline int cm_matrix_int_get(const CmMatrixInt *matrix, size_t row,
+                                    size_t col) {
+  return matrix->data[row * matrix->columns + col];
+}
+
+static inline void cm_matrix_int_set(CmMatrixInt *matrix, size_t row,
+                                     size_t col, int x) {
+  matrix->data[row * matrix->columns + col] = x;
+}
 
 /* Debug */
 void _cm_matrix_int_printf(const CmMatrixInt *matrix);
