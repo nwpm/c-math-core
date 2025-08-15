@@ -1,4 +1,5 @@
 #include "cm_matrix_int.h"
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -6,6 +7,7 @@
 // TODO: error handler
 // TODO: return codes only in debug build or return codes only in some
 // functiuons
+// TODO: use get, set instead row getting, setting
 
 #ifdef DEBUG
 void _cm_matrix_int_printf(const CmMatrixInt *matrix) {
@@ -342,18 +344,30 @@ int cm_matrix_int_scale(CmMatrixInt *matrix_a, int scale) {
   return CM_SUCCESS;
 }
 
-CmMatrixInt *cm_matrix_int_mul(const CmMatrixInt *matrix_a, const CmMatrixInt *matrix_b) {
+CmMatrixInt *cm_matrix_int_mul(const CmMatrixInt *matrix_a,
+                               const CmMatrixInt *matrix_b) {
 
-  if(!matrix_a || !matrix_b) return NULL;
-  if(matrix_a->columns != matrix_b->rows) return NULL;
+  if (!matrix_a || !matrix_b)
+    return NULL;
+  if (matrix_a->columns != matrix_b->rows)
+    return NULL;
 
-  CmMatrixInt* result = cm_matrix_int_alloc(matrix_a->rows, matrix_b->columns);
+  CmMatrixInt *result = cm_matrix_int_alloc(matrix_a->rows, matrix_b->columns);
 
-  if(!result) return NULL;
+  if (!result)
+    return NULL;
+
+  size_t set_row = 0;
+  size_t set_column = 0;
 
   for (size_t i = 0; i < result->rows; ++i) {
-    for (size_t j = 0; j < result->columns; ++j) {
-
+    for (size_t k = 0; k < result->columns; ++k) {
+      int result_elem = 0;
+      for (size_t j = 0; j < result->columns; ++j) {
+        result_elem += cm_matrix_int_get(matrix_a, i, j) *
+                       cm_matrix_int_get(matrix_b, j, k);
+      }
+      cm_matrix_int_set(result, i, k, result_elem);
     }
   }
 
