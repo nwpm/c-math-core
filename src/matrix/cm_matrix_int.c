@@ -241,7 +241,52 @@ int cm_matrix_int_trace(const CmMatrixInt *matrix, int *trace_out) {
   return CM_SUCCESS;
 }
 
-int cm_matrix_int_det(const CmMatrixInt *matrix, int *det_out);
+// Bareiss
+int cm_matrix_int_det(const CmMatrixInt *matrix, int *det_out) {
+
+  CM_CHECK_NULL(matrix);
+  CM_SQUARE_CHECK(matrix);
+
+  if (matrix->rows == 2) {
+    *det_out = (matrix->data[0] * matrix->data[3]) -
+               (matrix->data[1] * matrix->data[2]);
+    return CM_SUCCESS;
+  }
+
+  CmMatrixInt *copy_matrix = cm_matrix_int_create_from_matrix(matrix);
+  CM_CHECK_NULL(copy_matrix);
+
+  int d = 1;
+
+  for (size_t k = 0; k < copy_matrix->rows - 1; ++k) {
+    int pivot = copy_matrix->data[k * copy_matrix->columns + k];
+    if (pivot == 0) {
+      // swap
+    }
+    for (size_t i = k + 1; i < copy_matrix->rows; ++i) {
+      for (size_t j = k + 1; j < copy_matrix->columns; ++j) {
+
+        int elem1 = copy_matrix->data[i * copy_matrix->columns + j];
+        int elem2 = copy_matrix->data[i * copy_matrix->columns + k];
+        int elem3 = copy_matrix->data[k * copy_matrix->columns + j];
+
+        copy_matrix->data[i * copy_matrix->columns + j] =
+            (pivot * elem1 - elem2 * elem3) / d;
+      }
+    }
+    for (size_t n = k + 1; n < copy_matrix->rows; ++n) {
+      copy_matrix->data[n * copy_matrix->columns + k] = 0;
+    }
+    d = pivot;
+  }
+
+  *det_out = cm_matrix_int_get(copy_matrix, copy_matrix->rows - 1,
+                               copy_matrix->columns - 1);
+
+  cm_matrix_int_free(copy_matrix);
+
+  return CM_SUCCESS;
+}
 
 bool cm_matrix_int_is_null(const CmMatrixInt *matrix) {
 
@@ -357,8 +402,8 @@ CmMatrixInt *cm_matrix_int_mul(const CmMatrixInt *matrix_a,
   if (!result)
     return NULL;
 
-  size_t set_row = 0;
-  size_t set_column = 0;
+  // size_t set_row = 0;
+  // size_t set_column = 0;
 
   for (size_t i = 0; i < result->rows; ++i) {
     for (size_t k = 0; k < result->columns; ++k) {

@@ -6,6 +6,8 @@
 
 // TODO: create_row_from_matrix
 // TODO: create_col_from_matrix
+// TODO: det, invers, minor, gauss
+// TODO: tests
 
 typedef enum {
 
@@ -61,8 +63,13 @@ CmMatrixInt *cm_matrix_int_mul(const CmMatrixInt *matrix_a,
 CmMatrixInt *cm_matrix_int_pow(const CmMatrixInt* base_matrix, int exponent);
 
 /* Inverse */
-
 CmMatrixInt* cm_matrix_int_inverse(const CmMatrixInt* orig_matrix);
+
+/* Minor */
+CmMatrixInt* cm_matrix_int_minor(const CmMatrixInt* orig_matrix);
+
+/* Gauss-Jordan */
+int* cm_matrix_int_gauss(const CmMatrixInt* augmented_matrix);
 
 /* Getter/Setter */
 
