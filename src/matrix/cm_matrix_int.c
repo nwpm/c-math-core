@@ -1,7 +1,9 @@
 #include "cm_matrix_int.h"
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 // TODO: make NULL check or not?
 // TODO: error handler
@@ -51,6 +53,9 @@ void _cm_matrix_int_printf(const CmMatrixInt *matrix) { (void)matrix; }
       return CM_ERR_MULT_SIZE_MISMATCH;                                        \
     }                                                                          \
   } while (0)
+
+#define CM_GET_MATRIX_ELEM(matrix, row, column)                                \
+  ((matrix)->data[(row) * (matrix)->columns + (column)])
 
 CmMatrixInt *cm_matrix_int_alloc(size_t rows, size_t cols) {
 
@@ -253,37 +258,90 @@ int cm_matrix_int_det(const CmMatrixInt *matrix, int *det_out) {
     return CM_SUCCESS;
   }
 
+  if (matrix->rows == 3) {
+    *det_out = (matrix->data[0] * matrix->data[4] * matrix->data[8]) +
+               (matrix->data[1] * matrix->data[5] * matrix->data[6]) +
+               (matrix->data[2] * matrix->data[3] * matrix->data[7]) -
+               (matrix->data[2] * matrix->data[4] * matrix->data[6]) -
+               (matrix->data[1] * matrix->data[3] * matrix->data[8]) -
+               (matrix->data[0] * matrix->data[5] * matrix->data[7]);
+
+    return CM_SUCCESS;
+  }
+
   CmMatrixInt *copy_matrix = cm_matrix_int_create_from_matrix(matrix);
   CM_CHECK_NULL(copy_matrix);
 
-  int d = 1;
+  int *mult_constants = malloc(copy_matrix->columns * sizeof(int));
+  if (!mult_constants)
+    return CM_ERR_ALLOC_FAILED;
+
+  int mult_const_index = 0;
+  int swap_number = 0;
 
   for (size_t k = 0; k < copy_matrix->rows - 1; ++k) {
     int pivot = copy_matrix->data[k * copy_matrix->columns + k];
     if (pivot == 0) {
-      // swap
-    }
-    for (size_t i = k + 1; i < copy_matrix->rows; ++i) {
-      for (size_t j = k + 1; j < copy_matrix->columns; ++j) {
 
-        int elem1 = copy_matrix->data[i * copy_matrix->columns + j];
-        int elem2 = copy_matrix->data[i * copy_matrix->columns + k];
-        int elem3 = copy_matrix->data[k * copy_matrix->columns + j];
+      bool find_non_zero = false;
 
-        copy_matrix->data[i * copy_matrix->columns + j] =
-            (pivot * elem1 - elem2 * elem3) / d;
+      for (size_t i = k + 1; i < copy_matrix->rows && !find_non_zero; ++k) {
+        if (copy_matrix->data[i * copy_matrix->columns + i] != 0) {
+
+          find_non_zero = true;
+          void *buffer = malloc(copy_matrix->columns * sizeof(int));
+
+          if (!buffer)
+            return CM_ERR_ALLOC_FAILED;
+
+          memcpy(buffer, copy_matrix->data + (i * copy_matrix->columns),
+                 sizeof(int) * copy_matrix->columns);
+
+          memmove(copy_matrix->data + (i * copy_matrix->columns),
+                  copy_matrix->data + (k * copy_matrix->columns),
+                  sizeof(int) * copy_matrix->columns);
+
+          memmove(copy_matrix->data + (k * copy_matrix->columns), buffer,
+                  sizeof(int) * copy_matrix->columns);
+
+          swap_number++;
+        }
+      }
+
+      if (!find_non_zero) {
+        *det_out = 0;
+        return CM_SUCCESS;
       }
     }
-    for (size_t n = k + 1; n < copy_matrix->rows; ++n) {
-      copy_matrix->data[n * copy_matrix->columns + k] = 0;
+
+    for (size_t i = 0; i < copy_matrix->columns; ++i) {
+      int tmp = cm_matrix_int_get(copy_matrix, k, i) / pivot;
+      cm_matrix_int_set(copy_matrix, k, i, tmp);
     }
-    d = pivot;
+
+    mult_constants[mult_const_index++] = pivot;
+
+    for (size_t i = k + 1; i < copy_matrix->rows; ++i) {
+      int deleted = -cm_matrix_int_get(copy_matrix, i, k);
+      for (size_t j = 0; j < copy_matrix->columns; ++j) {
+        int set_elem = cm_matrix_int_get(copy_matrix, k, j) * deleted +
+                       cm_matrix_int_get(copy_matrix, i, j);
+        cm_matrix_int_set(copy_matrix, i, j, set_elem);
+      }
+    }
   }
 
-  *det_out = cm_matrix_int_get(copy_matrix, copy_matrix->rows - 1,
-                               copy_matrix->columns - 1);
+  int mult = (swap_number % 2 == 0) ? 1 : -1;
+
+  *det_out = mult * cm_matrix_int_get(copy_matrix, copy_matrix->rows - 1,
+                                      copy_matrix->rows - 1);
+
+  for (int i = 0; i < mult_const_index; ++i) {
+    *det_out *= mult_constants[i];
+  }
 
   cm_matrix_int_free(copy_matrix);
+  free(mult_constants);
 
   return CM_SUCCESS;
 }
