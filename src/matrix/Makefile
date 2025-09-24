@@ -6,7 +6,7 @@ CFLAGS = -DDEBUG -g -Wall -Wextra -O0 -fsanitize=address
 
 BUILD_DIR  = ../../build/matrix
 
-MATRIX_SRC     = cm_matrix_int.c
+MATRIX_SRC     = cm_matrix_double.c
 MATRIX_OBJ     = $(BUILD_DIR)/libmatrix.o
 MATRIX_TARGET  = $(BUILD_DIR)/libmatrix.a
 

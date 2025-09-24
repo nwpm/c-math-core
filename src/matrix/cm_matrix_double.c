@@ -1,4 +1,4 @@
-#include "cm_matrix_int.h"
+#include "cm_matrix_double.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -12,17 +12,17 @@
 // TODO: use get, set instead row getting, setting
 
 #ifdef DEBUG
-void _cm_matrix_int_printf(const CmMatrixInt *matrix) {
+void _cm_matrix_double_printf(const CmMatrixDouble *matrix) {
 
   for (size_t i = 0; i < matrix->rows; ++i) {
     for (size_t j = 0; j < matrix->columns; ++j) {
-      printf("%d ", matrix->data[i * matrix->columns + j]);
+      printf("%f ", matrix->data[i * matrix->columns + j]);
     }
     putchar('\n');
   }
 }
 #else
-void _cm_matrix_int_printf(const CmMatrixInt *matrix) { (void)matrix; }
+void _cm_matrix_double_printf(const CmMatrixDouble *matrix) { (void)matrix; }
 #endif
 
 #define CM_CHECK_NULL(ptr)                                                     \
@@ -57,14 +57,21 @@ void _cm_matrix_int_printf(const CmMatrixInt *matrix) { (void)matrix; }
 #define CM_GET_MATRIX_ELEM(matrix, row, column)                                \
   ((matrix)->data[(row) * (matrix)->columns + (column)])
 
-CmMatrixInt *cm_matrix_int_alloc(size_t rows, size_t cols) {
+static void matrix_double_mult_row(CmMatrixDouble *matrix, size_t row,
+                                   double mult_by) {
+  for (size_t i = 0; i < matrix->columns; ++i) {
+    matrix->data[row * matrix->columns + i] *= mult_by;
+  }
+}
 
-  CmMatrixInt *matrix = malloc(sizeof(CmMatrixInt));
+CmMatrixDouble *cm_matrix_double_alloc(size_t rows, size_t cols) {
+
+  CmMatrixDouble *matrix = malloc(sizeof(CmMatrixDouble));
 
   if (!matrix)
     return NULL;
 
-  int *data = malloc(sizeof(int) * rows * cols);
+  double *data = malloc(sizeof(double) * rows * cols);
 
   if (!data) {
     free(matrix);
@@ -78,14 +85,14 @@ CmMatrixInt *cm_matrix_int_alloc(size_t rows, size_t cols) {
   return matrix;
 }
 
-CmMatrixInt *cm_matrix_int_calloc(size_t rows, size_t cols) {
+CmMatrixDouble *cm_matrix_double_calloc(size_t rows, size_t cols) {
 
-  CmMatrixInt *matrix = malloc(sizeof(CmMatrixInt));
+  CmMatrixDouble *matrix = malloc(sizeof(CmMatrixDouble));
 
   if (!matrix)
     return NULL;
 
-  int *data = calloc(rows * cols, sizeof(int));
+  double *data = calloc(rows * cols, sizeof(double));
 
   if (!data) {
     free(matrix);
@@ -99,10 +106,11 @@ CmMatrixInt *cm_matrix_int_calloc(size_t rows, size_t cols) {
   return matrix;
 }
 
-CmMatrixInt *cm_matrix_int_create_from_matrix(const CmMatrixInt *orig_matrix) {
+CmMatrixDouble *
+cm_matrix_double_create_from_matrix(const CmMatrixDouble *orig_matrix) {
 
-  CmMatrixInt *copy_matrix =
-      cm_matrix_int_alloc(orig_matrix->rows, orig_matrix->columns);
+  CmMatrixDouble *copy_matrix =
+      cm_matrix_double_alloc(orig_matrix->rows, orig_matrix->columns);
 
   if (!copy_matrix) {
     return NULL;
@@ -118,19 +126,20 @@ CmMatrixInt *cm_matrix_int_create_from_matrix(const CmMatrixInt *orig_matrix) {
   return copy_matrix;
 }
 
-int cm_matrix_int_swap(CmMatrixInt **matrix_a, CmMatrixInt **matrix_b) {
+int cm_matrix_double_swap(CmMatrixDouble **matrix_a,
+                          CmMatrixDouble **matrix_b) {
 
   CM_CHECK_NULL(matrix_a);
   CM_CHECK_NULL(matrix_b);
 
-  CmMatrixInt *tmp = *matrix_a;
+  CmMatrixDouble *tmp = *matrix_a;
   *matrix_a = *matrix_b;
   *matrix_b = tmp;
 
   return CM_SUCCESS;
 }
 
-int cm_matrix_int_set_identity(CmMatrixInt *matrix) {
+int cm_matrix_double_set_identity(CmMatrixDouble *matrix) {
 
   CM_CHECK_NULL(matrix);
   CM_SQUARE_CHECK(matrix);
@@ -148,7 +157,7 @@ int cm_matrix_int_set_identity(CmMatrixInt *matrix) {
   return CM_SUCCESS;
 }
 
-int cm_matrix_int_set_zero(CmMatrixInt *matrix) {
+int cm_matrix_double_set_zero(CmMatrixDouble *matrix) {
 
   CM_CHECK_NULL(matrix);
 
@@ -161,7 +170,7 @@ int cm_matrix_int_set_zero(CmMatrixInt *matrix) {
   return CM_SUCCESS;
 }
 
-int cm_matrix_int_set_all(CmMatrixInt *matrix, int x) {
+int cm_matrix_double_set_all(CmMatrixDouble *matrix, double x) {
 
   CM_CHECK_NULL(matrix);
 
@@ -174,7 +183,7 @@ int cm_matrix_int_set_all(CmMatrixInt *matrix, int x) {
   return CM_SUCCESS;
 }
 
-int cm_matrix_int_max(const CmMatrixInt *matrix, int *max_out) {
+int cm_matrix_double_max(const CmMatrixDouble *matrix, double *max_out) {
 
   CM_CHECK_NULL(matrix);
   CM_CHECK_NULL(max_out);
@@ -191,7 +200,7 @@ int cm_matrix_int_max(const CmMatrixInt *matrix, int *max_out) {
   return CM_SUCCESS;
 }
 
-int cm_matrix_int_min(const CmMatrixInt *matrix, int *min_out) {
+int cm_matrix_double_min(const CmMatrixDouble *matrix, double *min_out) {
 
   CM_CHECK_NULL(matrix);
   CM_CHECK_NULL(min_out);
@@ -208,11 +217,12 @@ int cm_matrix_int_min(const CmMatrixInt *matrix, int *min_out) {
   return CM_SUCCESS;
 }
 
-int cm_matrix_int_transpose(CmMatrixInt *matrix) {
+int cm_matrix_double_transpose(CmMatrixDouble *matrix) {
 
   CM_CHECK_NULL(matrix);
 
-  CmMatrixInt *tmp_matrix = cm_matrix_int_calloc(matrix->columns, matrix->rows);
+  CmMatrixDouble *tmp_matrix =
+      cm_matrix_double_calloc(matrix->columns, matrix->rows);
 
   // NOTE: separate macro?
   if (!tmp_matrix) {
@@ -226,10 +236,13 @@ int cm_matrix_int_transpose(CmMatrixInt *matrix) {
     }
   }
 
+  cm_matrix_double_free(matrix);
+  matrix = tmp_matrix;
+
   return CM_SUCCESS;
 }
 
-int cm_matrix_int_trace(const CmMatrixInt *matrix, int *trace_out) {
+int cm_matrix_double_trace(const CmMatrixDouble *matrix, double *trace_out) {
 
   CM_CHECK_NULL(matrix);
   CM_CHECK_NULL(trace_out);
@@ -246,8 +259,7 @@ int cm_matrix_int_trace(const CmMatrixInt *matrix, int *trace_out) {
   return CM_SUCCESS;
 }
 
-// Bareiss
-int cm_matrix_int_det(const CmMatrixInt *matrix, int *det_out) {
+int cm_matrix_double_det(const CmMatrixDouble *matrix, double *det_out) {
 
   CM_CHECK_NULL(matrix);
   CM_SQUARE_CHECK(matrix);
@@ -269,10 +281,10 @@ int cm_matrix_int_det(const CmMatrixInt *matrix, int *det_out) {
     return CM_SUCCESS;
   }
 
-  CmMatrixInt *copy_matrix = cm_matrix_int_create_from_matrix(matrix);
+  CmMatrixDouble *copy_matrix = cm_matrix_double_create_from_matrix(matrix);
   CM_CHECK_NULL(copy_matrix);
 
-  int *mult_constants = malloc(copy_matrix->columns * sizeof(int));
+  double *mult_constants = malloc(copy_matrix->columns * sizeof(double));
   if (!mult_constants)
     return CM_ERR_ALLOC_FAILED;
 
@@ -280,7 +292,7 @@ int cm_matrix_int_det(const CmMatrixInt *matrix, int *det_out) {
   int swap_number = 0;
 
   for (size_t k = 0; k < copy_matrix->rows - 1; ++k) {
-    int pivot = copy_matrix->data[k * copy_matrix->columns + k];
+    double pivot = copy_matrix->data[k * copy_matrix->columns + k];
     if (pivot == 0) {
 
       bool find_non_zero = false;
@@ -289,20 +301,20 @@ int cm_matrix_int_det(const CmMatrixInt *matrix, int *det_out) {
         if (copy_matrix->data[i * copy_matrix->columns + i] != 0) {
 
           find_non_zero = true;
-          void *buffer = malloc(copy_matrix->columns * sizeof(int));
+          void *buffer = malloc(copy_matrix->columns * sizeof(double));
 
           if (!buffer)
             return CM_ERR_ALLOC_FAILED;
 
           memcpy(buffer, copy_matrix->data + (i * copy_matrix->columns),
-                 sizeof(int) * copy_matrix->columns);
+                 sizeof(double) * copy_matrix->columns);
 
           memmove(copy_matrix->data + (i * copy_matrix->columns),
                   copy_matrix->data + (k * copy_matrix->columns),
-                  sizeof(int) * copy_matrix->columns);
+                  sizeof(double) * copy_matrix->columns);
 
           memmove(copy_matrix->data + (k * copy_matrix->columns), buffer,
-                  sizeof(int) * copy_matrix->columns);
+                  sizeof(double) * copy_matrix->columns);
 
           swap_number++;
         }
@@ -315,38 +327,117 @@ int cm_matrix_int_det(const CmMatrixInt *matrix, int *det_out) {
     }
 
     for (size_t i = 0; i < copy_matrix->columns; ++i) {
-      int tmp = cm_matrix_int_get(copy_matrix, k, i) / pivot;
-      cm_matrix_int_set(copy_matrix, k, i, tmp);
+      double tmp = cm_matrix_double_get(copy_matrix, k, i) / pivot;
+      cm_matrix_double_set(copy_matrix, k, i, tmp);
     }
 
     mult_constants[mult_const_index++] = pivot;
 
     for (size_t i = k + 1; i < copy_matrix->rows; ++i) {
-      int deleted = -cm_matrix_int_get(copy_matrix, i, k);
+      double deleted = -cm_matrix_double_get(copy_matrix, i, k);
       for (size_t j = 0; j < copy_matrix->columns; ++j) {
-        int set_elem = cm_matrix_int_get(copy_matrix, k, j) * deleted +
-                       cm_matrix_int_get(copy_matrix, i, j);
-        cm_matrix_int_set(copy_matrix, i, j, set_elem);
+        double set_elem = cm_matrix_double_get(copy_matrix, k, j) * deleted +
+                          cm_matrix_double_get(copy_matrix, i, j);
+        cm_matrix_double_set(copy_matrix, i, j, set_elem);
       }
     }
   }
 
-  int mult = (swap_number % 2 == 0) ? 1 : -1;
+  double mult = (swap_number % 2 == 0) ? 1 : -1;
 
-  *det_out = mult * cm_matrix_int_get(copy_matrix, copy_matrix->rows - 1,
-                                      copy_matrix->rows - 1);
+  *det_out = mult * cm_matrix_double_get(copy_matrix, copy_matrix->rows - 1,
+                                         copy_matrix->rows - 1);
 
   for (int i = 0; i < mult_const_index; ++i) {
     *det_out *= mult_constants[i];
   }
 
-  cm_matrix_int_free(copy_matrix);
+  cm_matrix_double_free(copy_matrix);
   free(mult_constants);
 
   return CM_SUCCESS;
 }
 
-bool cm_matrix_int_is_null(const CmMatrixInt *matrix) {
+CmMatrixDouble *cm_matrix_double_inverse(const CmMatrixDouble *orig_matrix) {
+
+  if (!orig_matrix || (orig_matrix->rows != orig_matrix->columns)) {
+    return NULL;
+  }
+
+  CmMatrixDouble *copy_matrix =
+      cm_matrix_double_create_from_matrix(orig_matrix);
+  if (!copy_matrix) {
+    return NULL;
+  }
+
+  CmMatrixDouble *res_matrix =
+      cm_matrix_double_alloc(orig_matrix->rows, orig_matrix->columns);
+  if (!res_matrix) {
+    return NULL;
+  }
+  cm_matrix_double_set_identity(res_matrix);
+
+  for (size_t k = 0; k < copy_matrix->columns; ++k) {
+
+    double pivot = copy_matrix->data[k * copy_matrix->columns + k];
+
+    if (pivot == 0.) {
+      bool find_non_zero = false;
+
+      for (size_t i = k + 1; i < copy_matrix->rows && !find_non_zero; ++k) {
+        if (copy_matrix->data[i * copy_matrix->columns + k] != 0) {
+
+          find_non_zero = true;
+          void *buffer = malloc(copy_matrix->columns * sizeof(double));
+
+          if (!buffer)
+            return NULL;
+
+          memcpy(buffer, copy_matrix->data + (i * copy_matrix->columns),
+                 sizeof(double) * copy_matrix->columns);
+
+          memmove(copy_matrix->data + (i * copy_matrix->columns),
+                  copy_matrix->data + (k * copy_matrix->columns),
+                  sizeof(double) * copy_matrix->columns);
+
+          memmove(copy_matrix->data + (k * copy_matrix->columns), buffer,
+                  sizeof(double) * copy_matrix->columns);
+
+          // swap in res matrix
+        }
+      }
+
+      if (!find_non_zero) {
+        return NULL;
+      }
+    }
+
+    double sign = (pivot < 0) ? -1. : 1;
+    matrix_double_mult_row(copy_matrix, k, 1. / (sign * pivot));
+    matrix_double_mult_row(res_matrix, k, 1. / (sign * pivot));
+
+    for (size_t j = 0; j < copy_matrix->rows; ++j) {
+      if(j == k) continue;
+
+      double pivot = copy_matrix->data[j * copy_matrix->columns + k];
+
+      for (size_t i = 0; i < copy_matrix->columns; ++i) {
+        copy_matrix->data[j * copy_matrix->columns + i] =
+            (copy_matrix->data[k * copy_matrix->columns + i] *
+            pivot * -1.) + copy_matrix->data[j * copy_matrix->columns + i];
+
+        res_matrix->data[j * res_matrix->columns + i] =
+            (res_matrix->data[k * res_matrix->columns + i] *
+            pivot * -1.) + res_matrix->data[j * res_matrix->columns + i];
+
+      }
+    }
+  }
+
+  return res_matrix;
+}
+
+bool cm_matrix_double_is_null(const CmMatrixDouble *matrix) {
 
   if (!matrix)
     return false;
@@ -362,14 +453,14 @@ bool cm_matrix_int_is_null(const CmMatrixInt *matrix) {
   return true;
 }
 
-bool cm_matrix_int_is_identity(const CmMatrixInt *matrix) {
+bool cm_matrix_double_is_identity(const CmMatrixDouble *matrix) {
 
   if (!matrix)
     return false;
 
   for (size_t i = 0; i < matrix->rows; ++i) {
     for (size_t j = 0; j < matrix->columns; ++j) {
-      int current_elem = matrix->data[i * matrix->columns + j];
+      double current_elem = matrix->data[i * matrix->columns + j];
       if (i == j && current_elem != 1) {
         return false;
       } else if (i != j && current_elem != 0) {
@@ -381,8 +472,8 @@ bool cm_matrix_int_is_identity(const CmMatrixInt *matrix) {
   return true;
 }
 
-bool cm_matrix_int_is_equal(const CmMatrixInt *matrix_a,
-                            const CmMatrixInt *matrix_b) {
+bool cm_matrix_double_is_equal(const CmMatrixDouble *matrix_a,
+                               const CmMatrixDouble *matrix_b) {
 
   if (!matrix_a || !matrix_b)
     return false;
@@ -402,7 +493,8 @@ bool cm_matrix_int_is_equal(const CmMatrixInt *matrix_a,
   return true;
 }
 
-int cm_matrix_int_add(CmMatrixInt *matrix_a, const CmMatrixInt *matrix_b) {
+int cm_matrix_double_add(CmMatrixDouble *matrix_a,
+                         const CmMatrixDouble *matrix_b) {
 
   CM_CHECK_NULL(matrix_a);
   CM_CHECK_NULL(matrix_b);
@@ -418,7 +510,8 @@ int cm_matrix_int_add(CmMatrixInt *matrix_a, const CmMatrixInt *matrix_b) {
   return CM_SUCCESS;
 }
 
-int cm_matrix_int_sub(CmMatrixInt *matrix_a, const CmMatrixInt *matrix_b) {
+int cm_matrix_double_sub(CmMatrixDouble *matrix_a,
+                         const CmMatrixDouble *matrix_b) {
 
   CM_CHECK_NULL(matrix_a);
   CM_CHECK_NULL(matrix_b);
@@ -434,7 +527,7 @@ int cm_matrix_int_sub(CmMatrixInt *matrix_a, const CmMatrixInt *matrix_b) {
   return CM_SUCCESS;
 }
 
-int cm_matrix_int_scale(CmMatrixInt *matrix_a, int scale) {
+int cm_matrix_double_scale(CmMatrixDouble *matrix_a, double scale) {
 
   CM_CHECK_NULL(matrix_a);
 
@@ -447,15 +540,16 @@ int cm_matrix_int_scale(CmMatrixInt *matrix_a, int scale) {
   return CM_SUCCESS;
 }
 
-CmMatrixInt *cm_matrix_int_mul(const CmMatrixInt *matrix_a,
-                               const CmMatrixInt *matrix_b) {
+CmMatrixDouble *cm_matrix_double_mul(const CmMatrixDouble *matrix_a,
+                                     const CmMatrixDouble *matrix_b) {
 
   if (!matrix_a || !matrix_b)
     return NULL;
   if (matrix_a->columns != matrix_b->rows)
     return NULL;
 
-  CmMatrixInt *result = cm_matrix_int_alloc(matrix_a->rows, matrix_b->columns);
+  CmMatrixDouble *result =
+      cm_matrix_double_alloc(matrix_a->rows, matrix_b->columns);
 
   if (!result)
     return NULL;
@@ -465,19 +559,19 @@ CmMatrixInt *cm_matrix_int_mul(const CmMatrixInt *matrix_a,
 
   for (size_t i = 0; i < result->rows; ++i) {
     for (size_t k = 0; k < result->columns; ++k) {
-      int result_elem = 0;
+      double result_elem = 0;
       for (size_t j = 0; j < result->columns; ++j) {
-        result_elem += cm_matrix_int_get(matrix_a, i, j) *
-                       cm_matrix_int_get(matrix_b, j, k);
+        result_elem += cm_matrix_double_get(matrix_a, i, j) *
+                       cm_matrix_double_get(matrix_b, j, k);
       }
-      cm_matrix_int_set(result, i, k, result_elem);
+      cm_matrix_double_set(result, i, k, result_elem);
     }
   }
 
   return NULL;
 }
 
-void cm_matrix_int_free(CmMatrixInt *matrix) {
+void cm_matrix_double_free(CmMatrixDouble *matrix) {
   free(matrix->data);
   free(matrix);
 }
