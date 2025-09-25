@@ -412,9 +412,8 @@ CmMatrixDouble *cm_matrix_double_inverse(const CmMatrixDouble *orig_matrix) {
       }
     }
 
-    double sign = (pivot < 0) ? -1. : 1;
-    matrix_double_mult_row(copy_matrix, k, 1. / (sign * pivot));
-    matrix_double_mult_row(res_matrix, k, 1. / (sign * pivot));
+    matrix_double_mult_row(copy_matrix, k, 1. / (pivot));
+    matrix_double_mult_row(res_matrix, k, 1. / (pivot));
 
     for (size_t j = 0; j < copy_matrix->rows; ++j) {
       if(j == k) continue;
@@ -433,6 +432,8 @@ CmMatrixDouble *cm_matrix_double_inverse(const CmMatrixDouble *orig_matrix) {
       }
     }
   }
+
+  cm_matrix_double_free(copy_matrix);
 
   return res_matrix;
 }
