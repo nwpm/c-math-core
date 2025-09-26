@@ -65,8 +65,8 @@ CmMatrixCode cm_matrix_double_scale(CmMatrixDouble *matrix_a, double scale);
 CmMatrixDouble *cm_matrix_double_mul(const CmMatrixDouble *matrix_a,
                                      const CmMatrixDouble *matrix_b);
 
-CmMatrixCode cm_matrix_double_pow(const CmMatrixDouble *base_matrix,
-                                     double exponent);
+CmMatrixCode cm_matrix_double_pow(CmMatrixDouble *matrix,
+                                     int exp);
 
 /* Inverse */
 CmMatrixDouble *cm_matrix_double_inverse(const CmMatrixDouble *orig_matrix);
