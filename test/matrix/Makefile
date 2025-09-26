@@ -4,12 +4,14 @@ CFLAGS = -g -O0 -fsanitize=address -Wall -Wextra -pedantic -std=gnu99
 
 # === Paths ===
 
-INCLUDE     = ../../src/matrix
-BIN_DIR     = ../../bin/matrix
-BUILD_DIR   = ../../build
-LIB_DIR     = $(BUILD_DIR)/matrix
+INCLUDE       = ../../src/matrix
+BIN_DIR       = ../../bin/matrix
+BUILD_DIR     = ../../build
+LIB_DIR       = $(BUILD_DIR)/matrix
+UNITY_LIB_DIR = $(BUILD_DIR)/unity
 
-LIB         = $(LIB_DIR)/libvector.a
+LIB       = $(LIB_DIR)/libvector.a
+UNITY_LIB = $(UNITY_LIB_DIR)/libunity.a
 
 TEST_SRC = test_matrix.c
 TEST_OBJ = test_matrix.o
@@ -25,7 +27,7 @@ mtest: $(TEST_BIN)
 # === Build rules ===
 
 $(TEST_BIN): $(TEST_OBJ)
-	$(CC) $(CFLAGS) $< -o $@ -L$(LIB_DIR) -lmatrix
+	$(CC) $(CFLAGS) $< -o $@ -L$(LIB_DIR) -L$(UNITY_LIB_DIR) -lmatrix -lunity
 	rm $(TEST_OBJ)
 
 $(TEST_OBJ) : $(TEST_SRC) $(BIN_DIR)
