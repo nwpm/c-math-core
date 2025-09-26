@@ -403,7 +403,7 @@ CmMatrixDouble *cm_matrix_double_inverse(const CmMatrixDouble *orig_matrix) {
           memmove(copy_matrix->data + (k * copy_matrix->columns), buffer,
                   sizeof(double) * copy_matrix->columns);
 
-          // swap in res matrix
+          // TODO: swap in res matrix
         }
       }
 
@@ -416,19 +416,19 @@ CmMatrixDouble *cm_matrix_double_inverse(const CmMatrixDouble *orig_matrix) {
     matrix_double_mult_row(res_matrix, k, 1. / (pivot));
 
     for (size_t j = 0; j < copy_matrix->rows; ++j) {
-      if(j == k) continue;
+      if (j == k)
+        continue;
 
       double pivot = copy_matrix->data[j * copy_matrix->columns + k];
 
       for (size_t i = 0; i < copy_matrix->columns; ++i) {
         copy_matrix->data[j * copy_matrix->columns + i] =
-            (copy_matrix->data[k * copy_matrix->columns + i] *
-            pivot * -1.) + copy_matrix->data[j * copy_matrix->columns + i];
+            (copy_matrix->data[k * copy_matrix->columns + i] * pivot * -1.) +
+            copy_matrix->data[j * copy_matrix->columns + i];
 
         res_matrix->data[j * res_matrix->columns + i] =
-            (res_matrix->data[k * res_matrix->columns + i] *
-            pivot * -1.) + res_matrix->data[j * res_matrix->columns + i];
-
+            (res_matrix->data[k * res_matrix->columns + i] * pivot * -1.) +
+            res_matrix->data[j * res_matrix->columns + i];
       }
     }
   }
@@ -438,6 +438,45 @@ CmMatrixDouble *cm_matrix_double_inverse(const CmMatrixDouble *orig_matrix) {
   return res_matrix;
 }
 
+int cm_matrix_double_minor(const CmMatrixDouble *matrix, size_t row, size_t col,
+                           double *minor_out) {
+
+  CM_CHECK_NULL(matrix);
+  CM_SQUARE_CHECK(matrix);
+
+  if (matrix->rows == 0 && matrix->columns == 0)
+    return CM_ERR_ZERO_MATRIX;
+
+  if (row > matrix->rows || col > matrix->columns)
+    return CM_ERR_WRONG_POS;
+
+  CmMatrixDouble *block_matrix =
+      cm_matrix_double_alloc(matrix->rows - 1, matrix->columns - 1);
+
+  size_t block_i = 0;
+
+  for (size_t i = 0; i < matrix->rows; ++i) {
+    if (i == row)
+      continue;
+
+    size_t block_j = 0;
+    for (size_t j = 0; j < matrix->columns; ++j) {
+      if (j == col)
+        continue;
+
+      double elem = cm_matrix_double_get(matrix, i, j);
+      cm_matrix_double_set(block_matrix, block_i, block_j++, elem);
+    }
+    ++block_i;
+  }
+
+  cm_matrix_double_det(block_matrix, minor_out);
+
+  cm_matrix_double_free(block_matrix);
+
+  return CM_SUCCESS;
+}
+
 bool cm_matrix_double_is_null(const CmMatrixDouble *matrix) {
 
   if (!matrix)
@@ -445,7 +484,7 @@ bool cm_matrix_double_is_null(const CmMatrixDouble *matrix) {
 
   for (size_t i = 0; i < matrix->rows; ++i) {
     for (size_t j = 0; j < matrix->columns; ++j) {
-      if (matrix->data[i * matrix->columns + j] == 0) {
+      if (matrix->data[i * matrix->columns + j] != 0) {
         return false;
       }
     }
