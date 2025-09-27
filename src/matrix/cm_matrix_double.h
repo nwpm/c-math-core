@@ -45,7 +45,7 @@ CmMatrixCode cm_matrix_double_set_identity(CmMatrixDouble *matrix);
 CmMatrixCode cm_matrix_double_set_zero(CmMatrixDouble *matrix);
 CmMatrixCode cm_matrix_double_set_all(CmMatrixDouble *matrix, double x);
 CmMatrixCode cm_matrix_double_swap(CmMatrixDouble **matrix_a, CmMatrixDouble **matrix_b);
-CmMatrixCode cm_matrix_double_transpose(CmMatrixDouble *matrix);
+CmMatrixCode cm_matrix_double_transpose(CmMatrixDouble **matrix);
 
 CmMatrixCode cm_matrix_double_max(const CmMatrixDouble *matrix, double *max_out);
 CmMatrixCode cm_matrix_double_min(const CmMatrixDouble *matrix, double *min_out);

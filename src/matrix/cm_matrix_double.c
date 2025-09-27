@@ -219,27 +219,26 @@ CmMatrixCode cm_matrix_double_min(const CmMatrixDouble *matrix,
   return CM_SUCCESS;
 }
 
-CmMatrixCode cm_matrix_double_transpose(CmMatrixDouble *matrix) {
+CmMatrixCode cm_matrix_double_transpose(CmMatrixDouble **matrix) {
 
   CM_CHECK_NULL(matrix);
 
   CmMatrixDouble *tmp_matrix =
-      cm_matrix_double_calloc(matrix->columns, matrix->rows);
+      cm_matrix_double_alloc((*matrix)->columns, (*matrix)->rows);
 
-  // NOTE: separate macro?
   if (!tmp_matrix) {
     return CM_ERR_ALLOC_FAILED;
   }
 
-  for (size_t i = 0; i < matrix->rows; ++i) {
-    for (size_t j = 0; j < matrix->columns; ++j) {
-      tmp_matrix->data[j * matrix->rows + i] =
-          matrix->data[i * matrix->columns + j];
+  for (size_t i = 0; i < (*matrix)->rows; ++i) {
+    for (size_t j = 0; j < (*matrix)->columns; ++j) {
+      tmp_matrix->data[j * (*matrix)->rows + i] =
+          (*matrix)->data[i * (*matrix)->columns + j];
     }
   }
 
-  cm_matrix_double_free(matrix);
-  matrix = tmp_matrix;
+  cm_matrix_double_free(*matrix);
+  *matrix = tmp_matrix;
 
   return CM_SUCCESS;
 }
