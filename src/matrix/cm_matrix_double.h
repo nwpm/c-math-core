@@ -9,7 +9,7 @@
 // TODO: minor, gauss
 // TODO: tests
 
-typedef enum CmMatrixCode{
+typedef enum CmMatrixCode {
 
   CM_SUCCESS = 0,
   CM_ERR_WRONG_POS,
@@ -44,13 +44,18 @@ void cm_matrix_double_free(CmMatrixDouble *matrix);
 CmMatrixCode cm_matrix_double_set_identity(CmMatrixDouble *matrix);
 CmMatrixCode cm_matrix_double_set_zero(CmMatrixDouble *matrix);
 CmMatrixCode cm_matrix_double_set_all(CmMatrixDouble *matrix, double x);
-CmMatrixCode cm_matrix_double_swap(CmMatrixDouble **matrix_a, CmMatrixDouble **matrix_b);
+CmMatrixCode cm_matrix_double_swap(CmMatrixDouble **matrix_a,
+                                   CmMatrixDouble **matrix_b);
 CmMatrixCode cm_matrix_double_transpose(CmMatrixDouble **matrix);
 
-CmMatrixCode cm_matrix_double_max(const CmMatrixDouble *matrix, double *max_out);
-CmMatrixCode cm_matrix_double_min(const CmMatrixDouble *matrix, double *min_out);
-CmMatrixCode cm_matrix_double_trace(const CmMatrixDouble *matrix, double *trace_out);
-CmMatrixCode cm_matrix_double_det(const CmMatrixDouble *matrix, double *det_out);
+CmMatrixCode cm_matrix_double_max(const CmMatrixDouble *matrix,
+                                  double *max_out);
+CmMatrixCode cm_matrix_double_min(const CmMatrixDouble *matrix,
+                                  double *min_out);
+CmMatrixCode cm_matrix_double_trace(const CmMatrixDouble *matrix,
+                                    double *trace_out);
+CmMatrixCode cm_matrix_double_det(const CmMatrixDouble *matrix,
+                                  double *det_out);
 
 bool cm_matrix_double_is_null(const CmMatrixDouble *matrix);
 bool cm_matrix_double_is_identity(const CmMatrixDouble *matrix);
@@ -58,26 +63,25 @@ bool cm_matrix_double_is_equal(const CmMatrixDouble *matrix_a,
                                const CmMatrixDouble *matrix_b);
 
 CmMatrixCode cm_matrix_double_add(CmMatrixDouble *matrix_a,
-                         const CmMatrixDouble *matrix_b);
+                                  const CmMatrixDouble *matrix_b);
 CmMatrixCode cm_matrix_double_sub(CmMatrixDouble *matrix_a,
-                         const CmMatrixDouble *matrix_b);
+                                  const CmMatrixDouble *matrix_b);
 CmMatrixCode cm_matrix_double_scale(CmMatrixDouble *matrix_a, double scale);
 CmMatrixDouble *cm_matrix_double_mul(const CmMatrixDouble *matrix_a,
                                      const CmMatrixDouble *matrix_b);
 
-CmMatrixCode cm_matrix_double_pow(CmMatrixDouble *matrix,
-                                     int exp);
+CmMatrixCode cm_matrix_double_pow(CmMatrixDouble *matrix, int exp);
 
 /* Inverse */
 CmMatrixDouble *cm_matrix_double_inverse(const CmMatrixDouble *orig_matrix);
 
 /* Minor */
 CmMatrixCode cm_matrix_double_minor(const CmMatrixDouble *matrix, size_t row,
-                              size_t col, double* minor_out);
+                                    size_t col, double *minor_out);
 
 /* Cofactor */
 CmMatrixCode cm_matrix_double_cofactor(const CmMatrixDouble *matrix, size_t row,
-                                 size_t col, double* cofactor_out);
+                                       size_t col, double *cofactor_out);
 
 /* Gauss-Jordan */
 double *cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix);

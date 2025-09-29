@@ -261,11 +261,17 @@ CmMatrixCode cm_matrix_double_trace(const CmMatrixDouble *matrix,
   return CM_SUCCESS;
 }
 
+// TODO: Optimize
 CmMatrixCode cm_matrix_double_det(const CmMatrixDouble *matrix,
                                   double *det_out) {
 
   CM_CHECK_NULL(matrix);
   CM_SQUARE_CHECK(matrix);
+
+  if (matrix->rows == 1) {
+    *det_out = matrix->data[0];
+    return CM_SUCCESS;
+  }
 
   if (matrix->rows == 2) {
     *det_out = (matrix->data[0] * matrix->data[3]) -
@@ -295,13 +301,14 @@ CmMatrixCode cm_matrix_double_det(const CmMatrixDouble *matrix,
   int swap_number = 0;
 
   for (size_t k = 0; k < copy_matrix->rows - 1; ++k) {
-    double pivot = copy_matrix->data[k * copy_matrix->columns + k];
+
+    double pivot = cm_matrix_double_get(copy_matrix, k, k);
     if (pivot == 0) {
 
       bool find_non_zero = false;
 
-      for (size_t i = k + 1; i < copy_matrix->rows && !find_non_zero; ++k) {
-        if (copy_matrix->data[i * copy_matrix->columns + i] != 0) {
+      for (size_t i = k + 1; i < copy_matrix->rows && !find_non_zero; ++i) {
+        if (cm_matrix_double_get(copy_matrix, i, k) != 0) {
 
           find_non_zero = true;
           void *buffer = malloc(copy_matrix->columns * sizeof(double));
@@ -325,14 +332,13 @@ CmMatrixCode cm_matrix_double_det(const CmMatrixDouble *matrix,
 
       if (!find_non_zero) {
         *det_out = 0;
+        cm_matrix_double_free(copy_matrix);
+        free(mult_constants);
         return CM_SUCCESS;
       }
     }
 
-    for (size_t i = 0; i < copy_matrix->columns; ++i) {
-      double tmp = cm_matrix_double_get(copy_matrix, k, i) / pivot;
-      cm_matrix_double_set(copy_matrix, k, i, tmp);
-    }
+    matrix_double_mult_row(copy_matrix, k, (1. / pivot));
 
     mult_constants[mult_const_index++] = pivot;
 
@@ -497,15 +503,14 @@ CmMatrixCode cm_matrix_double_cofactor(const CmMatrixDouble *matrix, size_t row,
 
 CmMatrixCode cm_matrix_double_pow(CmMatrixDouble *matrix, int exp) {
 
-  CmMatrixDouble *res =
-      cm_matrix_double_alloc(matrix->rows, matrix->columns);
+  CmMatrixDouble *res = cm_matrix_double_alloc(matrix->rows, matrix->columns);
   if (!res)
     return CM_ERR_ALLOC_FAILED;
 
   cm_matrix_double_set_identity(res);
 
   while (exp > 0) {
-    if(exp & 0x1){
+    if (exp & 0x1) {
       CmMatrixDouble *tmp = cm_matrix_double_mul(res, matrix);
       cm_matrix_double_free(res);
       res = tmp;
