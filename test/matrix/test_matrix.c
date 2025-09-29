@@ -7,6 +7,8 @@
 void setUp() {}
 void tearDown() {}
 
+// TODO add corner cases for all tests
+
 // create_from_matrix + set_all + is_equal
 
 void check_create_from_matrix(size_t orig_rows, size_t orig_cols,
@@ -41,41 +43,62 @@ void test_create_from_matrix_rows_100_cols_100() {
 
 // Set Identity + is identity
 
-void check_set_identity(size_t orig_rows, size_t orig_cols) {
+void check_set_identity(size_t orig_rows, size_t orig_cols,
+                        CmMatrixCode end_status) {
 
   CmMatrixDouble *matrix = cm_matrix_double_alloc(orig_rows, orig_cols);
   TEST_ASSERT_NOT_NULL(matrix);
 
-  cm_matrix_double_set_identity(matrix);
-  TEST_ASSERT_TRUE(cm_matrix_double_is_identity(matrix));
+  CmMatrixCode res_code = cm_matrix_double_set_identity(matrix);
+
+  TEST_ASSERT_EQUAL(end_status, res_code);
+
+  if (end_status == CM_SUCCESS) {
+    TEST_ASSERT_TRUE(cm_matrix_double_is_identity(matrix));
+  }
 
   cm_matrix_double_free(matrix);
 }
 
-void test_set_identity_rows_1_cols_1() { check_set_identity(1, 1); }
-void test_set_identity_rows_5_cols_5() { check_set_identity(5, 5); }
-void test_set_identity_rows_25_cols_25() { check_set_identity(25, 25); }
-void test_set_identity_rows_100_cols_100() { check_set_identity(100, 100); }
+void test_set_identity_rows_1_cols_1() { check_set_identity(1, 1, CM_SUCCESS); }
+void test_set_identity_rows_5_cols_5() { check_set_identity(5, 5, CM_SUCCESS); }
+void test_set_identity_rows_25_cols_25() {
+  check_set_identity(25, 25, CM_SUCCESS);
+}
+void test_set_identity_rows_100_cols_100() {
+  check_set_identity(100, 100, CM_SUCCESS);
+}
+void test_set_identity_rows_12_cols_5() {
+  check_set_identity(12, 5, CM_ERR_MATRIX_NOT_SQUARE);
+}
+void test_set_identity_null_check() {
+  TEST_ASSERT_EQUAL(CM_ERR_NULL_POINTER, cm_matrix_double_set_identity(NULL));
+}
 
 // set_zero + is zero matrix
 
-void check_set_zero(size_t orig_rows, size_t orig_cols) {
+void check_set_zero(size_t orig_rows, size_t orig_cols,
+                    CmMatrixCode end_status) {
 
   CmMatrixDouble *matrix = cm_matrix_double_alloc(orig_rows, orig_cols);
   TEST_ASSERT_NOT_NULL(matrix);
 
-  cm_matrix_double_set_zero(matrix);
+  CmMatrixCode res_code = cm_matrix_double_set_zero(matrix);
+  TEST_ASSERT_EQUAL(end_status, res_code);
   TEST_ASSERT_TRUE(cm_matrix_double_is_null(matrix));
 
   cm_matrix_double_free(matrix);
 }
 
-void test_set_zero_rows_1_cols_1() { check_set_zero(1, 1); }
-void test_set_zero_rows_5_cols_5() { check_set_zero(5, 5); }
-void test_set_zero_rows_15_cols_5() { check_set_zero(5, 5); }
-void test_set_zero_rows_25_cols_25() { check_set_zero(25, 25); }
-void test_set_zero_rows_55_cols_15() { check_set_zero(25, 25); }
-void test_set_zero_rows_100_cols_100() { check_set_zero(100, 100); }
+void test_set_zero_rows_1_cols_1() { check_set_zero(1, 1, CM_SUCCESS); }
+void test_set_zero_rows_5_cols_5() { check_set_zero(5, 5, CM_SUCCESS); }
+void test_set_zero_rows_15_cols_5() { check_set_zero(5, 5, CM_SUCCESS); }
+void test_set_zero_rows_25_cols_25() { check_set_zero(25, 25, CM_SUCCESS); }
+void test_set_zero_rows_55_cols_15() { check_set_zero(55, 15, CM_SUCCESS); }
+void test_set_zero_rows_100_cols_100() { check_set_zero(100, 100, CM_SUCCESS); }
+void test_set_zero_null_check() {
+  TEST_ASSERT_EQUAL(CM_ERR_NULL_POINTER, cm_matrix_double_set_zero(NULL));
+}
 
 // swap + get
 
@@ -178,7 +201,6 @@ void check_max(size_t rows, size_t cols, double max_elem, size_t max_elem_row,
   TEST_ASSERT_NOT_NULL(matrix);
 
   cm_matrix_double_set_identity(matrix);
-
   cm_matrix_double_set(matrix, max_elem_row, max_elem_col, max_elem);
 
   double max_current = 0.;
@@ -209,7 +231,6 @@ void check_min(size_t rows, size_t cols, double min_elem, size_t min_elem_row,
   TEST_ASSERT_NOT_NULL(matrix);
 
   cm_matrix_double_set_identity(matrix);
-
   cm_matrix_double_set(matrix, min_elem_row, min_elem_col, min_elem);
 
   double min_current = 0.;
@@ -233,6 +254,116 @@ void test_min_rows_150_cols_150_expected_minus_10() {
   check_min(150, 150, -10., 100, 120);
 }
 
+// trace
+
+void check_trace(size_t rows, size_t cols, double res,
+                 CmMatrixCode end_status) {
+
+  CmMatrixDouble *matrix = cm_matrix_double_alloc(rows, cols);
+  TEST_ASSERT_NOT_NULL(matrix);
+
+  cm_matrix_double_set_identity(matrix);
+
+  double trace = 0.;
+  CmMatrixCode res_code = cm_matrix_double_trace(matrix, &trace);
+  TEST_ASSERT_EQUAL(res_code, end_status);
+
+  TEST_ASSERT_EQUAL_DOUBLE(res, trace);
+  cm_matrix_double_free(matrix);
+}
+
+void test_trace_rows_3_cols_3() { check_trace(3, 3, 3, CM_SUCCESS); }
+void test_trace_rows_10_cols_10() { check_trace(10, 10, 10, CM_SUCCESS); }
+void test_trace_rows_25_cols_25() { check_trace(25, 25, 25, CM_SUCCESS); }
+void test_trace_rows_120_cols_120() { check_trace(120, 120, 120, CM_SUCCESS); }
+void test_trace_rows_150_cols_150() { check_trace(150, 150, 150, CM_SUCCESS); }
+void test_trace_rows_5_cols_15() {
+  check_trace(5, 15, 0, CM_ERR_MATRIX_NOT_SQUARE);
+}
+
+// det
+void check_det(size_t rows, size_t cols, double res, double *init_data) {
+
+  CmMatrixDouble *matrix = cm_matrix_double_alloc(rows, cols);
+  TEST_ASSERT_NOT_NULL(matrix);
+
+  size_t k = 0;
+  for (size_t i = 0; i < matrix->rows; ++i) {
+    for (size_t j = 0; j < matrix->columns; ++j) {
+      cm_matrix_double_set(matrix, i, j, init_data[k++]);
+    }
+  }
+
+  double det_current = 0.;
+  cm_matrix_double_det(matrix, &det_current);
+
+  TEST_ASSERT_EQUAL_DOUBLE(res, det_current);
+  cm_matrix_double_free(matrix);
+}
+
+void check_det_identity(size_t rows, size_t cols) {
+
+  CmMatrixDouble *matrix = cm_matrix_double_alloc(rows, cols);
+  TEST_ASSERT_NOT_NULL(matrix);
+
+  cm_matrix_double_set_identity(matrix);
+
+  double det_current = 0.;
+  cm_matrix_double_det(matrix, &det_current);
+
+  TEST_ASSERT_EQUAL_DOUBLE(1, det_current);
+  cm_matrix_double_free(matrix);
+}
+
+void check_det_zero(size_t rows, size_t cols) {
+
+  CmMatrixDouble *matrix = cm_matrix_double_alloc(rows, cols);
+  TEST_ASSERT_NOT_NULL(matrix);
+
+  cm_matrix_double_set_zero(matrix);
+
+  double det_current = 0.;
+  cm_matrix_double_det(matrix, &det_current);
+
+  TEST_ASSERT_EQUAL_DOUBLE(0, det_current);
+  cm_matrix_double_free(matrix);
+}
+
+void test_det_identity_size_2x2() { (check_det_identity(2, 2)); }
+void test_det_identity_size_3x3() { (check_det_identity(3, 3)); }
+void test_det_identity_size_4x4() { (check_det_identity(4, 4)); }
+void test_det_identity_size_5x5() { (check_det_identity(5, 5)); }
+
+void test_det_zero_size_2x2() { (check_det_zero(2, 2)); }
+void test_det_zero_size_3x3() { (check_det_zero(3, 3)); }
+void test_det_zero_size_4x4() { (check_det_zero(4, 4)); }
+void test_det_zero_size_5x5() { (check_det_zero(5, 5)); }
+
+void test_det_rows_1_cols_1() {
+  double init_data[] = {5.};
+  check_det(1, 1, 5., init_data);
+}
+void test_det_rows_2_cols_2() {
+  double init_data[] = {5., 11., 28., -10.};
+  check_det(2, 2, -358., init_data);
+}
+void test_det_rows_3_cols_3() {
+  double init_data[] = {2., -4., 1., 7., 11., -5., 1., 9., 3.};
+  check_det(3, 3, 312., init_data);
+}
+void test_det_rows_4_cols_4() {
+  double init_data[] = {2., -4., 1., 8.,  7., 11., -5., -1.,
+                        1., 9.,  3., 16., 3., -8., 10., 4};
+  check_det(4, 4, -12901, init_data);
+}
+void test_det_rows_5_cols_5() {
+  double init_data[] = {
+      2.,  -4., 1., 8.,  3.,  7., 11., -5., -1., 8., 1., 9., 3.,
+      16., -4., 3., -8., 10., 4., 0.,  -6., 3.,  7., 5., 0.,
+  };
+  check_det(5, 5, -165350, init_data);
+}
+
 int main() {
 
   UNITY_BEGIN();
@@ -248,6 +379,8 @@ int main() {
   RUN_TEST(test_set_identity_rows_5_cols_5);
   RUN_TEST(test_set_identity_rows_25_cols_25);
   RUN_TEST(test_set_identity_rows_100_cols_100);
+  RUN_TEST(test_set_identity_rows_12_cols_5);
+  RUN_TEST(test_set_identity_null_check);
 
   puts("\nSet zero + is zero\n");
   RUN_TEST(test_set_zero_rows_1_cols_1);
@@ -285,6 +418,31 @@ int main() {
   RUN_TEST(test_min_rows_25_cols_25_expected_minus_10);
   RUN_TEST(test_min_rows_90_cols_120_expected_minus_10);
   RUN_TEST(test_min_rows_150_cols_150_expected_minus_10);
+
+  puts("\ntrace\n");
+  RUN_TEST(test_trace_rows_3_cols_3);
+  RUN_TEST(test_trace_rows_10_cols_10);
+  RUN_TEST(test_trace_rows_25_cols_25);
+  RUN_TEST(test_trace_rows_120_cols_120);
+  RUN_TEST(test_trace_rows_150_cols_150);
+  RUN_TEST(test_trace_rows_5_cols_15);
+
+  puts("\ndet\n");
+  RUN_TEST(test_det_identity_size_2x2);
+  RUN_TEST(test_det_identity_size_3x3);
+  RUN_TEST(test_det_identity_size_4x4);
+  RUN_TEST(test_det_identity_size_5x5);
+
+  RUN_TEST(test_det_zero_size_2x2);
+  RUN_TEST(test_det_zero_size_3x3);
+  RUN_TEST(test_det_zero_size_4x4);
+  RUN_TEST(test_det_zero_size_5x5);
+
+  RUN_TEST(test_det_rows_1_cols_1);
+  RUN_TEST(test_det_rows_2_cols_2);
+  RUN_TEST(test_det_rows_3_cols_3);
+  RUN_TEST(test_det_rows_4_cols_4);
+  RUN_TEST(test_det_rows_5_cols_5);
 
   return UNITY_END();
 }
