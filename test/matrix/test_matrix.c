@@ -364,6 +364,143 @@ void test_det_rows_5_cols_5() {
   check_det(5, 5, -165350, init_data);
 }
 
+// add
+
+void check_add(size_t rows_a, size_t cols_a, size_t rows_b, size_t cols_b,
+               double init_val_a, double init_val_b, CmMatrixCode end_status) {
+
+  CmMatrixDouble *matrix_a = cm_matrix_double_alloc(rows_a, cols_a);
+  TEST_ASSERT_NOT_NULL(matrix_a);
+
+  CmMatrixDouble *matrix_b = cm_matrix_double_alloc(rows_b, cols_b);
+  TEST_ASSERT_NOT_NULL(matrix_b);
+
+  cm_matrix_double_set_all(matrix_a, init_val_a);
+  cm_matrix_double_set_all(matrix_b, init_val_b);
+
+  CmMatrixCode res = cm_matrix_double_add(matrix_a, matrix_b);
+  TEST_ASSERT_EQUAL(end_status, res);
+
+  if (end_status == CM_SUCCESS) {
+    double res_val = init_val_a + init_val_b;
+    for (size_t i = 0; i < rows_a; ++i) {
+      for (size_t j = 0; j < cols_b; ++j) {
+        TEST_ASSERT_EQUAL_DOUBLE(res_val, cm_matrix_double_get(matrix_a, i, j));
+      }
+    }
+  }
+
+  cm_matrix_double_free(matrix_a);
+  cm_matrix_double_free(matrix_b);
+}
+
+void test_add_rows_2_cols_4() { check_add(2, 4, 2, 4, 5., 10., CM_SUCCESS); }
+void test_add_rows_10_cols_10() {
+  check_add(10, 10, 10, 10, 12., 34., CM_SUCCESS);
+}
+void test_add_rows_57_cols_11() {
+  check_add(57, 11, 57, 11, 32., 90., CM_SUCCESS);
+}
+void test_add_rows_142_cols_384() {
+  check_add(142, 384, 142, 384, 129., 341., CM_SUCCESS);
+}
+void test_add_diff_size() {
+  check_add(12, 12, 2, 2, 9., 4., CM_ERR_SIZE_MISMATCH);
+}
+
+// diff
+
+void check_sub(size_t rows_a, size_t cols_a, size_t rows_b, size_t cols_b,
+               double init_val_a, double init_val_b, CmMatrixCode end_status) {
+
+  CmMatrixDouble *matrix_a = cm_matrix_double_alloc(rows_a, cols_a);
+  TEST_ASSERT_NOT_NULL(matrix_a);
+
+  CmMatrixDouble *matrix_b = cm_matrix_double_alloc(rows_b, cols_b);
+  TEST_ASSERT_NOT_NULL(matrix_b);
+
+  cm_matrix_double_set_all(matrix_a, init_val_a);
+  cm_matrix_double_set_all(matrix_b, init_val_b);
+
+  CmMatrixCode res = cm_matrix_double_sub(matrix_a, matrix_b);
+  TEST_ASSERT_EQUAL(end_status, res);
+
+  if (end_status == CM_SUCCESS) {
+    double res_val = init_val_a - init_val_b;
+    for (size_t i = 0; i < rows_a; ++i) {
+      for (size_t j = 0; j < cols_b; ++j) {
+        TEST_ASSERT_EQUAL_DOUBLE(res_val, cm_matrix_double_get(matrix_a, i, j));
+      }
+    }
+  }
+
+  cm_matrix_double_free(matrix_a);
+  cm_matrix_double_free(matrix_b);
+}
+
+void test_sub_rows_2_cols_4() { check_sub(2, 4, 2, 4, 5., 10., CM_SUCCESS); }
+void test_sub_rows_10_cols_10() {
+  check_sub(10, 10, 10, 10, 12., 34., CM_SUCCESS);
+}
+void test_sub_rows_57_cols_11() {
+  check_sub(57, 11, 57, 11, 32., 90., CM_SUCCESS);
+}
+void test_sub_rows_142_cols_384() {
+  check_sub(142, 384, 142, 384, 129., 341., CM_SUCCESS);
+}
+void test_sub_diff_size() {
+  check_sub(12, 12, 2, 2, 9., 4., CM_ERR_SIZE_MISMATCH);
+}
+
+// scale
+
+void check_scale(size_t rows, size_t cols, double init_val, double scale_val) {
+
+  CmMatrixDouble *matrix = cm_matrix_double_alloc(rows, cols);
+  TEST_ASSERT_NOT_NULL(matrix);
+
+  cm_matrix_double_set_all(matrix, init_val);
+
+  cm_matrix_double_scale(matrix, scale_val);
+
+  double res_val = init_val * scale_val;
+  for (size_t i = 0; i < rows; ++i) {
+    for (size_t j = 0; j < cols; ++j) {
+      TEST_ASSERT_EQUAL_DOUBLE(res_val, cm_matrix_double_get(matrix, i, j));
+    }
+  }
+
+  cm_matrix_double_free(matrix);
+}
+
+void test_scale_rows_2_cols_4() { check_scale(2, 4, 5, 2); }
+void test_scale_rows_10_cols_10() { check_scale(10, 10, 10, 9); }
+void test_scale_rows_57_cols_11() { check_scale(57, 11, 48, 3); }
+void test_scale_rows_142_cols_384() { check_scale(142, 384, 124, 9); }
+void test_scale_rows_441_cols_507() { check_scale(441, 507, 29, 0); }
+
+// mul
+// scale
+
+void check_mul(size_t rows, size_t cols, double init_val, double scale_val) {
+
+  CmMatrixDouble *matrix = cm_matrix_double_alloc(rows, cols);
+  TEST_ASSERT_NOT_NULL(matrix);
+
+  cm_matrix_double_set_all(matrix, init_val);
+
+  cm_matrix_double_scale(matrix, scale_val);
+
+  double res_val = init_val * scale_val;
+  for (size_t i = 0; i < rows; ++i) {
+    for (size_t j = 0; j < cols; ++j) {
+      TEST_ASSERT_EQUAL_DOUBLE(res_val, cm_matrix_double_get(matrix, i, j));
+    }
+  }
+
+  cm_matrix_double_free(matrix);
+}
+
 int main() {
 
   UNITY_BEGIN();
@@ -443,6 +580,27 @@ int main() {
   RUN_TEST(test_det_rows_3_cols_3);
   RUN_TEST(test_det_rows_4_cols_4);
   RUN_TEST(test_det_rows_5_cols_5);
+
+  puts("\nadd\n");
+  RUN_TEST(test_add_rows_2_cols_4);
+  RUN_TEST(test_add_rows_10_cols_10);
+  RUN_TEST(test_add_rows_57_cols_11);
+  RUN_TEST(test_add_rows_142_cols_384);
+  RUN_TEST(test_add_diff_size);
+
+  puts("\nsub\n");
+  RUN_TEST(test_sub_rows_2_cols_4);
+  RUN_TEST(test_sub_rows_10_cols_10);
+  RUN_TEST(test_sub_rows_57_cols_11);
+  RUN_TEST(test_sub_rows_142_cols_384);
+  RUN_TEST(test_sub_diff_size);
+
+  puts("\nscale\n");
+  RUN_TEST(test_scale_rows_2_cols_4);
+  RUN_TEST(test_scale_rows_10_cols_10);
+  RUN_TEST(test_scale_rows_57_cols_11);
+  RUN_TEST(test_scale_rows_142_cols_384);
+  RUN_TEST(test_scale_rows_441_cols_507);
 
   return UNITY_END();
 }
