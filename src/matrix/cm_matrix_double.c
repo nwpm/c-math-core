@@ -126,6 +126,23 @@ cm_matrix_double_create_from_matrix(const CmMatrixDouble *orig_matrix) {
   return copy_matrix;
 }
 
+CmMatrixDouble *cm_matrix_double_create_from_array(const double **arr,
+                                                   size_t rows, size_t cols) {
+
+  CmMatrixDouble *matrix = cm_matrix_double_alloc(rows, cols);
+
+  if (!matrix)
+    return NULL;
+
+  for (size_t i = 0; i < rows; ++i) {
+    for (size_t j = 0; j < cols; ++j) {
+      cm_matrix_double_set(matrix, i, j, arr[i][j]);
+    }
+  }
+
+  return matrix;
+}
+
 CmMatrixCode cm_matrix_double_swap(CmMatrixDouble **matrix_a,
                                    CmMatrixDouble **matrix_b) {
 

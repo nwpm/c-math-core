@@ -36,6 +36,8 @@ CmMatrixDouble *cm_matrix_double_calloc(size_t rows, size_t cols);
 
 CmMatrixDouble *
 cm_matrix_double_create_from_matrix(const CmMatrixDouble *orig_matrix);
+CmMatrixDouble *cm_matrix_double_create_from_array(const double **arr,
+                                                   size_t rows, size_t cols);
 
 void cm_matrix_double_free(CmMatrixDouble *matrix);
 
