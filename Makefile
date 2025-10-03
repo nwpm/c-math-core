@@ -22,7 +22,7 @@ unity: $(UNITY_BUILD)
 	find build/unity -mindepth 1 ! -name 'libunity.a' -exec rm -rf {} +
 
 bclean:
-	rm -r $(BUILD_DIR)/*
+	find $(BUILD_DIR) -mindepth 1 -maxdepth 1 -not -name 'unity' -exec rm -rf {} +
 
 # === RULES ===
 
