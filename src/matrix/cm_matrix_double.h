@@ -12,12 +12,14 @@
 typedef enum CmMatrixCode {
 
   CM_SUCCESS = 0,
+  CM_FAIL,
   CM_ERR_WRONG_POS,
   CM_ERR_NULL_POINTER,
   CM_ERR_SIZE_MISMATCH,
   CM_ERR_MULT_SIZE_MISMATCH,
   CM_ERR_MATRIX_NOT_SQUARE,
   CM_ERR_ALLOC_FAILED,
+  CM_ERR_INVALID_SIZE,
   CM_ERR_INVALID_ARGUMENT,
   CM_ERR_ZERO_MATRIX
 
@@ -86,7 +88,8 @@ CmMatrixCode cm_matrix_double_cofactor(const CmMatrixDouble *matrix, size_t row,
                                        size_t col, double *cofactor_out);
 
 /* Gauss-Jordan */
-double *cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix);
+CmMatrixCode cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix,
+                                    double *res);
 
 /* Getter/Setter */
 
