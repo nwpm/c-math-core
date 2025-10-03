@@ -481,8 +481,9 @@ void test_scale_rows_441_cols_507() { check_scale(441, 507, 29, 0); }
 
 // mul
 
-void check_mul(size_t rows_a, size_t cols_a, size_t rows_b, size_t cols_b,
-               double *init_data_a, double *init_data_b, double *res_data) {
+void check_mul_hand(size_t rows_a, size_t cols_a, size_t rows_b, size_t cols_b,
+                    double *init_data_a, double *init_data_b,
+                    double *res_data) {
 
   CmMatrixDouble *matrix_a = cm_matrix_double_alloc(rows_a, cols_a);
   TEST_ASSERT_NOT_NULL(matrix_a);
@@ -511,9 +512,39 @@ void check_mul(size_t rows_a, size_t cols_a, size_t rows_b, size_t cols_b,
 
   k = 0;
   for (size_t i = 0; i < matrix_res->rows; ++i) {
-    for (size_t j = 0; j < cols_b; ++j) {
+    for (size_t j = 0; j < matrix_res->columns; ++j) {
       TEST_ASSERT_EQUAL_DOUBLE(res_data[k],
                                cm_matrix_double_get(matrix_res, i, j));
+      k++;
+    }
+  }
+
+  cm_matrix_double_free(matrix_a);
+  cm_matrix_double_free(matrix_b);
+  cm_matrix_double_free(matrix_res);
+}
+
+void check_mul_auto(size_t rows_a, size_t cols_a, size_t rows_b, size_t cols_b,
+                    double init_val_a, double init_val_b, double res_val) {
+
+  CmMatrixDouble *matrix_a = cm_matrix_double_alloc(rows_a, cols_a);
+  TEST_ASSERT_NOT_NULL(matrix_a);
+
+  CmMatrixDouble *matrix_b = cm_matrix_double_alloc(rows_b, cols_b);
+  TEST_ASSERT_NOT_NULL(matrix_b);
+
+  cm_matrix_double_set_all(matrix_a, init_val_a);
+  cm_matrix_double_set_all(matrix_b, init_val_b);
+
+  CmMatrixDouble *matrix_res = cm_matrix_double_mul(matrix_a, matrix_b);
+  TEST_ASSERT_NOT_NULL(matrix_res);
+  TEST_ASSERT_EQUAL_size_t(rows_a, matrix_res->rows);
+  TEST_ASSERT_EQUAL_size_t(cols_b, matrix_res->columns);
+
+  size_t k = 0;
+  for (size_t i = 0; i < matrix_res->rows; ++i) {
+    for (size_t j = 0; j < matrix_res->columns; ++j) {
+      TEST_ASSERT_EQUAL_DOUBLE(res_val, cm_matrix_double_get(matrix_res, i, j));
       k++;
     }
   }
@@ -528,7 +559,7 @@ void test_mul_mat_a_rows_2_cols_2_mat_b_rows_2_cols_2() {
   double arr_b[] = {8., 13., 6., 2.};
   double res[] = {48., 47., 62., 31.};
 
-  check_mul(2, 2, 2, 2, arr_a, arr_b, res);
+  check_mul_hand(2, 2, 2, 2, arr_a, arr_b, res);
 }
 
 void test_mul_mat_a_rows_2_cols_4_mat_b_rows_4_cols_3() {
@@ -540,7 +571,7 @@ void test_mul_mat_a_rows_2_cols_4_mat_b_rows_4_cols_3() {
   };
   double res[] = {194., 106., 87., 474., 463., 409};
 
-  check_mul(2, 4, 4, 3, arr_a, arr_b, res);
+  check_mul_hand(2, 4, 4, 3, arr_a, arr_b, res);
 }
 
 void test_mul_mat_a_rows_3_cols_3_mat_b_rows_3_cols_3() {
@@ -554,9 +585,52 @@ void test_mul_mat_a_rows_3_cols_3_mat_b_rows_3_cols_3() {
       504., 1334., 154., -227., 43., -1224., -182., 365., 616.,
   };
 
-  check_mul(3, 3, 3, 3, arr_a, arr_b, res);
+  check_mul_hand(3, 3, 3, 3, arr_a, arr_b, res);
+}
+void test_mul_auto_mat_a_rows_2_cols_2_mat_b_rows_2_cols_2() {
+  check_mul_auto(2, 2, 2, 2, 2, 3, 12);
 }
 
+void test_mul_auto_mat_a_rows_3_cols_3_mat_b_rows_3_cols_3() {
+  check_mul_auto(3, 3, 3, 3, 5, 7, 105);
+}
+
+void test_mul_auto_mat_a_rows_4_cols_4_mat_b_rows_4_cols_4() {
+  check_mul_auto(4, 4, 4, 4, 10, 11, 440);
+}
+
+void test_mul_auto_mat_a_rows_5_cols_5_mat_b_rows_5_cols_5() {
+  check_mul_auto(5, 5, 5, 5, 23, 15, 1725);
+}
+
+void test_mul_auto_mat_a_rows_3_cols_3_mat_b_identity() {
+  double arr_a[] = {
+      12., 2., 32., -25., -19., 6., 17., -10., 1.,
+  };
+  double arr_b[] = {
+      1., 0., 0., 0., 1., 0., 0., 0., 1.,
+  };
+
+  check_mul_hand(3, 3, 3, 3, arr_a, arr_b, arr_a);
+}
+
+void test_mul_auto_mat_a_rows_5_cols_5_mat_b_zero() {
+  check_mul_auto(5, 5, 5, 5, 3, 0, 0);
+}
+
+void test_mul_size_mismatch() {
+
+  CmMatrixDouble *matrix_a = cm_matrix_double_alloc(5, 10);
+  TEST_ASSERT_NOT_NULL(matrix_a);
+
+  CmMatrixDouble *matrix_b = cm_matrix_double_alloc(5, 10);
+  TEST_ASSERT_NOT_NULL(matrix_b);
+
+  TEST_ASSERT_NULL(cm_matrix_double_mul(matrix_a, matrix_b));
+
+  cm_matrix_double_free(matrix_a);
+  cm_matrix_double_free(matrix_b);
+}
 int main() {
 
   UNITY_BEGIN();
@@ -662,6 +736,13 @@ int main() {
   RUN_TEST(test_mul_mat_a_rows_2_cols_2_mat_b_rows_2_cols_2);
   RUN_TEST(test_mul_mat_a_rows_2_cols_4_mat_b_rows_4_cols_3);
   RUN_TEST(test_mul_mat_a_rows_3_cols_3_mat_b_rows_3_cols_3);
+  RUN_TEST(test_mul_auto_mat_a_rows_2_cols_2_mat_b_rows_2_cols_2);
+  RUN_TEST(test_mul_auto_mat_a_rows_3_cols_3_mat_b_rows_3_cols_3);
+  RUN_TEST(test_mul_auto_mat_a_rows_4_cols_4_mat_b_rows_4_cols_4);
+  RUN_TEST(test_mul_auto_mat_a_rows_5_cols_5_mat_b_rows_5_cols_5);
+  RUN_TEST(test_mul_auto_mat_a_rows_3_cols_3_mat_b_identity);
+  RUN_TEST(test_mul_auto_mat_a_rows_5_cols_5_mat_b_zero);
+  RUN_TEST(test_mul_size_mismatch);
 
   return UNITY_END();
 }
