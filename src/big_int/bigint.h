@@ -1,37 +1,37 @@
-#ifndef BIG_INT_H
-#define BIG_INT_H
+#ifndef CM_BIG_INT_H
+#define CM_BIG_INT_H
 
 #include <stddef.h>
 
-#define BIGINT_START_CAPACITY 4
+#define CM_BIGINT_START_CAPACITY 4
 
-typedef struct BigInt {
+typedef struct CmBigInt {
 
   char sign;
   char *buffer;
   size_t size;
   size_t capacity;
 
-} BigInt;
+} CmBigInt;
 
-BigInt *bigint_create();
-BigInt *bigint_create_from_num(long long src_num);
-BigInt *bigint_create_from_cstr(const char *src_cstr);
-BigInt *bigint_create_copy(const BigInt *src_num);
+CmBigInt *cm_bigint_create();
+CmBigInt *cm_bigint_create_from_num(long long src_num);
+CmBigInt *cm_bigint_create_from_cstr(const char *src_cstr);
+CmBigInt *cm_bigint_create_copy(const CmBigInt *src_num);
 
-int bigint_less(const BigInt *lhs, const BigInt *rhs);
-int bigint_less_or_equal(const BigInt *lhs, const BigInt *rhs);
-int bigint_greater(const BigInt *lhs, const BigInt *rhs);
-int bigint_greater_or_equal(const BigInt *lhs, const BigInt *rhs);
-int bigint_is_equal(const BigInt *lhs, const BigInt *rhs);
+int cm_bigint_less(const CmBigInt *lhs, const CmBigInt *rhs);
+int cm_bigint_less_or_equal(const CmBigInt *lhs, const CmBigInt *rhs);
+int cm_bigint_greater(const CmBigInt *lhs, const CmBigInt *rhs);
+int cm_bigint_greater_or_equal(const CmBigInt *lhs, const CmBigInt *rhs);
+int cm_bigint_is_equal(const CmBigInt *lhs, const CmBigInt *rhs);
 
-BigInt *bigint_add(BigInt *bigint_num, const BigInt *addend);
-BigInt *bigint_subtract(BigInt *bigint_num, const BigInt *substr);
-BigInt *bigint_multiply(BigInt *bigint_num, const BigInt* multiplier);
+CmBigInt *cm_bigint_add(CmBigInt *bigint_num, const CmBigInt *addend);
+CmBigInt *cm_bigint_subtract(CmBigInt *bigint_num, const CmBigInt *substr);
+CmBigInt *cm_bigint_multiply(CmBigInt *bigint_num, const CmBigInt* multiplier);
 
-BigInt *bigint_negate(BigInt *bigint_num);
-BigInt *bigint_abs(BigInt *bigint_num);
+CmBigInt *cm_bigint_negate(CmBigInt *bigint_num);
+CmBigInt *cm_bigint_abs(CmBigInt *bigint_num);
 
-void bigint_free(BigInt *bigint_num);
+void cm_bigint_free(CmBigInt *bigint_num);
 
 #endif // BIG_INT_H
