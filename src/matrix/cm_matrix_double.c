@@ -527,9 +527,19 @@ CmMatrixCode cm_matrix_double_cofactor(const CmMatrixDouble *matrix, size_t row,
   return res;
 }
 
-CmMatrixCode cm_matrix_double_pow(CmMatrixDouble *matrix, int exp) {
+CmMatrixCode cm_matrix_double_pow(CmMatrixDouble **matrix, unsigned exp) {
 
-  CmMatrixDouble *res = cm_matrix_double_alloc(matrix->rows, matrix->columns);
+  if (!matrix)
+    return CM_ERR_NULL_POINTER;
+
+  if(exp == 1)
+    return CM_SUCCESS;
+  else if(exp == 0){
+    cm_matrix_double_set_zero(*matrix);
+    return CM_SUCCESS;
+  }
+
+  CmMatrixDouble *res = cm_matrix_double_alloc((*matrix)->rows, (*matrix)->columns);
   if (!res)
     return CM_ERR_ALLOC_FAILED;
 
@@ -537,15 +547,31 @@ CmMatrixCode cm_matrix_double_pow(CmMatrixDouble *matrix, int exp) {
 
   while (exp > 0) {
     if (exp & 0x1) {
-      CmMatrixDouble *tmp = cm_matrix_double_mul(res, matrix);
+      CmMatrixDouble *tmp = cm_matrix_double_mul(res, *matrix);
+      if (!tmp) {
+        cm_matrix_double_free(res);
+        return CM_ERR_ALLOC_FAILED;
+      }
       cm_matrix_double_free(res);
       res = tmp;
     }
-    CmMatrixDouble *tmp = cm_matrix_double_mul(matrix, matrix);
-    cm_matrix_double_free(matrix);
-    matrix = tmp;
-    exp >>= 1;
+    CmMatrixDouble *tmp = cm_matrix_double_mul(*matrix, *matrix);
+    if (!tmp) {
+      cm_matrix_double_free(res);
+      return CM_ERR_ALLOC_FAILED;
+    }
+    cm_matrix_double_free(*matrix);
+    *matrix = tmp;
+    exp /= 2;
   }
+
+  for (size_t i = 0; i < (*matrix)->rows; ++i) {
+    for (size_t j = 0; j < (*matrix)->columns; ++j) {
+      cm_matrix_double_set(*matrix, i, j, cm_matrix_double_get(res, i, j));
+    }
+  }
+
+  cm_matrix_double_free(res);
 
   return CM_SUCCESS;
 }
