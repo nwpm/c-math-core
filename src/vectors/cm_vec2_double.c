@@ -35,9 +35,7 @@ CmVec2Double *cm_vec2_double_create_from_vec(CmVec2Double *orig_vec) {
   return vec;
 }
 
-void cm_vec2_double_free(CmVec2Double *vec){
-  free(vec);
-}
+void cm_vec2_double_free(CmVec2Double *vec) { free(vec); }
 
 void cm_vec2_double_sum(CmVec2Double *vec_a, const CmVec2Double *vec_b) {
   vec_a->x += vec_b->x;
@@ -63,4 +61,15 @@ double cm_vec2_double_dot(const CmVec2Double *vec_a,
   return vec_a->x * vec_b->x + vec_a->y * vec_b->y;
 }
 
-CmVec2Double *cm_vec2_double_normalize(const CmVec2Double *vec);
+CmVec2Double *cm_vec2_double_normalize(const CmVec2Double *vec) {
+
+  double vec_norm = cm_vec2_double_norm(vec);
+
+  CmVec2Double *normalized =
+      cm_vec2_double_init(vec->x / vec_norm, vec->y / vec_norm);
+  if (!normalized)
+    return NULL;
+
+  return normalized;
+}
+
