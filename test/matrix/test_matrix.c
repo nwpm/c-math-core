@@ -631,6 +631,53 @@ void test_mul_size_mismatch() {
   cm_matrix_double_free(matrix_a);
   cm_matrix_double_free(matrix_b);
 }
+
+// pow
+
+void check_pow_auto(size_t rows, size_t cols, double init_val, double res_val,
+                    unsigned exp) {
+
+  CmMatrixDouble *matrix = cm_matrix_double_alloc(rows, cols);
+  TEST_ASSERT_NOT_NULL(matrix);
+
+  cm_matrix_double_set_all(matrix, init_val);
+  cm_matrix_double_pow(&matrix, exp);
+
+  size_t k = 0;
+  for (size_t i = 0; i < matrix->rows; ++i) {
+    for (size_t j = 0; j < matrix->columns; ++j) {
+      TEST_ASSERT_EQUAL_DOUBLE(res_val, cm_matrix_double_get(matrix, i, j));
+      k++;
+    }
+  }
+
+  cm_matrix_double_free(matrix);
+}
+
+void test_pow_auto_mat_rows_2_cols_2_init_by_2_pow_2() {
+  check_pow_auto(2, 2, 2, 8, 2);
+}
+
+void test_pow_auto_mat_rows_3_cols_3_init_by_5_pow_3() {
+  check_pow_auto(3, 3, 5, 1125, 3);
+}
+
+void test_pow_auto_mat_rows_4_cols_4_init_by_6_pow_4() {
+  check_pow_auto(4, 4, 6, 82944, 4);
+}
+
+void test_pow_auto_mat_rows_5_cols_5_init_by_10_pow_5() {
+  check_pow_auto(5, 5, 10, 62500000, 5);
+}
+
+void test_pow_auto_mat_rows_3_cols_3_init_by_5_pow_0() {
+  check_pow_auto(3, 3, 5, 0, 0);
+}
+
+void test_pow_auto_mat_rows_3_cols_3_init_by_6_pow_1() {
+  check_pow_auto(3, 3, 6, 6, 1);
+}
+
 int main() {
 
   UNITY_BEGIN();
@@ -743,6 +790,14 @@ int main() {
   RUN_TEST(test_mul_auto_mat_a_rows_3_cols_3_mat_b_identity);
   RUN_TEST(test_mul_auto_mat_a_rows_5_cols_5_mat_b_zero);
   RUN_TEST(test_mul_size_mismatch);
+
+  puts("\npow\n");
+  RUN_TEST(test_pow_auto_mat_rows_2_cols_2_init_by_2_pow_2);
+  RUN_TEST(test_pow_auto_mat_rows_3_cols_3_init_by_5_pow_3);
+  RUN_TEST(test_pow_auto_mat_rows_4_cols_4_init_by_6_pow_4);
+  RUN_TEST(test_pow_auto_mat_rows_5_cols_5_init_by_10_pow_5);
+  RUN_TEST(test_pow_auto_mat_rows_3_cols_3_init_by_5_pow_0);
+  RUN_TEST(test_pow_auto_mat_rows_3_cols_3_init_by_6_pow_1);
 
   return UNITY_END();
 }
