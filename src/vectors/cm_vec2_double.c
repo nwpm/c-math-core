@@ -1,4 +1,5 @@
 #include "cm_vec2_double.h"
+#include "../utils/cm_checkers.h"
 #include <math.h>
 #include <stdlib.h>
 
@@ -37,28 +38,53 @@ CmVec2Double *cm_vec2_double_create_from_vec(CmVec2Double *orig_vec) {
 
 void cm_vec2_double_free(CmVec2Double *vec) { free(vec); }
 
-void cm_vec2_double_sum(CmVec2Double *vec_a, const CmVec2Double *vec_b) {
+CmStatusCode cm_vec2_double_sum(CmVec2Double *vec_a,
+                                const CmVec2Double *vec_b) {
+
+  CM_CHECK_NULL(vec_a);
+  CM_CHECK_NULL(vec_b);
+
   vec_a->x += vec_b->x;
   vec_a->y += vec_b->y;
+
+  return CM_SUCCESS;
 }
 
-void cm_vec2_double_sub(CmVec2Double *vec_a, const CmVec2Double *vec_b) {
+CmStatusCode cm_vec2_double_sub(CmVec2Double *vec_a,
+                                const CmVec2Double *vec_b) {
+
+  CM_CHECK_NULL(vec_a);
+  CM_CHECK_NULL(vec_b);
+
   vec_a->x -= vec_b->x;
   vec_a->y -= vec_b->y;
+
+  return CM_SUCCESS;
 }
 
-void cm_vec2_double_scale(CmVec2Double *vec, double scale) {
+CmStatusCode cm_vec2_double_scale(CmVec2Double *vec, double scale) {
+
+  CM_CHECK_NULL(vec);
+
   vec->x *= scale;
   vec->y *= scale;
+
+  return CM_SUCCESS;
 }
 
 double cm_vec2_double_norm(const CmVec2Double *vec) {
   return sqrt(vec->x * vec->x + vec->y * vec->y);
 }
 
-double cm_vec2_double_dot(const CmVec2Double *vec_a,
-                          const CmVec2Double *vec_b) {
-  return vec_a->x * vec_b->x + vec_a->y * vec_b->y;
+CmStatusCode cm_vec2_double_dot(const CmVec2Double *vec_a,
+                                const CmVec2Double *vec_b, double *res) {
+  CM_CHECK_NULL(vec_a);
+  CM_CHECK_NULL(vec_b);
+  CM_CHECK_NULL(res);
+
+  *res = vec_a->x * vec_b->x + vec_a->y * vec_b->y;
+
+  return CM_SUCCESS;
 }
 
 CmVec2Double *cm_vec2_double_normalize(const CmVec2Double *vec) {
@@ -72,4 +98,3 @@ CmVec2Double *cm_vec2_double_normalize(const CmVec2Double *vec) {
 
   return normalized;
 }
-

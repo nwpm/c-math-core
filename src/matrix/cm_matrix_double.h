@@ -4,26 +4,10 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "../utils/cm_err_codes.h"
+
 // TODO: create_row_from_matrix
 // TODO: create_col_from_matrix
-// TODO: minor, gauss
-// TODO: tests
-
-typedef enum CmMatrixCode {
-
-  CM_SUCCESS = 0,
-  CM_FAIL,
-  CM_ERR_WRONG_POS,
-  CM_ERR_NULL_POINTER,
-  CM_ERR_SIZE_MISMATCH,
-  CM_ERR_MULT_SIZE_MISMATCH,
-  CM_ERR_MATRIX_NOT_SQUARE,
-  CM_ERR_ALLOC_FAILED,
-  CM_ERR_INVALID_SIZE,
-  CM_ERR_INVALID_ARGUMENT,
-  CM_ERR_ZERO_MATRIX
-
-} CmMatrixCode;
 
 typedef struct CmMatrixDouble {
   size_t rows;
@@ -45,20 +29,20 @@ void cm_matrix_double_free(CmMatrixDouble *matrix);
 
 /* Operations */
 
-CmMatrixCode cm_matrix_double_set_identity(CmMatrixDouble *matrix);
-CmMatrixCode cm_matrix_double_set_zero(CmMatrixDouble *matrix);
-CmMatrixCode cm_matrix_double_set_all(CmMatrixDouble *matrix, double x);
-CmMatrixCode cm_matrix_double_swap(CmMatrixDouble **matrix_a,
+CmStatusCode cm_matrix_double_set_identity(CmMatrixDouble *matrix);
+CmStatusCode cm_matrix_double_set_zero(CmMatrixDouble *matrix);
+CmStatusCode cm_matrix_double_set_all(CmMatrixDouble *matrix, double x);
+CmStatusCode cm_matrix_double_swap(CmMatrixDouble **matrix_a,
                                    CmMatrixDouble **matrix_b);
-CmMatrixCode cm_matrix_double_transpose(CmMatrixDouble **matrix);
+CmStatusCode cm_matrix_double_transpose(CmMatrixDouble **matrix);
 
-CmMatrixCode cm_matrix_double_max(const CmMatrixDouble *matrix,
+CmStatusCode cm_matrix_double_max(const CmMatrixDouble *matrix,
                                   double *max_out);
-CmMatrixCode cm_matrix_double_min(const CmMatrixDouble *matrix,
+CmStatusCode cm_matrix_double_min(const CmMatrixDouble *matrix,
                                   double *min_out);
-CmMatrixCode cm_matrix_double_trace(const CmMatrixDouble *matrix,
+CmStatusCode cm_matrix_double_trace(const CmMatrixDouble *matrix,
                                     double *trace_out);
-CmMatrixCode cm_matrix_double_det(const CmMatrixDouble *matrix,
+CmStatusCode cm_matrix_double_det(const CmMatrixDouble *matrix,
                                   double *det_out);
 
 bool cm_matrix_double_is_null(const CmMatrixDouble *matrix);
@@ -66,29 +50,29 @@ bool cm_matrix_double_is_identity(const CmMatrixDouble *matrix);
 bool cm_matrix_double_is_equal(const CmMatrixDouble *matrix_a,
                                const CmMatrixDouble *matrix_b);
 
-CmMatrixCode cm_matrix_double_add(CmMatrixDouble *matrix_a,
+CmStatusCode cm_matrix_double_add(CmMatrixDouble *matrix_a,
                                   const CmMatrixDouble *matrix_b);
-CmMatrixCode cm_matrix_double_sub(CmMatrixDouble *matrix_a,
+CmStatusCode cm_matrix_double_sub(CmMatrixDouble *matrix_a,
                                   const CmMatrixDouble *matrix_b);
-CmMatrixCode cm_matrix_double_scale(CmMatrixDouble *matrix_a, double scale);
+CmStatusCode cm_matrix_double_scale(CmMatrixDouble *matrix_a, double scale);
 CmMatrixDouble *cm_matrix_double_mul(const CmMatrixDouble *matrix_a,
                                      const CmMatrixDouble *matrix_b);
 
-CmMatrixCode cm_matrix_double_pow(CmMatrixDouble **matrix, unsigned exp);
+CmStatusCode cm_matrix_double_pow(CmMatrixDouble **matrix, unsigned exp);
 
 /* Inverse */
 CmMatrixDouble *cm_matrix_double_inverse(const CmMatrixDouble *orig_matrix);
 
 /* Minor */
-CmMatrixCode cm_matrix_double_minor(const CmMatrixDouble *matrix, size_t row,
+CmStatusCode cm_matrix_double_minor(const CmMatrixDouble *matrix, size_t row,
                                     size_t col, double *minor_out);
 
 /* Cofactor */
-CmMatrixCode cm_matrix_double_cofactor(const CmMatrixDouble *matrix, size_t row,
+CmStatusCode cm_matrix_double_cofactor(const CmMatrixDouble *matrix, size_t row,
                                        size_t col, double *cofactor_out);
 
 /* Gauss-Jordan */
-CmMatrixCode cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix,
+CmStatusCode cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix,
                                     double *res);
 
 /* Getter/Setter */

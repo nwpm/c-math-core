@@ -1,4 +1,5 @@
 #include "cm_matrix_double.h"
+#include "../utils/cm_checkers.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -24,34 +25,6 @@ void _cm_matrix_double_printf(const CmMatrixDouble *matrix) {
 void _cm_matrix_double_printf(const CmMatrixDouble *matrix) { (void)matrix; }
 #endif
 
-#define CM_CHECK_NULL(ptr)                                                     \
-  do {                                                                         \
-    if ((ptr) == NULL) {                                                       \
-      return CM_ERR_NULL_POINTER;                                              \
-    }                                                                          \
-  } while (0)
-
-#define CM_SQUARE_CHECK(matrix)                                                \
-  do {                                                                         \
-    if ((matrix->rows) != (matrix->columns)) {                                 \
-      return CM_ERR_MATRIX_NOT_SQUARE;                                         \
-    }                                                                          \
-  } while (0)
-
-#define CM_SIZE_MATCH(matrix_a, matrix_b)                                      \
-  do {                                                                         \
-    if (((matrix_a->rows) != (matrix_b->rows)) ||                              \
-        ((matrix_a->columns) != (matrix_b->columns))) {                        \
-      return CM_ERR_SIZE_MISMATCH;                                             \
-    }                                                                          \
-  } while (0)
-
-#define CM_MULT_SIZE_MATCH(matrix_a, matrix_b)                                 \
-  do {                                                                         \
-    if (((matrix_a->columns) != (matrix_b->rows))) {                           \
-      return CM_ERR_MULT_SIZE_MISMATCH;                                        \
-    }                                                                          \
-  } while (0)
 
 #define CM_GET_MATRIX_ELEM(matrix, row, column)                                \
   ((matrix)->data[(row) * (matrix)->columns + (column)])
@@ -162,7 +135,7 @@ CmMatrixDouble *cm_matrix_double_create_from_array(const double **arr,
   return matrix;
 }
 
-CmMatrixCode cm_matrix_double_swap(CmMatrixDouble **matrix_a,
+CmStatusCode cm_matrix_double_swap(CmMatrixDouble **matrix_a,
                                    CmMatrixDouble **matrix_b) {
 
   CM_CHECK_NULL(matrix_a);
@@ -175,7 +148,7 @@ CmMatrixCode cm_matrix_double_swap(CmMatrixDouble **matrix_a,
   return CM_SUCCESS;
 }
 
-CmMatrixCode cm_matrix_double_set_identity(CmMatrixDouble *matrix) {
+CmStatusCode cm_matrix_double_set_identity(CmMatrixDouble *matrix) {
 
   CM_CHECK_NULL(matrix);
   CM_SQUARE_CHECK(matrix);
@@ -193,7 +166,7 @@ CmMatrixCode cm_matrix_double_set_identity(CmMatrixDouble *matrix) {
   return CM_SUCCESS;
 }
 
-CmMatrixCode cm_matrix_double_set_zero(CmMatrixDouble *matrix) {
+CmStatusCode cm_matrix_double_set_zero(CmMatrixDouble *matrix) {
 
   CM_CHECK_NULL(matrix);
 
@@ -206,7 +179,7 @@ CmMatrixCode cm_matrix_double_set_zero(CmMatrixDouble *matrix) {
   return CM_SUCCESS;
 }
 
-CmMatrixCode cm_matrix_double_set_all(CmMatrixDouble *matrix, double x) {
+CmStatusCode cm_matrix_double_set_all(CmMatrixDouble *matrix, double x) {
 
   CM_CHECK_NULL(matrix);
 
@@ -219,7 +192,7 @@ CmMatrixCode cm_matrix_double_set_all(CmMatrixDouble *matrix, double x) {
   return CM_SUCCESS;
 }
 
-CmMatrixCode cm_matrix_double_max(const CmMatrixDouble *matrix,
+CmStatusCode cm_matrix_double_max(const CmMatrixDouble *matrix,
                                   double *max_out) {
 
   CM_CHECK_NULL(matrix);
@@ -237,7 +210,7 @@ CmMatrixCode cm_matrix_double_max(const CmMatrixDouble *matrix,
   return CM_SUCCESS;
 }
 
-CmMatrixCode cm_matrix_double_min(const CmMatrixDouble *matrix,
+CmStatusCode cm_matrix_double_min(const CmMatrixDouble *matrix,
                                   double *min_out) {
 
   CM_CHECK_NULL(matrix);
@@ -255,7 +228,7 @@ CmMatrixCode cm_matrix_double_min(const CmMatrixDouble *matrix,
   return CM_SUCCESS;
 }
 
-CmMatrixCode cm_matrix_double_transpose(CmMatrixDouble **matrix) {
+CmStatusCode cm_matrix_double_transpose(CmMatrixDouble **matrix) {
 
   CM_CHECK_NULL(matrix);
 
@@ -279,7 +252,7 @@ CmMatrixCode cm_matrix_double_transpose(CmMatrixDouble **matrix) {
   return CM_SUCCESS;
 }
 
-CmMatrixCode cm_matrix_double_trace(const CmMatrixDouble *matrix,
+CmStatusCode cm_matrix_double_trace(const CmMatrixDouble *matrix,
                                     double *trace_out) {
 
   CM_CHECK_NULL(matrix);
@@ -297,7 +270,7 @@ CmMatrixCode cm_matrix_double_trace(const CmMatrixDouble *matrix,
   return CM_SUCCESS;
 }
 
-CmMatrixCode cm_matrix_double_det(const CmMatrixDouble *matrix,
+CmStatusCode cm_matrix_double_det(const CmMatrixDouble *matrix,
                                   double *det_out) {
 
   CM_CHECK_NULL(matrix);
@@ -391,6 +364,11 @@ CmMatrixDouble *cm_matrix_double_inverse(const CmMatrixDouble *orig_matrix) {
     return NULL;
   }
 
+  double det = 0.;
+  cm_matrix_double_det(orig_matrix, &det);
+  if (det == 0.)
+    return NULL;
+
   CmMatrixDouble *copy_matrix =
       cm_matrix_double_create_from_matrix(orig_matrix);
   if (!copy_matrix) {
@@ -473,7 +451,7 @@ CmMatrixDouble *cm_matrix_double_inverse(const CmMatrixDouble *orig_matrix) {
   return res_matrix;
 }
 
-CmMatrixCode cm_matrix_double_minor(const CmMatrixDouble *matrix, size_t row,
+CmStatusCode cm_matrix_double_minor(const CmMatrixDouble *matrix, size_t row,
                                     size_t col, double *minor_out) {
 
   CM_CHECK_NULL(matrix);
@@ -512,7 +490,7 @@ CmMatrixCode cm_matrix_double_minor(const CmMatrixDouble *matrix, size_t row,
   return CM_SUCCESS;
 }
 
-CmMatrixCode cm_matrix_double_cofactor(const CmMatrixDouble *matrix, size_t row,
+CmStatusCode cm_matrix_double_cofactor(const CmMatrixDouble *matrix, size_t row,
                                        size_t col, double *cofactor_out) {
 
   double sign = 1;
@@ -521,25 +499,26 @@ CmMatrixCode cm_matrix_double_cofactor(const CmMatrixDouble *matrix, size_t row,
   }
 
   double minor = 0.;
-  CmMatrixCode res = cm_matrix_double_minor(matrix, row, col, &minor);
+  CmStatusCode res = cm_matrix_double_minor(matrix, row, col, &minor);
   *cofactor_out = sign * minor;
 
   return res;
 }
 
-CmMatrixCode cm_matrix_double_pow(CmMatrixDouble **matrix, unsigned exp) {
+CmStatusCode cm_matrix_double_pow(CmMatrixDouble **matrix, unsigned exp) {
 
   if (!matrix)
     return CM_ERR_NULL_POINTER;
 
-  if(exp == 1)
+  if (exp == 1)
     return CM_SUCCESS;
-  else if(exp == 0){
+  else if (exp == 0) {
     cm_matrix_double_set_zero(*matrix);
     return CM_SUCCESS;
   }
 
-  CmMatrixDouble *res = cm_matrix_double_alloc((*matrix)->rows, (*matrix)->columns);
+  CmMatrixDouble *res =
+      cm_matrix_double_alloc((*matrix)->rows, (*matrix)->columns);
   if (!res)
     return CM_ERR_ALLOC_FAILED;
 
@@ -632,7 +611,7 @@ bool cm_matrix_double_is_equal(const CmMatrixDouble *matrix_a,
   return true;
 }
 
-CmMatrixCode cm_matrix_double_add(CmMatrixDouble *matrix_a,
+CmStatusCode cm_matrix_double_add(CmMatrixDouble *matrix_a,
                                   const CmMatrixDouble *matrix_b) {
 
   CM_CHECK_NULL(matrix_a);
@@ -649,7 +628,7 @@ CmMatrixCode cm_matrix_double_add(CmMatrixDouble *matrix_a,
   return CM_SUCCESS;
 }
 
-CmMatrixCode cm_matrix_double_sub(CmMatrixDouble *matrix_a,
+CmStatusCode cm_matrix_double_sub(CmMatrixDouble *matrix_a,
                                   const CmMatrixDouble *matrix_b) {
 
   CM_CHECK_NULL(matrix_a);
@@ -666,7 +645,7 @@ CmMatrixCode cm_matrix_double_sub(CmMatrixDouble *matrix_a,
   return CM_SUCCESS;
 }
 
-CmMatrixCode cm_matrix_double_scale(CmMatrixDouble *matrix_a, double scale) {
+CmStatusCode cm_matrix_double_scale(CmMatrixDouble *matrix_a, double scale) {
 
   CM_CHECK_NULL(matrix_a);
 
@@ -707,7 +686,7 @@ CmMatrixDouble *cm_matrix_double_mul(const CmMatrixDouble *matrix_a,
   return result;
 }
 
-CmMatrixCode cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix,
+CmStatusCode cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix,
                                     double *res) {
   CM_CHECK_NULL(augmented_matrix);
   CM_CHECK_NULL(res);

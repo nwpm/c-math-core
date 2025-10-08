@@ -1,4 +1,5 @@
 #include "cm_vec3_double.h"
+#include "../utils/cm_checkers.h"
 #include <math.h>
 #include <stdlib.h>
 
@@ -39,39 +40,62 @@ CmVec3Double *cm_vec3_double_create_from_vec(CmVec3Double *orig_vec) {
 
 void cm_vec3_double_free(CmVec3Double *vec) { free(vec); }
 
-void cm_vec3_double_sum(CmVec3Double *vec_a, const CmVec3Double *vec_b) {
+CmStatusCode cm_vec3_double_sum(CmVec3Double *vec_a,
+                                const CmVec3Double *vec_b) {
+  CM_CHECK_NULL(vec_a);
+  CM_CHECK_NULL(vec_b);
+
   vec_a->x += vec_b->x;
   vec_a->y += vec_b->y;
   vec_a->z += vec_b->z;
+
+  return CM_SUCCESS;
 }
 
-void cm_vec3_double_sub(CmVec3Double *vec_a, const CmVec3Double *vec_b) {
+CmStatusCode cm_vec3_double_sub(CmVec3Double *vec_a,
+                                const CmVec3Double *vec_b) {
+  CM_CHECK_NULL(vec_a);
+  CM_CHECK_NULL(vec_b);
+
   vec_a->x -= vec_b->x;
   vec_a->y -= vec_b->y;
   vec_a->z -= vec_b->z;
+
+  return CM_SUCCESS;
 }
 
-void cm_vec3_double_scale(CmVec3Double *vec, double scale) {
+CmStatusCode cm_vec3_double_scale(CmVec3Double *vec, double scale) {
+
+  CM_CHECK_NULL(vec);
+
   vec->x *= scale;
   vec->y *= scale;
   vec->z *= scale;
+
+  return CM_SUCCESS;
 }
 
 double cm_vec3_double_norm(const CmVec3Double *vec) {
   return sqrt(vec->x * vec->x + vec->y * vec->y + vec->z * vec->z);
 }
 
-double cm_vec3_double_dot(const CmVec3Double *vec_a,
-                          const CmVec3Double *vec_b) {
-  return vec_a->x * vec_b->x + vec_a->y * vec_b->y + vec_a->z * vec_b->z;
+CmStatusCode cm_vec3_double_dot(const CmVec3Double *vec_a,
+                                const CmVec3Double *vec_b, double *res) {
+  CM_CHECK_NULL(vec_a);
+  CM_CHECK_NULL(vec_b);
+  CM_CHECK_NULL(res);
+
+  *res = vec_a->x * vec_b->x + vec_a->y * vec_b->y + vec_a->z * vec_b->z;
+
+  return CM_SUCCESS;
 }
 
 CmVec3Double *cm_vec3_double_normalize(const CmVec3Double *vec) {
 
   double vec_norm = cm_vec3_double_norm(vec);
 
-  CmVec3Double *normalized =
-      cm_vec3_double_init(vec->x / vec_norm, vec->y / vec_norm, vec->z / vec_norm);
+  CmVec3Double *normalized = cm_vec3_double_init(
+      vec->x / vec_norm, vec->y / vec_norm, vec->z / vec_norm);
   if (!normalized)
     return NULL;
 
