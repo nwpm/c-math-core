@@ -2,6 +2,7 @@
 #define CM_BIG_INT_H
 
 #include <stddef.h>
+#include <stdbool.h>
 
 #define CM_BIGINT_START_CAPACITY 4
 
