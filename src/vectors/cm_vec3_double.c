@@ -75,24 +75,43 @@ CmStatusCode cm_vec3_double_scale(CmVec3Double *vec, double scale) {
   return CM_SUCCESS;
 }
 
-double cm_vec3_double_norm(const CmVec3Double *vec) {
-  return sqrt(vec->x * vec->x + vec->y * vec->y + vec->z * vec->z);
+CmStatusCode cm_vec3_double_norm(const CmVec3Double *vec, double *norm_res) {
+
+  CM_CHECK_NULL(vec);
+  CM_CHECK_NULL(norm_res);
+
+  *norm_res = sqrt(vec->x * vec->x + vec->y * vec->y + vec->z * vec->z);
+
+  return CM_SUCCESS;
+}
+
+CmStatusCode cm_vec3_double_norm_squared(const CmVec3Double *vec,
+                                         double *norm_res) {
+
+  CM_CHECK_NULL(vec);
+  CM_CHECK_NULL(norm_res);
+
+  *norm_res = vec->x * vec->x + vec->y * vec->y + vec->z * vec->z;
+
+  return CM_SUCCESS;
 }
 
 CmStatusCode cm_vec3_double_dot(const CmVec3Double *vec_a,
-                                const CmVec3Double *vec_b, double *res) {
+                                const CmVec3Double *vec_b, double *norm_res) {
   CM_CHECK_NULL(vec_a);
   CM_CHECK_NULL(vec_b);
-  CM_CHECK_NULL(res);
+  CM_CHECK_NULL(norm_res);
 
-  *res = vec_a->x * vec_b->x + vec_a->y * vec_b->y + vec_a->z * vec_b->z;
+  *norm_res = vec_a->x * vec_b->x + vec_a->y * vec_b->y + vec_a->z * vec_b->z;
 
   return CM_SUCCESS;
 }
 
 CmVec3Double *cm_vec3_double_normalize(const CmVec3Double *vec) {
 
-  double vec_norm = cm_vec3_double_norm(vec);
+  double vec_norm = 0.;
+  if (cm_vec3_double_norm(vec, &vec_norm) != CM_SUCCESS)
+    return NULL;
 
   CmVec3Double *normalized = cm_vec3_double_init(
       vec->x / vec_norm, vec->y / vec_norm, vec->z / vec_norm);
@@ -100,4 +119,21 @@ CmVec3Double *cm_vec3_double_normalize(const CmVec3Double *vec) {
     return NULL;
 
   return normalized;
+}
+
+bool cm_vec3_double_is_null(const CmVec3Double *vec) {
+
+  if (!vec)
+    return false;
+
+  return !vec->x && !vec->y && !vec->z;
+}
+
+bool cm_vec3_double_is_equal(const CmVec3Double *vec_a,
+                             const CmVec3Double *vec_b) {
+  if (!vec_a || !vec_b)
+    return false;
+
+  return (vec_a->x == vec_b->x) && (vec_a->y == vec_b->y) &&
+         (vec_a->z == vec_b->z);
 }

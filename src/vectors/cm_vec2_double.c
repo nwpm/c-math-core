@@ -72,24 +72,42 @@ CmStatusCode cm_vec2_double_scale(CmVec2Double *vec, double scale) {
   return CM_SUCCESS;
 }
 
-double cm_vec2_double_norm(const CmVec2Double *vec) {
-  return sqrt(vec->x * vec->x + vec->y * vec->y);
+CmStatusCode cm_vec2_double_norm(const CmVec2Double *vec, double *norm_res) {
+
+  CM_CHECK_NULL(vec);
+  CM_CHECK_NULL(norm_res);
+
+  *norm_res = sqrt(vec->x * vec->x + vec->y * vec->y);
+
+  return CM_SUCCESS;
+}
+
+CmStatusCode cm_vec2_double_norm_squared(const CmVec2Double *vec, double *norm_res) {
+
+  CM_CHECK_NULL(vec);
+  CM_CHECK_NULL(norm_res);
+
+  *norm_res = vec->x * vec->x + vec->y * vec->y;
+
+  return CM_SUCCESS;
 }
 
 CmStatusCode cm_vec2_double_dot(const CmVec2Double *vec_a,
-                                const CmVec2Double *vec_b, double *res) {
+                                const CmVec2Double *vec_b, double *dot_res) {
   CM_CHECK_NULL(vec_a);
   CM_CHECK_NULL(vec_b);
-  CM_CHECK_NULL(res);
+  CM_CHECK_NULL(dot_res);
 
-  *res = vec_a->x * vec_b->x + vec_a->y * vec_b->y;
+  *dot_res = vec_a->x * vec_b->x + vec_a->y * vec_b->y;
 
   return CM_SUCCESS;
 }
 
 CmVec2Double *cm_vec2_double_normalize(const CmVec2Double *vec) {
 
-  double vec_norm = cm_vec2_double_norm(vec);
+  double vec_norm = 0.;
+  if (cm_vec2_double_norm(vec, &vec_norm) != CM_SUCCESS)
+    return NULL;
 
   CmVec2Double *normalized =
       cm_vec2_double_init(vec->x / vec_norm, vec->y / vec_norm);
@@ -97,4 +115,17 @@ CmVec2Double *cm_vec2_double_normalize(const CmVec2Double *vec) {
     return NULL;
 
   return normalized;
+}
+
+bool cm_vec2_double_is_null(const CmVec2Double *vec) {
+  if (!vec)
+    return false;
+  return !vec->x && !vec->y;
+}
+
+bool cm_vec2_double_is_equal(const CmVec2Double *vec_a,
+                             const CmVec2Double *vec_b) {
+  if (!vec_a || !vec_b)
+    return false;
+  return (vec_a->x == vec_b->x) && (vec_a->y == vec_b->y);
 }

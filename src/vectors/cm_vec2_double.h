@@ -25,7 +25,7 @@ CmStatusCode cm_vec2_double_sub(CmVec2Double *vec_a, const CmVec2Double *vec_b);
 CmStatusCode cm_vec2_double_scale(CmVec2Double *vec, double scale);
 
 CmStatusCode cm_vec2_double_dot(const CmVec2Double *vec_a,
-                                const CmVec2Double *vec_b, double *res);
+                                const CmVec2Double *vec_b, double *dot_res);
 CmStatusCode cm_vec2_double_angle(const CmVec2Double *vec_a,
                                   const CmVec2Double *vec_b, double *angle);
 
@@ -39,8 +39,8 @@ CmVec2Double *cm_vec2_double_cross(const CmVec2Double *vec_a,
                                    const CmVec2Double *vec_b);
 
 /* Norm */
-double cm_vec2_double_norm(const CmVec2Double *vec);
-double cm_vec2_double_norm_squared(const CmVec2Double *vec);
+CmStatusCode cm_vec2_double_norm(const CmVec2Double *vec, double *norm_res);
+CmStatusCode cm_vec2_double_norm_squared(const CmVec2Double *vec, double *norm_res);
 double cm_vec2_double_distance(const CmVec2Double *vec_a,
                                const CmVec2Double *vec_b);
 
