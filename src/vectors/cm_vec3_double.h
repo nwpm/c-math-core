@@ -38,30 +38,23 @@ double cm_vec3_double_dot(const CmVec3Double *vec_a, const CmVec3Double *vec_b);
 CmVec3Double *cm_vec3_double_normalize(const CmVec3Double *vec);
 
 /* Setter */
-static inline void cm_vec3_double_set_x(CmVec3Double *vec, double x_val){
+static inline void cm_vec3_double_set_x(CmVec3Double *vec, double x_val) {
   vec->x = x_val;
 }
 
-static inline void cm_vec3_double_set_y(CmVec3Double *vec, double y_val){
+static inline void cm_vec3_double_set_y(CmVec3Double *vec, double y_val) {
   vec->y = y_val;
 }
 
-static inline void cm_vec3_double_set_z(CmVec3Double *vec, double z_val){
+static inline void cm_vec3_double_set_z(CmVec3Double *vec, double z_val) {
   vec->z = z_val;
 }
 
 /* Getter */
-static inline double cm_vec3_double_get_x(CmVec3Double *vec){
-  return vec->x;
-}
+static inline double cm_vec3_double_get_x(CmVec3Double *vec) { return vec->x; }
 
-static inline double cm_vec3_double_get_y(CmVec3Double *vec){
-  return vec->y;
-}
+static inline double cm_vec3_double_get_y(CmVec3Double *vec) { return vec->y; }
 
-static inline double cm_vec3_double_get_z(CmVec3Double *vec){
-  return vec->z;
-}
+static inline double cm_vec3_double_get_z(CmVec3Double *vec) { return vec->z; }
 
 #endif
-
