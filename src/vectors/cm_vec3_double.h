@@ -48,6 +48,7 @@ double cm_vec3_double_distance(const CmVec3Double *vec_a,
 
 /* Normalize */
 CmVec3Double *cm_vec3_double_normalize(const CmVec3Double *vec);
+CmStatusCode cm_vec3_double_normalize_inplace(CmVec3Double *vec);
 
 /* Project */
 CmVec3Double *cm_vec3_double_project(const CmVec3Double *proj_from,

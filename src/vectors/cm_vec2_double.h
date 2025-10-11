@@ -40,12 +40,14 @@ CmVec2Double *cm_vec2_double_cross(const CmVec2Double *vec_a,
 
 /* Norm */
 CmStatusCode cm_vec2_double_norm(const CmVec2Double *vec, double *norm_res);
-CmStatusCode cm_vec2_double_norm_squared(const CmVec2Double *vec, double *norm_res);
+CmStatusCode cm_vec2_double_norm_squared(const CmVec2Double *vec,
+                                         double *norm_res);
 double cm_vec2_double_distance(const CmVec2Double *vec_a,
                                const CmVec2Double *vec_b);
 
 /* Normalize */
 CmVec2Double *cm_vec2_double_normalize(const CmVec2Double *vec);
+CmStatusCode cm_vec2_double_normalize_inplace(CmVec2Double *vec);
 
 /* Project */
 CmVec2Double *cm_vec2_double_project(const CmVec2Double *proj_from,

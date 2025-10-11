@@ -82,7 +82,8 @@ CmStatusCode cm_vec2_double_norm(const CmVec2Double *vec, double *norm_res) {
   return CM_SUCCESS;
 }
 
-CmStatusCode cm_vec2_double_norm_squared(const CmVec2Double *vec, double *norm_res) {
+CmStatusCode cm_vec2_double_norm_squared(const CmVec2Double *vec,
+                                         double *norm_res) {
 
   CM_CHECK_NULL(vec);
   CM_CHECK_NULL(norm_res);
@@ -103,11 +104,52 @@ CmStatusCode cm_vec2_double_dot(const CmVec2Double *vec_a,
   return CM_SUCCESS;
 }
 
+CmStatusCode cm_vec2_double_angle(const CmVec2Double *vec_a,
+                                  const CmVec2Double *vec_b, double *angle) {
+
+  CM_CHECK_NULL(vec_a);
+  CM_CHECK_NULL(vec_b);
+  CM_CHECK_NULL(angle);
+
+  double dot_product = 0.;
+  double norm_vec_a = 0.;
+  double norm_vec_b = 0.;
+  cm_vec2_double_norm(vec_a, &norm_vec_a);
+  cm_vec2_double_norm(vec_b, &norm_vec_b);
+  cm_vec2_double_dot(vec_a, vec_b, &dot_product);
+
+  *angle = dot_product / (norm_vec_a * norm_vec_b);
+  *angle = acos(*angle);
+
+  return CM_SUCCESS;
+}
+
+CmVec2Double *cm_vec2_double_project(const CmVec2Double *proj_from,
+                                     const CmVec2Double *proj_to) {
+
+  CmVec2Double *res = cm_vec2_double_alloc();
+  if (!res)
+    return NULL;
+
+  double dot_product = 0.;
+  double len_vec_to = 0.;
+  cm_vec2_double_norm_squared(proj_to, &len_vec_to);
+  cm_vec2_double_dot(proj_from, proj_to, &dot_product);
+
+  double scalar = dot_product / len_vec_to;
+
+  cm_vec2_double_scale(res, scalar);
+
+  return res;
+}
+
 CmVec2Double *cm_vec2_double_normalize(const CmVec2Double *vec) {
 
-  double vec_norm = 0.;
-  if (cm_vec2_double_norm(vec, &vec_norm) != CM_SUCCESS)
+  if (!vec)
     return NULL;
+
+  double vec_norm = 0.;
+  cm_vec2_double_norm(vec, &vec_norm);
 
   CmVec2Double *normalized =
       cm_vec2_double_init(vec->x / vec_norm, vec->y / vec_norm);
@@ -115,6 +157,17 @@ CmVec2Double *cm_vec2_double_normalize(const CmVec2Double *vec) {
     return NULL;
 
   return normalized;
+}
+
+CmStatusCode cm_vec2_double_normalize_inplace(CmVec2Double *vec) {
+
+  CM_CHECK_NULL(vec);
+
+  double vec_norm = 0.;
+  cm_vec2_double_norm(vec, &vec_norm);
+  cm_vec2_double_scale(vec, 1. / vec_norm);
+
+  return CM_SUCCESS;
 }
 
 bool cm_vec2_double_is_null(const CmVec2Double *vec) {
