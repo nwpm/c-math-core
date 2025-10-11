@@ -695,6 +695,11 @@ CmStatusCode cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix,
     return CM_ERR_INVALID_SIZE;
   }
 
+  double matrix_det = 0.;
+  cm_matrix_double_det(augmented_matrix, &matrix_det);
+  if(matrix_det == 0)
+    return CM_ERR_SINGULAR_MATRIX;
+
   CmMatrixDouble *copy_matrix =
       cm_matrix_double_create_from_matrix(augmented_matrix);
   if (!copy_matrix) {
