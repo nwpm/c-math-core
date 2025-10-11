@@ -44,12 +44,12 @@ void test_create_from_matrix_rows_100_cols_100() {
 // Set Identity + is identity
 
 void check_set_identity(size_t orig_rows, size_t orig_cols,
-                        CmMatrixCode end_status) {
+                        CmStatusCode end_status) {
 
   CmMatrixDouble *matrix = cm_matrix_double_alloc(orig_rows, orig_cols);
   TEST_ASSERT_NOT_NULL(matrix);
 
-  CmMatrixCode res_code = cm_matrix_double_set_identity(matrix);
+  CmStatusCode res_code = cm_matrix_double_set_identity(matrix);
 
   TEST_ASSERT_EQUAL(end_status, res_code);
 
@@ -78,12 +78,12 @@ void test_set_identity_null_check() {
 // set_zero + is zero matrix
 
 void check_set_zero(size_t orig_rows, size_t orig_cols,
-                    CmMatrixCode end_status) {
+                    CmStatusCode end_status) {
 
   CmMatrixDouble *matrix = cm_matrix_double_alloc(orig_rows, orig_cols);
   TEST_ASSERT_NOT_NULL(matrix);
 
-  CmMatrixCode res_code = cm_matrix_double_set_zero(matrix);
+  CmStatusCode res_code = cm_matrix_double_set_zero(matrix);
   TEST_ASSERT_EQUAL(end_status, res_code);
   TEST_ASSERT_TRUE(cm_matrix_double_is_null(matrix));
 
@@ -257,7 +257,7 @@ void test_min_rows_150_cols_150_expected_minus_10() {
 // trace
 
 void check_trace(size_t rows, size_t cols, double res,
-                 CmMatrixCode end_status) {
+                 CmStatusCode end_status) {
 
   CmMatrixDouble *matrix = cm_matrix_double_alloc(rows, cols);
   TEST_ASSERT_NOT_NULL(matrix);
@@ -265,7 +265,7 @@ void check_trace(size_t rows, size_t cols, double res,
   cm_matrix_double_set_identity(matrix);
 
   double trace = 0.;
-  CmMatrixCode res_code = cm_matrix_double_trace(matrix, &trace);
+  CmStatusCode res_code = cm_matrix_double_trace(matrix, &trace);
   TEST_ASSERT_EQUAL(res_code, end_status);
 
   TEST_ASSERT_EQUAL_DOUBLE(res, trace);
@@ -367,7 +367,7 @@ void test_det_rows_5_cols_5() {
 // add
 
 void check_add(size_t rows_a, size_t cols_a, size_t rows_b, size_t cols_b,
-               double init_val_a, double init_val_b, CmMatrixCode end_status) {
+               double init_val_a, double init_val_b, CmStatusCode end_status) {
 
   CmMatrixDouble *matrix_a = cm_matrix_double_alloc(rows_a, cols_a);
   TEST_ASSERT_NOT_NULL(matrix_a);
@@ -378,7 +378,7 @@ void check_add(size_t rows_a, size_t cols_a, size_t rows_b, size_t cols_b,
   cm_matrix_double_set_all(matrix_a, init_val_a);
   cm_matrix_double_set_all(matrix_b, init_val_b);
 
-  CmMatrixCode res = cm_matrix_double_add(matrix_a, matrix_b);
+  CmStatusCode res = cm_matrix_double_add(matrix_a, matrix_b);
   TEST_ASSERT_EQUAL(end_status, res);
 
   if (end_status == CM_SUCCESS) {
@@ -411,7 +411,7 @@ void test_add_diff_size() {
 // diff
 
 void check_sub(size_t rows_a, size_t cols_a, size_t rows_b, size_t cols_b,
-               double init_val_a, double init_val_b, CmMatrixCode end_status) {
+               double init_val_a, double init_val_b, CmStatusCode end_status) {
 
   CmMatrixDouble *matrix_a = cm_matrix_double_alloc(rows_a, cols_a);
   TEST_ASSERT_NOT_NULL(matrix_a);
@@ -422,7 +422,7 @@ void check_sub(size_t rows_a, size_t cols_a, size_t rows_b, size_t cols_b,
   cm_matrix_double_set_all(matrix_a, init_val_a);
   cm_matrix_double_set_all(matrix_b, init_val_b);
 
-  CmMatrixCode res = cm_matrix_double_sub(matrix_a, matrix_b);
+  CmStatusCode res = cm_matrix_double_sub(matrix_a, matrix_b);
   TEST_ASSERT_EQUAL(end_status, res);
 
   if (end_status == CM_SUCCESS) {
@@ -676,6 +676,60 @@ void test_pow_auto_mat_rows_3_cols_3_init_by_5_pow_0() {
 
 void test_pow_auto_mat_rows_3_cols_3_init_by_6_pow_1() {
   check_pow_auto(3, 3, 6, 6, 1);
+}
+
+// minor
+void check_minor(size_t rows, size_t cols, double *init_data, double res,
+                 size_t minor_row, size_t minor_col, CmStatusCode end_status) {
+
+  CmMatrixDouble *matrix = cm_matrix_double_alloc(rows, cols);
+  TEST_ASSERT_NOT_NULL(matrix);
+
+  size_t k = 0;
+  for (size_t i = 0; i < rows; ++i) {
+    for (size_t j = 0; j < cols; ++j) {
+      cm_matrix_double_set(matrix, i, j, init_data[k++]);
+    }
+  }
+
+  double minor = 0.;
+  CmStatusCode res_status =
+      cm_matrix_double_minor(matrix, minor_row, minor_col, &minor);
+  TEST_ASSERT_EQUAL(end_status, res_status);
+
+  if (end_status == CM_SUCCESS) {
+    TEST_ASSERT_EQUAL_DOUBLE(res, minor);
+  }
+
+  cm_matrix_double_free(matrix);
+}
+
+// cofactor
+
+void check_cofactor(size_t rows, size_t cols, double *init_data, double res,
+                    size_t cofactor_row, size_t cofactor_col,
+                    CmStatusCode end_status) {
+
+  CmMatrixDouble *matrix = cm_matrix_double_alloc(rows, cols);
+  TEST_ASSERT_NOT_NULL(matrix);
+
+  size_t k = 0;
+  for (size_t i = 0; i < rows; ++i) {
+    for (size_t j = 0; j < cols; ++j) {
+      cm_matrix_double_set(matrix, i, j, init_data[k++]);
+    }
+  }
+
+  double cofactor = 0.;
+  CmStatusCode res_status =
+      cm_matrix_double_cofactor(matrix, cofactor_row, cofactor_col, &cofactor);
+  TEST_ASSERT_EQUAL(end_status, res_status);
+
+  if (end_status == CM_SUCCESS) {
+    TEST_ASSERT_EQUAL_DOUBLE(res, cofactor);
+  }
+
+  cm_matrix_double_free(matrix);
 }
 
 int main() {
