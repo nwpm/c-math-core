@@ -20,11 +20,11 @@ CmBigInt *cm_bigint_create_from_num(long long src_num);
 CmBigInt *cm_bigint_create_from_cstr(const char *src_cstr);
 CmBigInt *cm_bigint_create_copy(const CmBigInt *src_num);
 
-int cm_bigint_less(const CmBigInt *lhs, const CmBigInt *rhs);
-int cm_bigint_less_or_equal(const CmBigInt *lhs, const CmBigInt *rhs);
-int cm_bigint_greater(const CmBigInt *lhs, const CmBigInt *rhs);
-int cm_bigint_greater_or_equal(const CmBigInt *lhs, const CmBigInt *rhs);
-int cm_bigint_is_equal(const CmBigInt *lhs, const CmBigInt *rhs);
+bool cm_bigint_less(const CmBigInt *lhs, const CmBigInt *rhs);
+bool cm_bigint_less_or_equal(const CmBigInt *lhs, const CmBigInt *rhs);
+bool cm_bigint_greater(const CmBigInt *lhs, const CmBigInt *rhs);
+bool cm_bigint_greater_or_equal(const CmBigInt *lhs, const CmBigInt *rhs);
+bool cm_bigint_is_equal(const CmBigInt *lhs, const CmBigInt *rhs);
 
 CmBigInt *cm_bigint_add(CmBigInt *bigint_num, const CmBigInt *addend);
 CmBigInt *cm_bigint_subtract(CmBigInt *bigint_num, const CmBigInt *substr);

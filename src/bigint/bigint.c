@@ -455,7 +455,7 @@ CmBigInt *cm_bigint_create_from_cstr(const char *cstr) {
   return bigint_num;
 }
 
-int cm_bigint_less(const CmBigInt *lhs, const CmBigInt *rhs) {
+bool cm_bigint_less(const CmBigInt *lhs, const CmBigInt *rhs) {
 
   if (lhs->sign == '+' && rhs->sign == '-') {
     return 0;
@@ -477,7 +477,7 @@ int cm_bigint_less(const CmBigInt *lhs, const CmBigInt *rhs) {
   return 0;
 }
 
-int cm_bigint_less_or_equal(const CmBigInt *lhs, const CmBigInt *rhs) {
+bool cm_bigint_less_or_equal(const CmBigInt *lhs, const CmBigInt *rhs) {
 
   if (!cm_bigint_is_equal(lhs, rhs)) {
     if (!cm_bigint_less(lhs, rhs))
@@ -487,11 +487,11 @@ int cm_bigint_less_or_equal(const CmBigInt *lhs, const CmBigInt *rhs) {
   return 1;
 }
 
-int cm_bigint_greater(const CmBigInt *lhs, const CmBigInt *rhs) {
+bool cm_bigint_greater(const CmBigInt *lhs, const CmBigInt *rhs) {
   return !cm_bigint_less_or_equal(lhs, rhs);
 }
 
-int cm_bigint_greater_or_equal(const CmBigInt *lhs, const CmBigInt *rhs) {
+bool cm_bigint_greater_or_equal(const CmBigInt *lhs, const CmBigInt *rhs) {
 
   if (!cm_bigint_is_equal(lhs, rhs)) {
     if (cm_bigint_less(lhs, rhs))
@@ -501,7 +501,7 @@ int cm_bigint_greater_or_equal(const CmBigInt *lhs, const CmBigInt *rhs) {
   return 1;
 }
 
-int cm_bigint_is_equal(const CmBigInt *lhs, const CmBigInt *rhs) {
+bool cm_bigint_is_equal(const CmBigInt *lhs, const CmBigInt *rhs) {
 
   if (lhs->size == rhs->size) {
     if (lhs->sign == rhs->sign) {
