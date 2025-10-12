@@ -3,16 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-static char *_alloc_buffer(size_t size) {
-
-  char *buf = malloc(size);
-
-  if (!buf)
-    return NULL;
-
-  return buf;
-}
-
 static int _is_valid_cstr(const char *cstr) {
 
   size_t i = 0;
@@ -97,8 +87,7 @@ static int _create_from_cstr(CmBigInt *n, const char *cstr, char sign) {
     n->capacity = _calculate_capacity(cstr_len);
   }
 
-  char *alloc_buffer = _alloc_buffer(n->capacity);
-
+  char *alloc_buffer = malloc(n->capacity);
   if (!alloc_buffer)
     return -1;
 
@@ -115,6 +104,8 @@ static int _create_from_cstr(CmBigInt *n, const char *cstr, char sign) {
   return 0;
 }
 
+// Duplicates the buffer of CmBigInt, copying num->size bytes into a new buffer
+// of size num->capacity.
 static char *_buff_dup(const CmBigInt *num) {
 
   char *copy_buff = malloc(num->capacity);
@@ -179,7 +170,7 @@ static int _calculate_abs_sum(CmBigInt *bigint_num, const CmBigInt *addend,
 
   size_t max_size = greater_abs_num->size + 1;
 
-  if(_ensure_capacity(bigint_num, max_size) != 0)
+  if (_ensure_capacity(bigint_num, max_size) != 0)
     return -1;
 
   int add_part = 0;
@@ -286,12 +277,15 @@ static int _calculate_abs_dif(CmBigInt *bigint_num, const CmBigInt *substr,
   return 0;
 }
 
-static int _calculate_abs_mult(CmBigInt *bigint_num, const CmBigInt *multiplyer) {
+static int _calculate_abs_mult(CmBigInt *bigint_num,
+                               const CmBigInt *multiplyer) {
 
   int compare_res = _abs_compare(bigint_num, multiplyer);
 
-  const CmBigInt *smaller_abs_num = (compare_res >= 0) ? multiplyer : bigint_num;
-  const CmBigInt *greater_abs_num = (compare_res >= 0) ? bigint_num : multiplyer;
+  const CmBigInt *smaller_abs_num =
+      (compare_res >= 0) ? multiplyer : bigint_num;
+  const CmBigInt *greater_abs_num =
+      (compare_res >= 0) ? bigint_num : multiplyer;
 
   size_t max_size = greater_abs_num->size + smaller_abs_num->size;
 
@@ -305,7 +299,7 @@ static int _calculate_abs_mult(CmBigInt *bigint_num, const CmBigInt *multiplyer)
   if (!temp)
     return -1;
 
-  if(_ensure_capacity(temp, max_size) != 0)
+  if (_ensure_capacity(temp, max_size) != 0)
     return -1;
 
   for (size_t i = 0; i < smaller_abs_num->size; ++i) {
@@ -353,7 +347,7 @@ static int _calculate_abs_mult(CmBigInt *bigint_num, const CmBigInt *multiplyer)
   return 0;
 }
 
-CmBigInt *cm_bigint_create() {
+CmBigInt *cm_bigint_alloc() {
 
   CmBigInt *bigint_num = malloc(sizeof(CmBigInt));
 
@@ -373,7 +367,7 @@ CmBigInt *cm_bigint_create_copy(const CmBigInt *src_num) {
   if (!src_num)
     return NULL;
 
-  CmBigInt *new_num = cm_bigint_create();
+  CmBigInt *new_num = cm_bigint_alloc();
 
   if (!new_num)
     return NULL;
@@ -399,24 +393,20 @@ CmBigInt *cm_bigint_create_copy(const CmBigInt *src_num) {
 
 CmBigInt *cm_bigint_create_from_num(long long src_num) {
 
-  CmBigInt *bigint_num = cm_bigint_create();
+  CmBigInt *bigint_num = cm_bigint_alloc();
 
   if (!bigint_num)
     return NULL;
 
+  long long abs_num = _abs(src_num);
+
   bigint_num->sign = (src_num < 0) ? '-' : '+';
-  bigint_num->size = _get_number_of_digits(src_num);
+  bigint_num->size = _get_number_of_digits(abs_num);
+  bigint_num->capacity = _calculate_capacity(bigint_num->size);
 
-  if (bigint_num->size >= CM_BIGINT_START_CAPACITY) {
-    bigint_num->capacity = _calculate_capacity(bigint_num->size);
-  }
-
-  char *alloc_buffer = _alloc_buffer(bigint_num->capacity);
-
+  char *alloc_buffer = malloc(bigint_num->capacity);
   if (!alloc_buffer)
     return NULL;
-
-  long long abs_num = _abs(src_num);
 
   for (size_t i = 0; i < bigint_num->size; ++i) {
     alloc_buffer[i] = (abs_num % 10) + '0';
@@ -433,7 +423,7 @@ CmBigInt *cm_bigint_create_from_cstr(const char *cstr) {
   if (!cstr)
     return NULL;
 
-  CmBigInt *bigint_num = cm_bigint_create();
+  CmBigInt *bigint_num = cm_bigint_alloc();
 
   if (!bigint_num)
     return NULL;
