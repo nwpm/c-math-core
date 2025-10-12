@@ -252,39 +252,35 @@ static bool _cm_calculate_dif(CmBigInt *bigint_num, const CmBigInt *substr,
   return 0;
 }
 
-static int _cm_calculate_mult(CmBigInt *bigint_num,
-                              const CmBigInt *multiplyer) {
+static bool _cm_calculate_mult(CmBigInt *bigint_num,
+                              const CmBigInt *multiplier) {
 
-  int compare_res = _cm_bigint_abs_compare(bigint_num, multiplyer);
+  int compare_res = _cm_bigint_abs_compare(bigint_num, multiplier);
 
   const CmBigInt *smaller_abs_num =
-      (compare_res >= 0) ? multiplyer : bigint_num;
+      (compare_res >= 0) ? multiplier : bigint_num;
   const CmBigInt *greater_abs_num =
-      (compare_res >= 0) ? bigint_num : multiplyer;
+      (compare_res >= 0) ? bigint_num : multiplier;
 
   size_t max_size = greater_abs_num->size + smaller_abs_num->size;
 
-  CmBigInt *res_of_mult = cm_bigint_create_from_num(0);
-
+  CmBigInt *res_of_mult = cm_bigint_alloc();
   if (!res_of_mult)
-    return -1;
+    return false;
 
-  CmBigInt *temp = cm_bigint_create_from_num(0);
-
+  CmBigInt *temp = cm_bigint_alloc();
   if (!temp)
-    return -1;
+    return false;
 
-  if (_cm_ensure_capacity(temp, max_size) != 0)
-    return -1;
+  if (!_cm_ensure_capacity(temp, max_size))
+    return false;
 
   for (size_t i = 0; i < smaller_abs_num->size; ++i) {
     int digit_smaller = smaller_abs_num->buffer[i] - '0';
     int mult_part = 0;
     size_t k = 0;
 
-    for (; k < i; ++k) {
-      temp->buffer[k] = 0 + '0';
-    }
+    memset(temp->buffer, 0, temp->capacity);
 
     for (size_t j = 0; j < greater_abs_num->size; ++j) {
       int digit_greater = greater_abs_num->buffer[j] - '0';
@@ -308,18 +304,18 @@ static int _cm_calculate_mult(CmBigInt *bigint_num,
     cm_bigint_add(res_of_mult, temp);
   }
 
-  res_of_mult->sign = (bigint_num->sign == multiplyer->sign) ? '+' : '-';
+  res_of_mult->sign = (bigint_num->sign == multiplier->sign) ? '+' : '-';
 
   free(bigint_num->buffer);
   bigint_num->buffer = res_of_mult->buffer;
   bigint_num->size = res_of_mult->size;
   bigint_num->sign = res_of_mult->sign;
   bigint_num->capacity = res_of_mult->capacity;
-  free(res_of_mult);
 
   cm_bigint_free(temp);
+  cm_bigint_free(res_of_mult);
 
-  return 0;
+  return true;
 }
 
 CmBigInt *cm_bigint_alloc() {
@@ -501,16 +497,16 @@ CmBigInt *cm_bigint_subtract(CmBigInt *bigint_num, const CmBigInt *substr) {
   if (!bigint_num || !substr)
     return NULL;
 
-  int substr_status = 0;
+  bool is_subtracted = false;
   char res_sign = _cm_calculate_res_sign(bigint_num, substr, '-');
 
   if (bigint_num->sign == substr->sign) {
-    substr_status = _cm_calculate_dif(bigint_num, substr, res_sign);
+    is_subtracted = _cm_calculate_dif(bigint_num, substr, res_sign);
   } else {
-    substr_status = _cm_calculate_sum(bigint_num, substr, res_sign);
+    is_subtracted = _cm_calculate_sum(bigint_num, substr, res_sign);
   }
 
-  return (substr_status == 0) ? bigint_num : NULL;
+  return is_subtracted ? bigint_num : NULL;
 }
 
 CmBigInt *cm_bigint_multiply(CmBigInt *bigint_num, const CmBigInt *multiplier) {
@@ -518,9 +514,7 @@ CmBigInt *cm_bigint_multiply(CmBigInt *bigint_num, const CmBigInt *multiplier) {
   if (!bigint_num || !multiplier)
     return NULL;
 
-  int res_multiply = _cm_calculate_mult(bigint_num, multiplier);
-
-  return (res_multiply == 0) ? bigint_num : NULL;
+  return _cm_calculate_mult(bigint_num, multiplier) ? bigint_num : NULL;
 }
 
 CmBigInt *cm_bigint_abs(CmBigInt *bigint_num) {
