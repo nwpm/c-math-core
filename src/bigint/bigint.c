@@ -3,21 +3,21 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int _is_valid_cstr(const char *cstr) {
+static bool _cm_is_valid_cstr(const char *cstr) {
 
   size_t i = 0;
 
   while (cstr[i] != '\0') {
     if (cstr[i] < '0' || cstr[i] > '9') {
-      return 0;
+      return false;
     }
     i++;
   }
 
-  return 1;
+  return true;
 }
 
-static size_t _calculate_capacity(size_t size) {
+static size_t _cm_calc_capacity(size_t size) {
   if (size < 100) {
     return size * 2;
   } else if (size < 10000) {
@@ -30,7 +30,7 @@ static size_t _calculate_capacity(size_t size) {
 
 static inline long long _cm_long_abs(long long num) { return (num < 0) ? -num : num; }
 
-static size_t _get_number_of_digits(long long num) {
+static size_t _cm_long_digit_count(long long num) {
 
   if (num >= 0 && num < 10)
     return 1;
@@ -47,7 +47,7 @@ static int _ensure_capacity(CmBigInt *bigint_num, size_t max_size) {
 
   if (bigint_num->capacity < max_size) {
 
-    bigint_num->capacity = _calculate_capacity(max_size);
+    bigint_num->capacity = _cm_calc_capacity(max_size);
 
     void *new_buffer = realloc(bigint_num->buffer, bigint_num->capacity);
 
@@ -75,21 +75,21 @@ static int _buff_cmp(const CmBigInt *a, const CmBigInt *b) {
   return 1;
 }
 
-static int _create_from_cstr(CmBigInt *n, const char *cstr, char sign) {
+static bool _cm_bigint_create_from_cstr(CmBigInt *n, const char *cstr, char sign) {
 
-  if (!_is_valid_cstr(cstr)) {
-    return -1;
+  if (!_cm_is_valid_cstr(cstr)) {
+    return false;
   }
 
   size_t cstr_len = strlen(cstr);
 
   if (cstr_len >= n->capacity) {
-    n->capacity = _calculate_capacity(cstr_len);
+    n->capacity = _cm_calc_capacity(cstr_len);
   }
 
   char *alloc_buffer = malloc(n->capacity);
   if (!alloc_buffer)
-    return -1;
+    return false;
 
   size_t j = 0;
   size_t i = cstr_len;
@@ -225,7 +225,7 @@ static int _calculate_abs_dif(CmBigInt *bigint_num, const CmBigInt *substr,
 
   if (bigint_num->capacity < greater_abs_num->size) {
 
-    bigint_num->capacity = _calculate_capacity(greater_abs_num->size);
+    bigint_num->capacity = _cm_calc_capacity(greater_abs_num->size);
     void *new_buffer = realloc(bigint_num->buffer, greater_abs_num->capacity);
 
     if (!new_buffer) {
@@ -401,8 +401,8 @@ CmBigInt *cm_bigint_create_from_num(long long src_num) {
   long long abs_num = _cm_long_abs(src_num);
 
   bigint_num->sign = (src_num < 0) ? '-' : '+';
-  bigint_num->size = _get_number_of_digits(abs_num);
-  bigint_num->capacity = _calculate_capacity(bigint_num->size);
+  bigint_num->size = _cm_long_digit_count(abs_num);
+  bigint_num->capacity = _cm_calc_capacity(bigint_num->size);
 
   char *alloc_buffer = malloc(bigint_num->capacity);
   if (!alloc_buffer)
@@ -428,16 +428,16 @@ CmBigInt *cm_bigint_create_from_cstr(const char *cstr) {
   if (!bigint_num)
     return NULL;
 
-  int create_status = 0;
+  bool is_created = false;
 
   if (cstr[0] == '-' || cstr[0] == '+') {
     const char *magnitude = cstr + 1;
-    create_status = _create_from_cstr(bigint_num, magnitude, cstr[0]);
+    is_created = _cm_bigint_create_from_cstr(bigint_num, magnitude, cstr[0]);
   } else {
-    create_status = _create_from_cstr(bigint_num, cstr, '+');
+    is_created = _cm_bigint_create_from_cstr(bigint_num, cstr, '+');
   }
 
-  if (create_status != 0) {
+  if (!is_created) {
     free(bigint_num);
     return NULL;
   }
@@ -448,12 +448,12 @@ CmBigInt *cm_bigint_create_from_cstr(const char *cstr) {
 bool cm_bigint_less(const CmBigInt *lhs, const CmBigInt *rhs) {
 
   if (lhs->sign == '+' && rhs->sign == '-') {
-    return 0;
+    return false;
   } else if (lhs->sign == '-' && rhs->sign == '+') {
-    return 1;
+    return true;
   }
 
-  int is_negative = (lhs->sign == '-');
+  bool is_negative = (lhs->sign == '-');
   if (lhs->size != rhs->size) {
     return is_negative ? (lhs->size > rhs->size) : (lhs->size < rhs->size);
   }
@@ -464,7 +464,8 @@ bool cm_bigint_less(const CmBigInt *lhs, const CmBigInt *rhs) {
                          : (lhs->buffer[i - 1] < rhs->buffer[i - 1]);
     }
   }
-  return 0;
+
+  return false;
 }
 
 bool cm_bigint_less_or_equal(const CmBigInt *lhs, const CmBigInt *rhs) {
