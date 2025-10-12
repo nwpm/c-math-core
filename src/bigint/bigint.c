@@ -60,21 +60,6 @@ static int _ensure_capacity(CmBigInt *bigint_num, size_t max_size) {
   return 0;
 }
 
-static int _buff_cmp(const CmBigInt *a, const CmBigInt *b) {
-
-  if (a->size == 0) {
-    return 1;
-  }
-
-  for (size_t i = a->size; i > 0; --i) {
-    if (a->buffer[i - 1] != b->buffer[i - 1]) {
-      return 0;
-    }
-  }
-
-  return 1;
-}
-
 static bool _cm_bigint_create_from_cstr(CmBigInt *n, const char *cstr, char sign) {
 
   if (!_cm_is_valid_cstr(cstr)) {
@@ -472,10 +457,10 @@ bool cm_bigint_less_or_equal(const CmBigInt *lhs, const CmBigInt *rhs) {
 
   if (!cm_bigint_is_equal(lhs, rhs)) {
     if (!cm_bigint_less(lhs, rhs))
-      return 0;
+      return false;
   }
 
-  return 1;
+  return true;
 }
 
 bool cm_bigint_greater(const CmBigInt *lhs, const CmBigInt *rhs) {
@@ -486,22 +471,22 @@ bool cm_bigint_greater_or_equal(const CmBigInt *lhs, const CmBigInt *rhs) {
 
   if (!cm_bigint_is_equal(lhs, rhs)) {
     if (cm_bigint_less(lhs, rhs))
-      return 0;
+      return false;
   }
 
-  return 1;
+  return true;
 }
 
 bool cm_bigint_is_equal(const CmBigInt *lhs, const CmBigInt *rhs) {
 
   if (lhs->size == rhs->size) {
     if (lhs->sign == rhs->sign) {
-      if (_buff_cmp(lhs, rhs))
-        return 1;
+      if (memcmp(lhs->buffer, rhs->buffer, lhs->size))
+        return true;
     }
   }
 
-  return 0;
+  return false;
 }
 
 CmBigInt *cm_bigint_add(CmBigInt *bigint_num, const CmBigInt *addend) {
