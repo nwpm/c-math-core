@@ -15,7 +15,7 @@ typedef struct CmBigInt {
 
 } CmBigInt;
 
-CmBigInt *cm_bigint_create();
+CmBigInt *cm_bigint_alloc();
 CmBigInt *cm_bigint_create_from_num(long long src_num);
 CmBigInt *cm_bigint_create_from_cstr(const char *src_cstr);
 CmBigInt *cm_bigint_create_copy(const CmBigInt *src_num);
@@ -29,6 +29,8 @@ bool cm_bigint_is_equal(const CmBigInt *lhs, const CmBigInt *rhs);
 CmBigInt *cm_bigint_add(CmBigInt *bigint_num, const CmBigInt *addend);
 CmBigInt *cm_bigint_subtract(CmBigInt *bigint_num, const CmBigInt *substr);
 CmBigInt *cm_bigint_multiply(CmBigInt *bigint_num, const CmBigInt* multiplier);
+CmBigInt *cm_bigint_divide(CmBigInt *bigint_num, const CmBigInt* divide_by);
+CmBigInt *cm_bigint_mod(CmBigInt *bigint_num, const CmBigInt* divide_by);
 
 CmBigInt *cm_bigint_negate(CmBigInt *bigint_num);
 CmBigInt *cm_bigint_abs(CmBigInt *bigint_num);
