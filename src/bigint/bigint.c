@@ -28,7 +28,7 @@ static size_t _calculate_capacity(size_t size) {
   return size + (size / 20);
 }
 
-static inline long long _abs(long long num) { return (num < 0) ? -num : num; }
+static inline long long _cm_long_abs(long long num) { return (num < 0) ? -num : num; }
 
 static size_t _get_number_of_digits(long long num) {
 
@@ -118,7 +118,7 @@ static char *_buff_dup(const CmBigInt *num) {
   return copy_buff;
 }
 
-static int _abs_compare(const CmBigInt *lhs, const CmBigInt *rhs) {
+static int cm_bigint_abs_compare(const CmBigInt *lhs, const CmBigInt *rhs) {
 
   if (lhs->size != rhs->size) {
     return (lhs->size > rhs->size) ? 1 : -1;
@@ -137,7 +137,7 @@ static int _abs_compare(const CmBigInt *lhs, const CmBigInt *rhs) {
 static char _calculate_res_sign(const CmBigInt *lhs, const CmBigInt *rhs,
                                 char operation) {
 
-  int compare_res = _abs_compare(lhs, rhs);
+  int compare_res = cm_bigint_abs_compare(lhs, rhs);
 
   if (operation == '+') {
     if (compare_res == 0) {
@@ -163,7 +163,7 @@ static char _calculate_res_sign(const CmBigInt *lhs, const CmBigInt *rhs,
 static int _calculate_abs_sum(CmBigInt *bigint_num, const CmBigInt *addend,
                               char res_sign) {
 
-  int compare_res = _abs_compare(bigint_num, addend);
+  int compare_res = cm_bigint_abs_compare(bigint_num, addend);
 
   const CmBigInt *smaller_abs_num = (compare_res >= 0) ? addend : bigint_num;
   const CmBigInt *greater_abs_num = (compare_res >= 0) ? bigint_num : addend;
@@ -218,7 +218,7 @@ static int _calculate_abs_sum(CmBigInt *bigint_num, const CmBigInt *addend,
 static int _calculate_abs_dif(CmBigInt *bigint_num, const CmBigInt *substr,
                               char res_sign) {
 
-  int compare_res = _abs_compare(bigint_num, substr);
+  int compare_res = cm_bigint_abs_compare(bigint_num, substr);
 
   const CmBigInt *smaller_abs_num = (compare_res >= 0) ? substr : bigint_num;
   const CmBigInt *greater_abs_num = (compare_res >= 0) ? bigint_num : substr;
@@ -280,7 +280,7 @@ static int _calculate_abs_dif(CmBigInt *bigint_num, const CmBigInt *substr,
 static int _calculate_abs_mult(CmBigInt *bigint_num,
                                const CmBigInt *multiplyer) {
 
-  int compare_res = _abs_compare(bigint_num, multiplyer);
+  int compare_res = cm_bigint_abs_compare(bigint_num, multiplyer);
 
   const CmBigInt *smaller_abs_num =
       (compare_res >= 0) ? multiplyer : bigint_num;
@@ -398,7 +398,7 @@ CmBigInt *cm_bigint_create_from_num(long long src_num) {
   if (!bigint_num)
     return NULL;
 
-  long long abs_num = _abs(src_num);
+  long long abs_num = _cm_long_abs(src_num);
 
   bigint_num->sign = (src_num < 0) ? '-' : '+';
   bigint_num->size = _get_number_of_digits(abs_num);
