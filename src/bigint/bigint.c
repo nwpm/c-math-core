@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../utils/cm_checkers.h"
+
 static bool _cm_is_valid_cstr(const char *cstr) {
 
   size_t i = 0;
@@ -12,6 +14,16 @@ static bool _cm_is_valid_cstr(const char *cstr) {
       return false;
     }
     i++;
+  }
+
+  return true;
+}
+
+static bool _cm_is_zero_buff(const char *buff, size_t size) {
+
+  for (size_t i = 0; i < size; ++i) {
+    if (buff[i] != 0)
+      return false;
   }
 
   return true;
@@ -144,8 +156,8 @@ static char _cm_calculate_res_sign(const CmBigInt *lhs, const CmBigInt *rhs,
   return (lhs->sign == '-' && rhs->sign == '+') ? '-' : '+';
 }
 
-static bool _cm_calculate_sum(CmBigInt *bigint_num, const CmBigInt *addend,
-                              char res_sign) {
+static CmStatusCode _cm_calculate_sum(CmBigInt *bigint_num,
+                                      const CmBigInt *addend, char res_sign) {
 
   int compare_res = _cm_bigint_abs_compare(bigint_num, addend);
 
@@ -155,7 +167,7 @@ static bool _cm_calculate_sum(CmBigInt *bigint_num, const CmBigInt *addend,
   size_t max_size = greater_abs_num->size + 1;
 
   if (!_cm_ensure_capacity(bigint_num, max_size))
-    return false;
+    return CM_ERR_ALLOC_FAILED;
 
   int add_part = 0;
   size_t i = 0;
@@ -196,11 +208,11 @@ static bool _cm_calculate_sum(CmBigInt *bigint_num, const CmBigInt *addend,
   bigint_num->size = i;
   bigint_num->sign = res_sign;
 
-  return true;
+  return CM_SUCCESS;
 }
 
-static bool _cm_calculate_dif(CmBigInt *bigint_num, const CmBigInt *substr,
-                              char res_sign) {
+static CmStatusCode _cm_calculate_dif(CmBigInt *bigint_num,
+                                      const CmBigInt *substr, char res_sign) {
 
   int compare_res = _cm_bigint_abs_compare(bigint_num, substr);
 
@@ -208,7 +220,7 @@ static bool _cm_calculate_dif(CmBigInt *bigint_num, const CmBigInt *substr,
   const CmBigInt *greater_abs_num = (compare_res >= 0) ? bigint_num : substr;
 
   if (!_cm_ensure_capacity(bigint_num, greater_abs_num->size))
-    return false;
+    return CM_ERR_ALLOC_FAILED;
 
   int substr_part = 0;
   size_t i = 0;
@@ -249,11 +261,11 @@ static bool _cm_calculate_dif(CmBigInt *bigint_num, const CmBigInt *substr,
 
   bigint_num->sign = res_sign;
 
-  return 0;
+  return CM_SUCCESS;
 }
 
-static bool _cm_calculate_mult(CmBigInt *bigint_num,
-                              const CmBigInt *multiplier) {
+static CmStatusCode _cm_calculate_mult(CmBigInt *bigint_num,
+                                       const CmBigInt *multiplier) {
 
   int compare_res = _cm_bigint_abs_compare(bigint_num, multiplier);
 
@@ -266,14 +278,14 @@ static bool _cm_calculate_mult(CmBigInt *bigint_num,
 
   CmBigInt *res_of_mult = cm_bigint_alloc();
   if (!res_of_mult)
-    return false;
+    return CM_ERR_ALLOC_FAILED;
 
   CmBigInt *temp = cm_bigint_alloc();
   if (!temp)
-    return false;
+    return CM_ERR_ALLOC_FAILED;
 
   if (!_cm_ensure_capacity(temp, max_size))
-    return false;
+    return CM_ERR_ALLOC_FAILED;
 
   for (size_t i = 0; i < smaller_abs_num->size; ++i) {
     int digit_smaller = smaller_abs_num->buffer[i] - '0';
@@ -311,11 +323,52 @@ static bool _cm_calculate_mult(CmBigInt *bigint_num,
   bigint_num->size = res_of_mult->size;
   bigint_num->sign = res_of_mult->sign;
   bigint_num->capacity = res_of_mult->capacity;
+  free(res_of_mult);
 
   cm_bigint_free(temp);
-  cm_bigint_free(res_of_mult);
 
-  return true;
+  return CM_SUCCESS;
+}
+
+// Naive division
+// TODO: Shift-subtract
+// TODO: Knuth D
+static CmStatusCode _cm_calculate_div(CmBigInt *bigint_num,
+                                      const CmBigInt *divider) {
+
+  if (_cm_is_zero_buff(divider->buffer, divider->size))
+    return CM_ERR_ZERO_DIVISION;
+
+  if (cm_bigint_less(bigint_num, divider) ||
+      _cm_is_zero_buff(bigint_num->buffer, bigint_num->size)) {
+    bigint_num->size = 1;
+    bigint_num->sign = '+';
+    memset(bigint_num->buffer, 0, bigint_num->capacity);
+    return CM_SUCCESS;
+  }
+
+  CmBigInt *res = cm_bigint_alloc();
+  CmBigInt *tmp = cm_bigint_create_copy(bigint_num);
+  CmBigInt *one = cm_bigint_create_from_num(1);
+
+  while (true) {
+    cm_bigint_subtract(tmp, divider);
+    if (tmp->sign == '-')
+      break;
+    else
+      cm_bigint_add(res, one);
+  }
+
+  free(bigint_num->buffer);
+  bigint_num->buffer = res->buffer;
+  bigint_num->size = res->size;
+  bigint_num->capacity = res->capacity;
+  bigint_num->sign = (bigint_num->sign == divider->sign) ? '+' : '-';
+  free(res);
+
+  cm_bigint_free(one);
+
+  return CM_SUCCESS;
 }
 
 CmBigInt *cm_bigint_alloc() {
@@ -475,46 +528,57 @@ bool cm_bigint_is_equal(const CmBigInt *lhs, const CmBigInt *rhs) {
   return false;
 }
 
-CmBigInt *cm_bigint_add(CmBigInt *bigint_num, const CmBigInt *addend) {
+bool cm_bigint_is_equal_long(const CmBigInt *lhs, long long rhs) {}
 
-  if (!bigint_num || !addend)
-    return NULL;
+CmStatusCode cm_bigint_add(CmBigInt *bigint_num, const CmBigInt *addend) {
 
-  bool is_added = 0;
+  CM_CHECK_NULL(bigint_num);
+  CM_CHECK_NULL(addend);
+
+  CmStatusCode res_code;
   char res_sign = _cm_calculate_res_sign(bigint_num, addend, '+');
 
   if (bigint_num->sign == addend->sign) {
-    is_added = _cm_calculate_sum(bigint_num, addend, res_sign);
+    res_code = _cm_calculate_sum(bigint_num, addend, res_sign);
   } else {
-    is_added = _cm_calculate_dif(bigint_num, addend, res_sign);
+    res_code = _cm_calculate_dif(bigint_num, addend, res_sign);
   }
 
-  return is_added ? bigint_num : NULL;
+  return res_code;
 }
 
-CmBigInt *cm_bigint_subtract(CmBigInt *bigint_num, const CmBigInt *substr) {
+CmStatusCode cm_bigint_subtract(CmBigInt *bigint_num, const CmBigInt *substr) {
 
-  if (!bigint_num || !substr)
-    return NULL;
+  CM_CHECK_NULL(bigint_num);
+  CM_CHECK_NULL(substr);
 
-  bool is_subtracted = false;
+  CmStatusCode res_code;
   char res_sign = _cm_calculate_res_sign(bigint_num, substr, '-');
 
   if (bigint_num->sign == substr->sign) {
-    is_subtracted = _cm_calculate_dif(bigint_num, substr, res_sign);
+    res_code = _cm_calculate_dif(bigint_num, substr, res_sign);
   } else {
-    is_subtracted = _cm_calculate_sum(bigint_num, substr, res_sign);
+    res_code = _cm_calculate_sum(bigint_num, substr, res_sign);
   }
 
-  return is_subtracted ? bigint_num : NULL;
+  return res_code;
 }
 
-CmBigInt *cm_bigint_multiply(CmBigInt *bigint_num, const CmBigInt *multiplier) {
+CmStatusCode cm_bigint_multiply(CmBigInt *bigint_num,
+                                const CmBigInt *multiplier) {
 
-  if (!bigint_num || !multiplier)
+  CM_CHECK_NULL(bigint_num);
+  CM_CHECK_NULL(multiplier);
+
+  return _cm_calculate_mult(bigint_num, multiplier);
+}
+
+CmStatusCode cm_bigint_divide(CmBigInt *bigint_num, const CmBigInt *divider) {
+
+  if (!bigint_num || !divider)
     return NULL;
 
-  return _cm_calculate_mult(bigint_num, multiplier) ? bigint_num : NULL;
+  return NULL;
 }
 
 CmBigInt *cm_bigint_abs(CmBigInt *bigint_num) {
