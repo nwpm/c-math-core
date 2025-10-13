@@ -528,7 +528,9 @@ bool cm_bigint_is_equal(const CmBigInt *lhs, const CmBigInt *rhs) {
   return false;
 }
 
-bool cm_bigint_is_equal_long(const CmBigInt *lhs, long long rhs) {}
+bool cm_bigint_is_zero(const CmBigInt *bigint_num) {
+  return _cm_is_zero_buff(bigint_num->buffer, bigint_num->size);
+}
 
 CmStatusCode cm_bigint_add(CmBigInt *bigint_num, const CmBigInt *addend) {
 
@@ -575,10 +577,10 @@ CmStatusCode cm_bigint_multiply(CmBigInt *bigint_num,
 
 CmStatusCode cm_bigint_divide(CmBigInt *bigint_num, const CmBigInt *divider) {
 
-  if (!bigint_num || !divider)
-    return NULL;
+  CM_CHECK_NULL(bigint_num);
+  CM_CHECK_NULL(divider);
 
-  return NULL;
+  return _cm_calculate_div(bigint_num, divider);
 }
 
 CmBigInt *cm_bigint_abs(CmBigInt *bigint_num) {
@@ -599,6 +601,19 @@ CmBigInt *cm_bigint_negate(CmBigInt *bigint_num) {
   bigint_num->sign = (bigint_num->sign == '+') ? '-' : '+';
 
   return bigint_num;
+}
+
+char *cm_bigint_to_string(const CmBigInt *bigint_num) {
+
+  if (!bigint_num)
+    return NULL;
+
+  char *str = malloc(bigint_num->size);
+  if (!str)
+    return NULL;
+
+  memcpy(str, bigint_num->buffer, bigint_num->size);
+  return str;
 }
 
 void cm_bigint_free(CmBigInt *bigint_num) {
