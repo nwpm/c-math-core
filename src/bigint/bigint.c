@@ -1,5 +1,6 @@
 #include "bigint.h"
 #include <assert.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -38,6 +39,22 @@ static size_t _cm_calc_capacity(size_t size) {
     return size + size / 10;
   }
   return size + (size / 20);
+}
+
+static char *_cm_itoa(long long num, size_t size) {
+
+  char *num_str = calloc(size, sizeof(char));
+  if (!num_str)
+    return NULL;
+
+  size_t i = 0;
+
+  do {
+    int current_digit = num % 10;
+    num_str[i++] = current_digit;
+  } while (num / 10);
+
+  return num_str;
 }
 
 static inline long long _cm_long_abs(long long num) {
@@ -526,6 +543,80 @@ bool cm_bigint_is_equal(const CmBigInt *lhs, const CmBigInt *rhs) {
   }
 
   return false;
+}
+
+bool cm_bigint_is_positive(const CmBigInt *bigint_num) {
+  return bigint_num->sign == '+';
+}
+
+bool cm_bigint_less_ll(const CmBigInt *lhs, long long rhs) {
+
+  bool rhs_is_positive = rhs >= 0;
+  bool lhs_is_positive = cm_bigint_is_positive(lhs);
+
+  if (!lhs_is_positive && rhs_is_positive) {
+    return true;
+  } else if (lhs_is_positive && !rhs_is_positive) {
+    return false;
+  }
+
+  size_t rhs_digit_number = _cm_long_digit_count(rhs);
+
+  if (lhs->size != rhs_digit_number) {
+    return !lhs_is_positive ? (lhs->size > rhs_digit_number)
+                            : (lhs->size < rhs_digit_number);
+  }
+
+  const char *rhs_str = _cm_itoa(rhs, rhs_digit_number);
+
+  for (size_t i = lhs->size; i > 0; i--) {
+    if (lhs->buffer[i - 1] != rhs_str[i - 1]) {
+      return !lhs_is_positive ? (lhs->buffer[i - 1] > rhs_str[i - 1])
+                              : (lhs->buffer[i - 1] < rhs_str[i - 1]);
+    }
+  }
+
+  return true;
+}
+
+bool cm_bigint_is_equal_ll(const CmBigInt *lhs, long long rhs) {
+
+  size_t rhs_digit_number = _cm_long_digit_count(rhs);
+  const char *rhs_str = _cm_itoa(rhs, rhs_digit_number);
+  char rhs_sign = (rhs >= 0) ? '+' : '-';
+
+  if (lhs->size == rhs_digit_number) {
+    if (lhs->sign == rhs_sign) {
+      if (memcmp(lhs->buffer, rhs_str, lhs->size))
+        return true;
+    }
+  }
+
+  return false;
+}
+
+bool cm_bigint_less_or_equal_ll(const CmBigInt *lhs, long long rhs) {
+
+  if (!cm_bigint_is_equal_ll(lhs, rhs)) {
+    if (!cm_bigint_less_ll(lhs, rhs))
+      return false;
+  }
+
+  return true;
+}
+
+bool cm_bigint_greater_ll(const CmBigInt *lhs, long long rhs) {
+  return !cm_bigint_less_or_equal_ll(lhs, rhs);
+}
+
+bool cm_bigint_greater_or_equal_ll(const CmBigInt *lhs, long long rhs) {
+
+  if (!cm_bigint_is_equal_ll(lhs, rhs)) {
+    if (cm_bigint_less_ll(lhs, rhs))
+      return false;
+  }
+
+  return true;
 }
 
 bool cm_bigint_is_zero(const CmBigInt *bigint_num) {
