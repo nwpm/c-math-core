@@ -817,6 +817,22 @@ CmStatusCode cm_bigint_set_long(CmBigInt *bigint_num, long long setter) {
   return CM_SUCCESS;
 }
 
+CmStatusCode cm_bigint_shrink_to_fit(CmBigInt *bigint_num) {
+
+  CM_CHECK_NULL(bigint_num);
+
+  if (bigint_num->capacity > bigint_num->size) {
+    void *new_buffer = realloc(bigint_num->buffer, bigint_num->size);
+    if (!new_buffer) {
+      return CM_ERR_ALLOC_FAILED;
+    }
+
+    bigint_num->buffer = new_buffer;
+  }
+
+  return CM_SUCCESS;
+}
+
 CmBigInt *cm_bigint_abs(CmBigInt *bigint_num) {
 
   if (!bigint_num)

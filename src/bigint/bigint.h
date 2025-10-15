@@ -61,12 +61,9 @@ CmStatusCode cm_bigint_set_long(CmBigInt *bigint_num, long long setter);
 CmBigInt *cm_bigint_negate(CmBigInt *bigint_num);
 CmBigInt *cm_bigint_abs(CmBigInt *bigint_num);
 
+CmStatusCode cm_bigint_shrink_to_fit(CmBigInt *bigint_num);
 
 // TODO:
-
-
-CmStatusCode cm_bigint_normalize(CmBigInt *num);
-CmStatusCode cm_bigint_shrink_to_fit(CmBigInt *num);
 
 CmBigInt *cm_bigint_mod(CmBigInt *bigint_num, const CmBigInt *divider);
 CmStatusCode cm_bigint_div_mod(CmBigInt *quotient, CmBigInt *remainder,
@@ -84,10 +81,5 @@ CmStatusCode cm_bigint_mod_multiply(CmBigInt *num, const CmBigInt *multiplier,
                                     const CmBigInt *modulus);
 CmStatusCode cm_bigint_mod_pow(CmBigInt *num, const CmBigInt *exponent,
                                const CmBigInt *modulus);
-
-
-CmStatusCode cm_bigint_set(CmBigInt *bigint_num, const CmBigInt *setter);
-CmStatusCode cm_bigint_set_long(CmBigInt *bigint_num, long long setter);
-
 
 #endif // BIG_INT_H
