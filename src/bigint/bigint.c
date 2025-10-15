@@ -457,6 +457,37 @@ static CmStatusCode _cm_calculate_div(CmBigInt *bigint_num,
   return CM_SUCCESS;
 }
 
+CmStatusCode cm_bigint_shift_left(CmBigInt *bigint_num, size_t k) {
+
+  CM_CHECK_NULL(bigint_num);
+
+  if (!_cm_ensure_capacity(bigint_num, bigint_num->size + k))
+    return CM_ERR_ALLOC_FAILED;
+
+  memmove(bigint_num->buffer + k, bigint_num->buffer, bigint_num->size);
+  memset(bigint_num->buffer, 0, k);
+  bigint_num->size += k;
+
+  return CM_SUCCESS;
+}
+
+CmStatusCode cm_bigint_shift_right(CmBigInt *bigint_num, size_t k) {
+
+  CM_CHECK_NULL(bigint_num);
+
+  if(k >= bigint_num->size){
+    bigint_num->buffer[0] = 0;
+    bigint_num->size = 1;
+    bigint_num->sign = '+';
+    return CM_SUCCESS;
+  }
+
+  memmove(bigint_num->buffer, bigint_num->buffer + k, bigint_num->size);
+  bigint_num->size -= k;
+
+  return CM_SUCCESS;
+}
+
 CmBigInt *cm_bigint_alloc() {
 
   CmBigInt *bigint_num = malloc(sizeof(CmBigInt));
@@ -805,8 +836,8 @@ CmStatusCode cm_bigint_set_long(CmBigInt *bigint_num, long long setter) {
 
   bigint_num->sign = (setter < 0) ? '-' : '+';
   bigint_num->size = _cm_long_digit_count(abs_num);
-  if (_cm_ensure_capacity(bigint_num, bigint_num->size)) {
-    bigint_num->capacity = _cm_calc_capacity(bigint_num->size);
+  if (!_cm_ensure_capacity(bigint_num, bigint_num->size)) {
+    return CM_ERR_ALLOC_FAILED;
   }
 
   for (size_t i = 0; i < bigint_num->size; ++i) {

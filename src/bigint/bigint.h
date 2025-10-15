@@ -50,6 +50,10 @@ CmStatusCode cm_bigint_dec(CmBigInt *bigint_num);
 bool cm_bigint_is_positive(const CmBigInt *bigint_num);
 bool cm_bigint_is_zero(const CmBigInt *bigint_num);
 
+/* Shifts */
+CmStatusCode cm_bigint_shift_left(CmBigInt *bigint_num, size_t k);
+CmStatusCode cm_bigint_shift_right(CmBigInt *bigint_num, size_t k);
+
 /* Convert */
 char *cm_bigint_to_string(const CmBigInt *bigint_num);
 
@@ -73,9 +77,6 @@ CmStatusCode cm_bigint_pow(CmBigInt *num, unsigned long long exponent);
 
 CmStatusCode cm_bigint_add_ll(CmBigInt *num, long long value);
 CmStatusCode cm_bigint_sub_ll(CmBigInt *num, long long value);
-
-CmStatusCode cm_bigint_shift_left(CmBigInt *num, size_t k);
-CmStatusCode cm_bigint_shift_right(CmBigInt *num, size_t k);
 
 CmStatusCode cm_bigint_mod_multiply(CmBigInt *num, const CmBigInt *multiplier,
                                     const CmBigInt *modulus);
