@@ -228,6 +228,75 @@ static CmStatusCode _cm_calculate_sum(CmBigInt *bigint_num,
   return CM_SUCCESS;
 }
 
+static CmStatusCode _cm_calculate_inc(CmBigInt *bigint_num, char res_sign) {
+
+  CM_CHECK_NULL(bigint_num);
+  size_t max_size = bigint_num->size + 1;
+
+  if (!_cm_ensure_capacity(bigint_num, max_size))
+    return CM_ERR_ALLOC_FAILED;
+
+  int add_part = 1;
+  size_t i = 0;
+  size_t j = bigint_num->size;
+
+  do {
+
+    int bigint_digit = bigint_num->buffer[i] - '0';
+    int sum = bigint_digit + add_part;
+
+    if (sum > 9) {
+      sum -= 10;
+      add_part = 1;
+    } else {
+      add_part = 0;
+    }
+
+    bigint_num->buffer[i++] = sum + '0';
+
+  } while (add_part && j--);
+
+  if (add_part) {
+    bigint_num->buffer[i] = add_part + '0';
+    bigint_num->size++;
+  }
+
+  bigint_num->sign = res_sign;
+
+  return CM_SUCCESS;
+}
+
+static CmStatusCode _cm_calculate_dec(CmBigInt *bigint_num, char res_sign) {
+
+  int substr_part = 1;
+  size_t i = 0;
+  size_t j = bigint_num->size;
+
+  do {
+
+    int bigint_digit = bigint_num->buffer[i] - '0';
+    int substr = bigint_digit - substr_part;
+
+    if (substr < 0) {
+      substr += 10;
+      substr_part = 1;
+    } else {
+      substr_part = 0;
+    }
+    bigint_num->buffer[i++] = substr + '0';
+
+  } while (substr_part && j--);
+
+  while (bigint_num->size > 1 &&
+         bigint_num->buffer[bigint_num->size - 1] == '0') {
+    bigint_num->size--;
+  }
+
+  bigint_num->sign = res_sign;
+
+  return CM_SUCCESS;
+}
+
 static CmStatusCode _cm_calculate_dif(CmBigInt *bigint_num,
                                       const CmBigInt *substr, char res_sign) {
 
@@ -672,6 +741,41 @@ CmStatusCode cm_bigint_divide(CmBigInt *bigint_num, const CmBigInt *divider) {
   CM_CHECK_NULL(divider);
 
   return _cm_calculate_div(bigint_num, divider);
+}
+
+CmStatusCode cm_bigint_inc(CmBigInt *bigint_num) {
+
+  CM_CHECK_NULL(bigint_num);
+
+  CmStatusCode res_code;
+
+  if (bigint_num->sign == '+') {
+    res_code = _cm_calculate_inc(bigint_num, '+');
+  } else {
+    char res_sign =
+        cm_bigint_is_equal_ll(bigint_num, -1) ? '+' : bigint_num->sign;
+    res_code = _cm_calculate_dec(bigint_num, res_sign);
+  }
+
+  return res_code;
+}
+
+CmStatusCode cm_bigint_dec(CmBigInt *bigint_num) {
+
+  CM_CHECK_NULL(bigint_num);
+
+  CmStatusCode res_code;
+  bool is_zero = cm_bigint_is_zero(bigint_num);
+
+  if (bigint_num->sign == '-') {
+    res_code = _cm_calculate_inc(bigint_num, '-');
+  } else {
+    char res_sign =
+        cm_bigint_is_equal_ll(bigint_num, 0) ? '-' : bigint_num->sign;
+    res_code = _cm_calculate_dec(bigint_num, res_sign);
+  }
+
+  return res_code;
 }
 
 CmBigInt *cm_bigint_abs(CmBigInt *bigint_num) {
