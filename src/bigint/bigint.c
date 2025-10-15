@@ -767,7 +767,7 @@ CmStatusCode cm_bigint_dec(CmBigInt *bigint_num) {
   CmStatusCode res_code;
   bool is_zero = cm_bigint_is_zero(bigint_num);
 
-  if (bigint_num->sign == '-') {
+  if (bigint_num->sign == '-' || is_zero) {
     res_code = _cm_calculate_inc(bigint_num, '-');
   } else {
     char res_sign =
@@ -776,6 +776,45 @@ CmStatusCode cm_bigint_dec(CmBigInt *bigint_num) {
   }
 
   return res_code;
+}
+
+CmStatusCode cm_bigint_set(CmBigInt *bigint_num, const CmBigInt *setter) {
+
+  CM_CHECK_NULL(bigint_num);
+  CM_CHECK_NULL(setter);
+
+  char *new_buffer = malloc(setter->size);
+  if (!new_buffer)
+    return NULL;
+
+  free(bigint_num->buffer);
+  bigint_num->buffer = new_buffer;
+  bigint_num->size = setter->size;
+  bigint_num->capacity = setter->size;
+  bigint_num->sign = setter->sign;
+  memcpy(bigint_num->buffer, setter->buffer, setter->size);
+
+  return CM_SUCCESS;
+}
+
+CmStatusCode cm_bigint_set_long(CmBigInt *bigint_num, long long setter) {
+
+  CM_CHECK_NULL(bigint_num);
+
+  long long abs_num = _cm_long_abs(setter);
+
+  bigint_num->sign = (setter < 0) ? '-' : '+';
+  bigint_num->size = _cm_long_digit_count(abs_num);
+  if (_cm_ensure_capacity(bigint_num, bigint_num->size)) {
+    bigint_num->capacity = _cm_calc_capacity(bigint_num->size);
+  }
+
+  for (size_t i = 0; i < bigint_num->size; ++i) {
+    bigint_num->buffer[i] = (abs_num % 10) + '0';
+    abs_num /= 10;
+  }
+
+  return CM_SUCCESS;
 }
 
 CmBigInt *cm_bigint_abs(CmBigInt *bigint_num) {

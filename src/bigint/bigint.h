@@ -53,6 +53,10 @@ bool cm_bigint_is_zero(const CmBigInt *bigint_num);
 /* Convert */
 char *cm_bigint_to_string(const CmBigInt *bigint_num);
 
+/* Setters */
+CmStatusCode cm_bigint_set(CmBigInt *bigint_num, const CmBigInt *setter);
+CmStatusCode cm_bigint_set_long(CmBigInt *bigint_num, long long setter);
+
 /* Other */
 CmBigInt *cm_bigint_negate(CmBigInt *bigint_num);
 CmBigInt *cm_bigint_abs(CmBigInt *bigint_num);
