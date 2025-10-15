@@ -416,8 +416,7 @@ static CmStatusCode _cm_calculate_mult(CmBigInt *bigint_num,
   return CM_SUCCESS;
 }
 
-// Naive division
-// TODO: Shift-subtract
+// Shift-subtract
 // TODO: Knuth D
 static CmStatusCode _cm_calculate_div(CmBigInt *bigint_num,
                                       const CmBigInt *divider) {
@@ -433,26 +432,33 @@ static CmStatusCode _cm_calculate_div(CmBigInt *bigint_num,
     return CM_SUCCESS;
   }
 
-  CmBigInt *res = cm_bigint_alloc();
-  CmBigInt *tmp = cm_bigint_create_copy(bigint_num);
-  CmBigInt *one = cm_bigint_create_from_num(1);
+  CmBigInt *quotient = cm_bigint_alloc();
+  CmBigInt *remainder = cm_bigint_create_copy(bigint_num);
 
-  while (true) {
-    cm_bigint_subtract(tmp, divider);
-    if (tmp->sign == '-')
-      break;
-    else
-      cm_bigint_add(res, one);
+  while (cm_bigint_greater_or_equal(remainder, divider)) {
+    size_t shift = 0;
+    CmBigInt *divider_copy = cm_bigint_create_copy(divider);
+
+    cm_bigint_shift_left(divider_copy, shift + 1);
+    while (cm_bigint_less_or_equal(divider_copy, remainder)) {
+      cm_bigint_shift_left(divider_copy, shift);
+      shift++;
+    }
+    cm_bigint_shift_left(divider_copy, shift);
+    cm_bigint_subtract(remainder, divider_copy);
+
+    CmBigInt *one = cm_bigint_create_from_num(1);
+    cm_bigint_shift_left(one, shift);
+    cm_bigint_add(quotient, one);
+
+    cm_bigint_free(one);
+    cm_bigint_free(divider_copy);
   }
 
-  free(bigint_num->buffer);
-  bigint_num->buffer = res->buffer;
-  bigint_num->size = res->size;
-  bigint_num->capacity = res->capacity;
-  bigint_num->sign = (bigint_num->sign == divider->sign) ? '+' : '-';
-  free(res);
+  cm_bigint_set(bigint_num, quotient);
 
-  cm_bigint_free(one);
+  cm_bigint_free(remainder);
+  cm_bigint_free(quotient);
 
   return CM_SUCCESS;
 }
@@ -475,7 +481,7 @@ CmStatusCode cm_bigint_shift_right(CmBigInt *bigint_num, size_t k) {
 
   CM_CHECK_NULL(bigint_num);
 
-  if(k >= bigint_num->size){
+  if (k >= bigint_num->size) {
     bigint_num->buffer[0] = 0;
     bigint_num->size = 1;
     bigint_num->sign = '+';
