@@ -1,4 +1,4 @@
-#include "bigint.h"
+#include "cm_bigint.h"
 #include <assert.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -418,47 +418,40 @@ static CmStatusCode _cm_calculate_mult(CmBigInt *bigint_num,
 
 // Shift-subtract
 // TODO: Knuth D
-static CmStatusCode _cm_calculate_div(CmBigInt *bigint_num,
-                                      const CmBigInt *divider) {
+static CmStatusCode _cm_calculate_div(const CmBigInt *dividend,
+                                      const CmBigInt *divider,
+                                      CmBigInt *remainder, CmBigInt *quotient) {
 
   if (_cm_is_zero_buff(divider->buffer, divider->size))
     return CM_ERR_ZERO_DIVISION;
 
-  if (cm_bigint_less(bigint_num, divider) ||
-      _cm_is_zero_buff(bigint_num->buffer, bigint_num->size)) {
-    bigint_num->size = 1;
-    bigint_num->sign = '+';
-    memset(bigint_num->buffer, 0, bigint_num->capacity);
+  if (cm_bigint_less(dividend, divider) ||
+      _cm_is_zero_buff(dividend->buffer, dividend->size)) {
     return CM_SUCCESS;
   }
 
-  CmBigInt *quotient = cm_bigint_alloc();
-  CmBigInt *remainder = cm_bigint_create_copy(bigint_num);
+  CmBigInt *divider_copy = cm_bigint_create_copy(divider);
+  CmBigInt *one = cm_bigint_create_from_num(1);
 
-  while (cm_bigint_greater_or_equal(remainder, divider)) {
+  while (cm_bigint_greater_or_equal(remainder, divider_copy)) {
     size_t shift = 0;
-    CmBigInt *divider_copy = cm_bigint_create_copy(divider);
 
     cm_bigint_shift_left(divider_copy, shift + 1);
     while (cm_bigint_less_or_equal(divider_copy, remainder)) {
       cm_bigint_shift_left(divider_copy, shift);
       shift++;
     }
-    cm_bigint_shift_left(divider_copy, shift);
+    cm_bigint_shift_right(divider_copy, shift);
     cm_bigint_subtract(remainder, divider_copy);
 
-    CmBigInt *one = cm_bigint_create_from_num(1);
     cm_bigint_shift_left(one, shift);
     cm_bigint_add(quotient, one);
 
-    cm_bigint_free(one);
-    cm_bigint_free(divider_copy);
+    cm_bigint_shift_right(one, shift);
   }
 
-  cm_bigint_set(bigint_num, quotient);
-
-  cm_bigint_free(remainder);
-  cm_bigint_free(quotient);
+  cm_bigint_free(one);
+  cm_bigint_free(divider_copy);
 
   return CM_SUCCESS;
 }
@@ -746,6 +739,28 @@ CmStatusCode cm_bigint_add(CmBigInt *bigint_num, const CmBigInt *addend) {
   return res_code;
 }
 
+CmStatusCode cm_bigint_add_ll(CmBigInt *bigint_num, long long addend) {
+
+  CM_CHECK_NULL(bigint_num);
+
+  CmBigInt *bigint_addend = cm_bigint_create_from_num(addend);
+  if (!bigint_addend)
+    return CM_ERR_ALLOC_FAILED;
+
+  return cm_bigint_add(bigint_num, bigint_addend);
+}
+
+CmStatusCode cm_bigint_sub_ll(CmBigInt *bigint_num, long long subtrc) {
+
+  CM_CHECK_NULL(bigint_num);
+
+  CmBigInt *bigint_subtrc = cm_bigint_create_from_num(subtrc);
+  if (!bigint_subtrc)
+    return CM_ERR_ALLOC_FAILED;
+
+  return cm_bigint_subtract(bigint_num, bigint_subtrc);
+}
+
 CmStatusCode cm_bigint_subtract(CmBigInt *bigint_num, const CmBigInt *substr) {
 
   CM_CHECK_NULL(bigint_num);
@@ -777,11 +792,45 @@ CmStatusCode cm_bigint_divide(CmBigInt *bigint_num, const CmBigInt *divider) {
   CM_CHECK_NULL(bigint_num);
   CM_CHECK_NULL(divider);
 
-  return _cm_calculate_div(bigint_num, divider);
+  CmBigInt *remainder = cm_bigint_alloc();
+  CM_CHECK_NULL(remainder);
+
+  CmBigInt *quotient = cm_bigint_alloc();
+  CM_CHECK_NULL(quotient);
+
+  return cm_bigint_div_mod(quotient, remainder, bigint_num, divider);
+}
+
+CmStatusCode cm_bigint_mod(CmBigInt *bigint_num, const CmBigInt *divider) {
+
+  CM_CHECK_NULL(bigint_num);
+  CM_CHECK_NULL(divider);
+
+  CmBigInt *remainder = cm_bigint_alloc();
+  CM_CHECK_NULL(remainder);
+
+  CmBigInt *quotient = cm_bigint_alloc();
+  CM_CHECK_NULL(quotient);
+
+  return cm_bigint_div_mod(quotient, remainder, bigint_num, divider);
+}
+
+CmStatusCode cm_bigint_div_mod(CmBigInt *quotient, CmBigInt *remainder,
+                               const CmBigInt *dividend,
+                               const CmBigInt *divider) {
+
+  CM_CHECK_NULL(quotient);
+  CM_CHECK_NULL(remainder);
+  CM_CHECK_NULL(dividend);
+  CM_CHECK_NULL(divider);
+
+  cm_bigint_set(remainder, dividend);
+  cm_bigint_set_long(quotient, 0);
+
+  return _cm_calculate_div(dividend, divider, remainder, quotient);
 }
 
 CmStatusCode cm_bigint_inc(CmBigInt *bigint_num) {
-
   CM_CHECK_NULL(bigint_num);
 
   CmStatusCode res_code;

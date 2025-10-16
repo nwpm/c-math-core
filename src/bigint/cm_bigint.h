@@ -46,6 +46,14 @@ CmStatusCode cm_bigint_divide(CmBigInt *bigint_num, const CmBigInt *divider);
 CmStatusCode cm_bigint_inc(CmBigInt *bigint_num);
 CmStatusCode cm_bigint_dec(CmBigInt *bigint_num);
 
+CmStatusCode cm_bigint_add_ll(CmBigInt *bigint_num, long long addend);
+CmStatusCode cm_bigint_sub_ll(CmBigInt *bigint_num, long long subtrc);
+
+CmStatusCode cm_bigint_mod(CmBigInt *bigint_num, const CmBigInt *divider);
+CmStatusCode cm_bigint_div_mod(CmBigInt *quotient, CmBigInt *remainder,
+                               const CmBigInt *dividend,
+                               const CmBigInt *divider);
+
 /* Check */
 bool cm_bigint_is_positive(const CmBigInt *bigint_num);
 bool cm_bigint_is_zero(const CmBigInt *bigint_num);
@@ -69,15 +77,7 @@ CmStatusCode cm_bigint_shrink_to_fit(CmBigInt *bigint_num);
 
 // TODO:
 
-CmBigInt *cm_bigint_mod(CmBigInt *bigint_num, const CmBigInt *divider);
-CmStatusCode cm_bigint_div_mod(CmBigInt *quotient, CmBigInt *remainder,
-                               const CmBigInt *dividend,
-                               const CmBigInt *divider);
 CmStatusCode cm_bigint_pow(CmBigInt *num, unsigned long long exponent);
-
-CmStatusCode cm_bigint_add_ll(CmBigInt *num, long long value);
-CmStatusCode cm_bigint_sub_ll(CmBigInt *num, long long value);
-
 CmStatusCode cm_bigint_mod_multiply(CmBigInt *num, const CmBigInt *multiplier,
                                     const CmBigInt *modulus);
 CmStatusCode cm_bigint_mod_pow(CmBigInt *num, const CmBigInt *exponent,
