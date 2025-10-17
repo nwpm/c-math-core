@@ -25,7 +25,6 @@ void _cm_matrix_double_printf(const CmMatrixDouble *matrix) {
 void _cm_matrix_double_printf(const CmMatrixDouble *matrix) { (void)matrix; }
 #endif
 
-
 #define CM_GET_MATRIX_ELEM(matrix, row, column)                                \
   ((matrix)->data[(row) * (matrix)->columns + (column)])
 
@@ -98,8 +97,13 @@ CmMatrixDouble *cm_matrix_double_calloc(size_t rows, size_t cols) {
   return matrix;
 }
 
+// TODO: use memcpy instead for
 CmMatrixDouble *
 cm_matrix_double_create_from_matrix(const CmMatrixDouble *orig_matrix) {
+
+  if (!orig_matrix || !orig_matrix->data || orig_matrix->columns == 0 ||
+      orig_matrix->rows == 0)
+    return NULL;
 
   CmMatrixDouble *copy_matrix =
       cm_matrix_double_alloc(orig_matrix->rows, orig_matrix->columns);
@@ -148,10 +152,12 @@ CmStatusCode cm_matrix_double_swap(CmMatrixDouble **matrix_a,
   return CM_SUCCESS;
 }
 
+// TODO: memset optimuzation
 CmStatusCode cm_matrix_double_set_identity(CmMatrixDouble *matrix) {
 
   CM_CHECK_NULL(matrix);
-  CM_SQUARE_CHECK(matrix);
+  CM_MATRIX_SQUARE_CHECK(matrix);
+  CM_MATRIX_BUFF_NULL_CHECK(matrix);
 
   for (size_t i = 0; i < matrix->rows; ++i) {
     for (size_t j = 0; j < matrix->columns; ++j) {
@@ -169,12 +175,9 @@ CmStatusCode cm_matrix_double_set_identity(CmMatrixDouble *matrix) {
 CmStatusCode cm_matrix_double_set_zero(CmMatrixDouble *matrix) {
 
   CM_CHECK_NULL(matrix);
+  CM_MATRIX_BUFF_NULL_CHECK(matrix);
 
-  for (size_t i = 0; i < matrix->rows; ++i) {
-    for (size_t j = 0; j < matrix->columns; ++j) {
-      matrix->data[i * matrix->columns + j] = 0;
-    }
-  }
+  memset(matrix->data, 0, sizeof(double) * matrix->rows * matrix->columns);
 
   return CM_SUCCESS;
 }
@@ -182,11 +185,17 @@ CmStatusCode cm_matrix_double_set_zero(CmMatrixDouble *matrix) {
 CmStatusCode cm_matrix_double_set_all(CmMatrixDouble *matrix, double x) {
 
   CM_CHECK_NULL(matrix);
+  CM_MATRIX_BUFF_NULL_CHECK(matrix);
 
-  for (size_t i = 0; i < matrix->rows; ++i) {
-    for (size_t j = 0; j < matrix->columns; ++j) {
-      matrix->data[i * matrix->columns + j] = x;
-    }
+  if (x == 0.) {
+    cm_matrix_double_set_zero(matrix);
+    return CM_SUCCESS;
+  }
+
+  size_t num_of_elems = matrix->rows * matrix->columns;
+
+  for (size_t i = 0; i < num_of_elems; ++i) {
+    matrix->data[i] = x;
   }
 
   return CM_SUCCESS;
@@ -257,7 +266,7 @@ CmStatusCode cm_matrix_double_trace(const CmMatrixDouble *matrix,
 
   CM_CHECK_NULL(matrix);
   CM_CHECK_NULL(trace_out);
-  CM_SQUARE_CHECK(matrix);
+  CM_MATRIX_SQUARE_CHECK(matrix);
 
   for (size_t i = 0; i < matrix->rows; ++i) {
     for (size_t j = 0; j < matrix->columns; ++j) {
@@ -274,7 +283,7 @@ CmStatusCode cm_matrix_double_det(const CmMatrixDouble *matrix,
                                   double *det_out) {
 
   CM_CHECK_NULL(matrix);
-  CM_SQUARE_CHECK(matrix);
+  CM_MATRIX_SQUARE_CHECK(matrix);
 
   if (matrix->columns <= 3) {
     *det_out = cm_matrix_double_det_less_3(matrix);
@@ -455,7 +464,7 @@ CmStatusCode cm_matrix_double_minor(const CmMatrixDouble *matrix, size_t row,
                                     size_t col, double *minor_out) {
 
   CM_CHECK_NULL(matrix);
-  CM_SQUARE_CHECK(matrix);
+  CM_MATRIX_SQUARE_CHECK(matrix);
 
   if (matrix->rows == 0 && matrix->columns == 0)
     return CM_ERR_ZERO_MATRIX;
@@ -616,7 +625,7 @@ CmStatusCode cm_matrix_double_add(CmMatrixDouble *matrix_a,
 
   CM_CHECK_NULL(matrix_a);
   CM_CHECK_NULL(matrix_b);
-  CM_SIZE_MATCH(matrix_a, matrix_b);
+  CM_MATRIX_SIZE_MATCH(matrix_a, matrix_b);
 
   for (size_t i = 0; i < matrix_a->rows; ++i) {
     for (size_t j = 0; j < matrix_a->columns; ++j) {
@@ -633,7 +642,7 @@ CmStatusCode cm_matrix_double_sub(CmMatrixDouble *matrix_a,
 
   CM_CHECK_NULL(matrix_a);
   CM_CHECK_NULL(matrix_b);
-  CM_SIZE_MATCH(matrix_a, matrix_b);
+  CM_MATRIX_SIZE_MATCH(matrix_a, matrix_b);
 
   for (size_t i = 0; i < matrix_a->rows; ++i) {
     for (size_t j = 0; j < matrix_a->columns; ++j) {
@@ -697,7 +706,7 @@ CmStatusCode cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix,
 
   double matrix_det = 0.;
   cm_matrix_double_det(augmented_matrix, &matrix_det);
-  if(matrix_det == 0)
+  if (matrix_det == 0)
     return CM_ERR_SINGULAR_MATRIX;
 
   CmMatrixDouble *copy_matrix =
@@ -764,7 +773,10 @@ CmStatusCode cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix,
   return CM_SUCCESS;
 }
 
-void cm_matrix_double_free(CmMatrixDouble *matrix) {
+CmStatusCode cm_matrix_double_free(CmMatrixDouble *matrix) {
+  if (!matrix)
+    return CM_ERR_NULL_POINTER;
   free(matrix->data);
   free(matrix);
+  return CM_SUCCESS;
 }
