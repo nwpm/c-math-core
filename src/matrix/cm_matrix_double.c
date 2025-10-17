@@ -478,10 +478,10 @@ CmStatusCode cm_matrix_double_minor(const CmMatrixDouble *matrix, size_t row,
   CM_MATRIX_SQUARE_CHECK(matrix);
 
   if (matrix->rows == 0 && matrix->columns == 0)
-    return CM_ERR_ZERO_MATRIX;
+    return CM_MATRIX_ERR_ZERO;
 
   if (row > matrix->rows || col > matrix->columns)
-    return CM_ERR_WRONG_POS;
+    return CM_MATRIX_ERR_WRONG_POS;
 
   CmMatrixDouble *block_matrix =
       cm_matrix_double_alloc(matrix->rows - 1, matrix->columns - 1);
@@ -664,12 +664,23 @@ CmStatusCode cm_matrix_double_add(CmMatrixDouble *matrix_a,
 
   CM_CHECK_NULL(matrix_a);
   CM_CHECK_NULL(matrix_b);
+  CM_MATRIX_BUFF_NULL_CHECK(matrix_a);
+  CM_MATRIX_BUFF_NULL_CHECK(matrix_b);
   CM_MATRIX_SIZE_MATCH(matrix_a, matrix_b);
 
-  for (size_t i = 0; i < matrix_a->rows; ++i) {
-    for (size_t j = 0; j < matrix_a->columns; ++j) {
-      matrix_a->data[i * matrix_a->columns + j] +=
-          matrix_b->data[i * matrix_b->columns + j];
+  size_t i = 0;
+  size_t j = 0;
+
+  for (; i < matrix_a->rows;) {
+    double current_elem_b = matrix_b->data[i * matrix_b->columns + j];
+
+    matrix_a->data[i * matrix_a->columns + j] += current_elem_b;
+
+    if (j == matrix_a->columns) {
+      j = 0;
+      ++i;
+    } else {
+      ++j;
     }
   }
 
@@ -678,38 +689,57 @@ CmStatusCode cm_matrix_double_add(CmMatrixDouble *matrix_a,
 
 CmStatusCode cm_matrix_double_sub(CmMatrixDouble *matrix_a,
                                   const CmMatrixDouble *matrix_b) {
-
   CM_CHECK_NULL(matrix_a);
   CM_CHECK_NULL(matrix_b);
+  CM_MATRIX_BUFF_NULL_CHECK(matrix_a);
+  CM_MATRIX_BUFF_NULL_CHECK(matrix_b);
   CM_MATRIX_SIZE_MATCH(matrix_a, matrix_b);
 
-  for (size_t i = 0; i < matrix_a->rows; ++i) {
-    for (size_t j = 0; j < matrix_a->columns; ++j) {
-      matrix_a->data[i * matrix_a->columns + j] -=
-          matrix_b->data[i * matrix_b->columns + j];
+  size_t i = 0;
+  size_t j = 0;
+
+  for (; i < matrix_a->rows;) {
+    double current_elem_b = matrix_b->data[i * matrix_b->columns + j];
+
+    matrix_a->data[i * matrix_a->columns + j] -= current_elem_b;
+
+    if (j == matrix_a->columns) {
+      j = 0;
+      ++i;
+    } else {
+      ++j;
     }
   }
 
   return CM_SUCCESS;
 }
 
-CmStatusCode cm_matrix_double_scale(CmMatrixDouble *matrix_a, double scale) {
+CmStatusCode cm_matrix_double_scale(CmMatrixDouble *matrix, double scale) {
 
-  CM_CHECK_NULL(matrix_a);
+  CM_CHECK_NULL(matrix);
+  CM_MATRIX_BUFF_NULL_CHECK(matrix);
 
-  for (size_t i = 0; i < matrix_a->rows; ++i) {
-    for (size_t j = 0; j < matrix_a->columns; ++j) {
-      matrix_a->data[i * matrix_a->columns + j] *= scale;
-    }
+  if (_cm_double_abs(scale) <= CM_MATRIX_EPS) {
+    cm_matrix_double_set_zero(matrix);
+    return CM_SUCCESS;
+  }
+
+  size_t num_of_elems = matrix->rows * matrix->columns;
+
+  for (size_t i = 0; i < num_of_elems; ++i) {
+    matrix->data[i] *= scale;
   }
 
   return CM_SUCCESS;
 }
 
+// TODO: Get/set slow (macro bounds? overkill per inner), better direct data
+// access result
+// TODO: better performance
 CmMatrixDouble *cm_matrix_double_mul(const CmMatrixDouble *matrix_a,
                                      const CmMatrixDouble *matrix_b) {
 
-  if (!matrix_a || !matrix_b)
+  if (!matrix_a || !matrix_b || !matrix_a->data || !matrix_b->data)
     return NULL;
   if (matrix_a->columns != matrix_b->rows)
     return NULL;
@@ -740,13 +770,13 @@ CmStatusCode cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix,
   CM_CHECK_NULL(res);
 
   if (augmented_matrix->rows != (augmented_matrix->columns - 1)) {
-    return CM_ERR_INVALID_SIZE;
+    return CM_MATRIX_ERR_INVALID_SIZE;
   }
 
   double matrix_det = 0.;
   cm_matrix_double_det(augmented_matrix, &matrix_det);
   if (matrix_det == 0)
-    return CM_ERR_SINGULAR_MATRIX;
+    return CM_MATRIX_ERR_SINGULAR;
 
   CmMatrixDouble *copy_matrix =
       cm_matrix_double_create_from_matrix(augmented_matrix);
