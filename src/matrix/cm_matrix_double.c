@@ -27,6 +27,7 @@ void _cm_matrix_double_printf(const CmMatrixDouble *matrix) { (void)matrix; }
 
 #define CM_GET_MATRIX_ELEM(matrix, row, column)                                \
   ((matrix)->data[(row) * (matrix)->columns + (column)])
+#define CM_MATRIX_EPS 1.0e-20
 
 static void matrix_double_mult_row(CmMatrixDouble *matrix, size_t row,
                                    double mult_by) {
@@ -35,7 +36,9 @@ static void matrix_double_mult_row(CmMatrixDouble *matrix, size_t row,
   }
 }
 
-static double cm_matrix_double_det_less_3(const CmMatrixDouble *matrix) {
+static double _cm_double_abs(double x) { return x >= 0 ? x : -1. * x; }
+
+static double _cm_matrix_double_det_less_3(const CmMatrixDouble *matrix) {
 
   double det_out = 0.;
 
@@ -267,36 +270,41 @@ CmStatusCode cm_matrix_double_trace(const CmMatrixDouble *matrix,
 
   CM_CHECK_NULL(matrix);
   CM_CHECK_NULL(trace_out);
+  CM_MATRIX_BUFF_NULL_CHECK(matrix);
   CM_MATRIX_SQUARE_CHECK(matrix);
 
+  size_t num_of_elems = matrix->rows * matrix->columns;
+  *trace_out = 0.;
+
   for (size_t i = 0; i < matrix->rows; ++i) {
-    for (size_t j = 0; j < matrix->columns; ++j) {
-      if (i == j) {
-        *trace_out += matrix->data[i * matrix->columns + j];
-      }
-    }
+    *trace_out += matrix->data[i * matrix->columns + i];
   }
 
   return CM_SUCCESS;
 }
 
+// NOTE: fine for small matrix
+// TODO: change get to direct data access
 CmStatusCode cm_matrix_double_det(const CmMatrixDouble *matrix,
                                   double *det_out) {
 
   CM_CHECK_NULL(matrix);
   CM_MATRIX_SQUARE_CHECK(matrix);
+  CM_MATRIX_BUFF_NULL_CHECK(matrix);
 
   if (matrix->columns <= 3) {
-    *det_out = cm_matrix_double_det_less_3(matrix);
+    *det_out = _cm_matrix_double_det_less_3(matrix);
     return CM_SUCCESS;
   }
 
   CmMatrixDouble *copy_matrix = cm_matrix_double_create_from_matrix(matrix);
-  CM_CHECK_NULL(copy_matrix);
+  CM_ALLOC_CHECK_NULL(copy_matrix);
 
   double *mult_constants = malloc(copy_matrix->columns * sizeof(double));
-  if (!mult_constants)
+  if (!mult_constants) {
+    cm_matrix_double_free(copy_matrix);
     return CM_ERR_ALLOC_FAILED;
+  }
 
   int mult_const_index = 0;
   int swap_number = 0;
@@ -313,9 +321,11 @@ CmStatusCode cm_matrix_double_det(const CmMatrixDouble *matrix,
 
           find_non_zero = true;
           void *buffer = malloc(copy_matrix->columns * sizeof(double));
-
-          if (!buffer)
+          if (!buffer) {
+            cm_matrix_double_free(copy_matrix);
+            free(mult_constants);
             return CM_ERR_ALLOC_FAILED;
+          }
 
           memcpy(buffer, copy_matrix->data + (i * copy_matrix->columns),
                  sizeof(double) * copy_matrix->columns);
@@ -565,56 +575,84 @@ CmStatusCode cm_matrix_double_pow(CmMatrixDouble **matrix, unsigned exp) {
   return CM_SUCCESS;
 }
 
+// TODO: NaN/Inf handling weak (NaN compare false may pass as null, bad). EPS
+// fixed 1e-20 arbitrary (better relative eps * max_elem or ULPs)
 bool cm_matrix_double_is_null(const CmMatrixDouble *matrix) {
 
-  if (!matrix)
+  if (!matrix || !matrix->data)
     return false;
 
-  for (size_t i = 0; i < matrix->rows; ++i) {
-    for (size_t j = 0; j < matrix->columns; ++j) {
-      if (matrix->data[i * matrix->columns + j] != 0) {
-        return false;
-      }
-    }
+  size_t num_of_elems = matrix->rows * matrix->columns;
+
+  for (size_t i = 0; i < num_of_elems; ++i) {
+    if (_cm_double_abs(matrix->data[i]) >= CM_MATRIX_EPS)
+      return false;
   }
 
   return true;
 }
 
+// TODO: NaN/Inf handling weak (NaN compare false may pass as null, bad). EPS
+// fixed 1e-20 arbitrary (better relative eps * max_elem or ULPs)
 bool cm_matrix_double_is_identity(const CmMatrixDouble *matrix) {
 
-  if (!matrix)
+  if (!matrix || !matrix->data)
     return false;
 
-  for (size_t i = 0; i < matrix->rows; ++i) {
-    for (size_t j = 0; j < matrix->columns; ++j) {
-      double current_elem = matrix->data[i * matrix->columns + j];
-      if (i == j && current_elem != 1) {
-        return false;
-      } else if (i != j && current_elem != 0) {
-        return false;
-      }
+  if ((matrix->rows) != (matrix->columns)) {
+    return false;
+  }
+
+  size_t i = 0;
+  size_t j = 0;
+
+  for (; i < matrix->rows;) {
+    double current_elem = matrix->data[i * matrix->columns + j];
+    if (i == j && _cm_double_abs(current_elem - 1.) >= CM_MATRIX_EPS) {
+      return false;
+    } else if (i != j && _cm_double_abs(current_elem) >= CM_MATRIX_EPS) {
+      return false;
+    }
+
+    if (j == matrix->columns) {
+      j = 0;
+      ++i;
+    } else {
+      ++j;
     }
   }
 
   return true;
 }
 
+// TODO: NaN/Inf handling weak (NaN compare false may pass as null, bad). EPS
+// fixed 1e-20 arbitrary (better relative eps * max_elem or ULPs)
 bool cm_matrix_double_is_equal(const CmMatrixDouble *matrix_a,
                                const CmMatrixDouble *matrix_b) {
 
-  if (!matrix_a || !matrix_b)
+  if (!matrix_a || !matrix_b || !matrix_a->data || !matrix_b->data)
     return false;
 
   if ((matrix_a->rows != matrix_b->rows) ||
       (matrix_a->columns != matrix_b->columns))
     return false;
 
-  for (size_t i = 0; i < matrix_a->rows; ++i) {
-    for (size_t j = 0; j < matrix_a->columns; ++j) {
-      if (matrix_a->data[i * matrix_a->columns + j] !=
-          matrix_b->data[i * matrix_b->columns + j])
-        return false;
+  size_t i = 0;
+  size_t j = 0;
+
+  for (; i < matrix_a->rows;) {
+    double current_elem_a = matrix_a->data[i * matrix_a->columns + j];
+    double current_elem_b = matrix_b->data[i * matrix_b->columns + j];
+
+    if (_cm_double_abs(current_elem_a - current_elem_b) >= CM_MATRIX_EPS) {
+      return false;
+    }
+
+    if (j == matrix_a->columns) {
+      j = 0;
+      ++i;
+    } else {
+      ++j;
     }
   }
 
