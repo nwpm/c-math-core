@@ -1,29 +1,60 @@
-# CMathCore
+# CMathCore - Mathematical Core Library
 
-**CMathCore** is a C library designed for mathematical computations, providing robust support for vectors (2D and 3D), matrices, arbitrary-precision integers (BigInt). In future, it will include support for complex numbers, geometry, statistics, calculus, and series.  
+**CMathCore** is a robust library designed to provide essential mathematical functions for physics simulations and graphics programming. Built with precision and extensibility in mind, it leverages C/C++ for performance-critical applications.
 
-The library is built with **performance, reliability, and portability** in mind, making it ideal for applications in computer graphics, physics simulations, machine learning, and scientific computing.  
+## Overview
 
-CMathCore follows a **modular design**, employs **explicit memory management**, and uses **status codes** for error handling.
+This library aims to encapsulate a wide range of mathematical utilities, including:
 
----
+- Linear algebra
+- Numerical methods
+- Specialized computations
 
-## Installation Prerequisites
+It uses return codes (`CmStatusCode`) to track operation outcomes, ensuring robust error handling.
 
-- C compiler (GCC, Clang, or equivalent)  
-- Standard C libraries (`<stdlib.h>`, `<string.h>`, `<math.h>`)  
-- Build system: `make`
+## Current Implementation
 
-### Quick Start
+The following components are implemented and partially tested:
+
+- **Matrix**: Supports matrix operations for linear algebra tasks.
+- **BigInt**: Handles arbitrary-precision integer arithmetic.
+- **Vectors**: Provides vector operations for 2D and 3D spaces (e.g., `vec2_double`, `vec3_double`).
+
+## Future Development
+
+Additional functionalities will be added progressively, including but not limited to:
+
+- Complex number operations
+- Geometry calculations
+- Numerical optimizations
+- Quaternions
+- Sequences
+- Statistical functions
+- Special mathematical functions
+
+## Usage
+
+The library is structured with clear separation of source (`.c`) and header (`.h`) files, managed via Makefiles in each subdirectory. Integrate by including the relevant headers and linking against the compiled objects.
+
+## Installation
+
+Clone the repository and build the library using the provided Makefiles:
 
 ```bash
-# Clone the repository
 git clone https://github.com/yourusername/CMathCore.git
 cd CMathCore
-
-# Build the library
 make
+```
 
-# (Optional) Install the library
-make install
+## Testing
+
+Partial testing has been conducted on implemented features. Further test cases will be developed as the library expands.
+
+## Contributing
+
+Contributions are welcome. Ensure new features align with the library's design and include appropriate tests.
+
+## License
+
+See `LICENSE.md` for details.
 
