@@ -173,6 +173,24 @@ CmStatusCode cm_vec3_double_normalize_inplace(CmVec3Double *vec) {
   return CM_SUCCESS;
 }
 
+CmVec3Double *cm_vec3_double_cross(const CmVec3Double *vec_a,
+                                   const CmVec3Double *vec_b){
+
+  if(!vec_a || !vec_b)
+    return NULL;
+
+  CmVec3Double *res_vec = cm_vec3_double_alloc();
+  if(!res_vec)
+    return NULL;
+
+  double det_x = (vec_a->y * vec_b->z) - (vec_a->z * vec_b->y);
+  double det_y = -((vec_a->x * vec_b->z) - (vec_a->z * vec_b->x));
+  double det_z = (vec_a->x * vec_b->y) - (vec_a->y * vec_b->x);
+
+
+
+}
+
 bool cm_vec3_double_is_null(const CmVec3Double *vec) {
 
   if (!vec)
