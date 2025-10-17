@@ -35,8 +35,6 @@ bool cm_vec2_double_is_equal(const CmVec2Double *vec_a,
 
 CmVec2Double *cm_vec2_double_perpendicular(const CmVec2Double *vec);
 CmVec2Double *cm_vec2_double_rotate(const CmVec2Double *vec, double angle);
-CmVec2Double *cm_vec2_double_cross(const CmVec2Double *vec_a,
-                                   const CmVec2Double *vec_b);
 
 /* Norm */
 CmStatusCode cm_vec2_double_norm(const CmVec2Double *vec, double *norm_res);
