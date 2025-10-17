@@ -206,14 +206,14 @@ CmStatusCode cm_matrix_double_max(const CmMatrixDouble *matrix,
 
   CM_CHECK_NULL(matrix);
   CM_CHECK_NULL(max_out);
+  CM_MATRIX_BUFF_NULL_CHECK(matrix);
 
   *max_out = matrix->data[0];
+  size_t num_of_elems = matrix->rows * matrix->columns;
 
-  for (size_t i = 0; i < matrix->rows; ++i) {
-    for (size_t j = 0; j < matrix->columns; ++j) {
-      if (matrix->data[i * matrix->columns + j] > *max_out)
-        *max_out = matrix->data[i * matrix->columns + j];
-    }
+  for (size_t i = 0; i < num_of_elems; ++i) {
+    if (matrix->data[i] > *max_out)
+      *max_out = matrix->data[i];
   }
 
   return CM_SUCCESS;
@@ -224,29 +224,30 @@ CmStatusCode cm_matrix_double_min(const CmMatrixDouble *matrix,
 
   CM_CHECK_NULL(matrix);
   CM_CHECK_NULL(min_out);
+  CM_MATRIX_BUFF_NULL_CHECK(matrix);
 
   *min_out = matrix->data[0];
+  size_t num_of_elems = matrix->rows * matrix->columns;
 
-  for (size_t i = 0; i < matrix->rows; ++i) {
-    for (size_t j = 0; j < matrix->columns; ++j) {
-      if (matrix->data[i * matrix->columns + j] < *min_out)
-        *min_out = matrix->data[i * matrix->columns + j];
-    }
+  for (size_t i = 0; i < num_of_elems; ++i) {
+    if (matrix->data[i] < *min_out)
+      *min_out = matrix->data[i];
   }
 
   return CM_SUCCESS;
 }
 
+// NOTE: fine for general, but mem-heavy for large rect
 CmStatusCode cm_matrix_double_transpose(CmMatrixDouble **matrix) {
 
   CM_CHECK_NULL(matrix);
+  CM_CHECK_NULL(*matrix);
+  CM_MATRIX_BUFF_NULL_CHECK((*matrix));
 
   CmMatrixDouble *tmp_matrix =
       cm_matrix_double_alloc((*matrix)->columns, (*matrix)->rows);
 
-  if (!tmp_matrix) {
-    return CM_ERR_ALLOC_FAILED;
-  }
+  CM_ALLOC_CHECK_NULL(tmp_matrix);
 
   for (size_t i = 0; i < (*matrix)->rows; ++i) {
     for (size_t j = 0; j < (*matrix)->columns; ++j) {
@@ -774,9 +775,12 @@ CmStatusCode cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix,
 }
 
 CmStatusCode cm_matrix_double_free(CmMatrixDouble *matrix) {
-  if (!matrix)
-    return CM_ERR_NULL_POINTER;
+
+  CM_CHECK_NULL(matrix);
+  CM_MATRIX_BUFF_NULL_CHECK(matrix);
+
   free(matrix->data);
   free(matrix);
+
   return CM_SUCCESS;
 }
