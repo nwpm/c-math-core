@@ -378,16 +378,13 @@ CmStatusCode cm_matrix_double_det(const CmMatrixDouble *matrix,
   return CM_SUCCESS;
 }
 
+// TODO: if pivot 1e-20 unstable
 CmMatrixDouble *cm_matrix_double_inverse(const CmMatrixDouble *orig_matrix) {
 
-  if (!orig_matrix || (orig_matrix->rows != orig_matrix->columns)) {
+  if (!orig_matrix || !orig_matrix->data ||
+      (orig_matrix->rows != orig_matrix->columns)) {
     return NULL;
   }
-
-  double det = 0.;
-  cm_matrix_double_det(orig_matrix, &det);
-  if (det == 0.)
-    return NULL;
 
   CmMatrixDouble *copy_matrix =
       cm_matrix_double_create_from_matrix(orig_matrix);
@@ -398,6 +395,7 @@ CmMatrixDouble *cm_matrix_double_inverse(const CmMatrixDouble *orig_matrix) {
   CmMatrixDouble *res_matrix =
       cm_matrix_double_alloc(orig_matrix->rows, orig_matrix->columns);
   if (!res_matrix) {
+    cm_matrix_double_free(copy_matrix);
     return NULL;
   }
   cm_matrix_double_set_identity(res_matrix);
@@ -405,18 +403,23 @@ CmMatrixDouble *cm_matrix_double_inverse(const CmMatrixDouble *orig_matrix) {
   for (size_t k = 0; k < copy_matrix->columns; ++k) {
 
     double pivot = copy_matrix->data[k * copy_matrix->columns + k];
+    bool is_pivot_zero = _cm_double_abs(pivot) < CM_MATRIX_EPS;
 
-    if (pivot == 0.) {
+    if (is_pivot_zero) {
       bool find_non_zero = false;
 
-      for (size_t i = k + 1; i < copy_matrix->rows && !find_non_zero; ++k) {
-        if (copy_matrix->data[i * copy_matrix->columns + k] != 0) {
+      for (size_t i = k + 1; i < copy_matrix->rows && !find_non_zero; ++i) {
+        if (_cm_double_abs(copy_matrix->data[i * copy_matrix->columns + k]) >=
+            CM_MATRIX_EPS) {
 
           find_non_zero = true;
           void *buffer = malloc(copy_matrix->columns * sizeof(double));
 
-          if (!buffer)
+          if (!buffer) {
+            cm_matrix_double_free(copy_matrix);
+            cm_matrix_double_free(res_matrix);
             return NULL;
+          }
 
           memcpy(buffer, copy_matrix->data + (i * copy_matrix->columns),
                  sizeof(double) * copy_matrix->columns);
@@ -437,12 +440,17 @@ CmMatrixDouble *cm_matrix_double_inverse(const CmMatrixDouble *orig_matrix) {
 
           memmove(res_matrix->data + (k * res_matrix->columns), buffer,
                   sizeof(double) * res_matrix->columns);
+
+          free(buffer);
         }
       }
 
       if (!find_non_zero) {
+        cm_matrix_double_free(copy_matrix);
+        cm_matrix_double_free(res_matrix);
         return NULL;
       }
+      pivot = copy_matrix->data[k * copy_matrix->columns + k];
     }
 
     matrix_double_mult_row(copy_matrix, k, 1. / (pivot));
@@ -452,15 +460,17 @@ CmMatrixDouble *cm_matrix_double_inverse(const CmMatrixDouble *orig_matrix) {
       if (j == k)
         continue;
 
-      double pivot = copy_matrix->data[j * copy_matrix->columns + k];
+      double elim_factor = copy_matrix->data[j * copy_matrix->columns + k];
 
       for (size_t i = 0; i < copy_matrix->columns; ++i) {
         copy_matrix->data[j * copy_matrix->columns + i] =
-            (copy_matrix->data[k * copy_matrix->columns + i] * pivot * -1.) +
+            (copy_matrix->data[k * copy_matrix->columns + i] * elim_factor *
+             -1.) +
             copy_matrix->data[j * copy_matrix->columns + i];
 
         res_matrix->data[j * res_matrix->columns + i] =
-            (res_matrix->data[k * res_matrix->columns + i] * pivot * -1.) +
+            (res_matrix->data[k * res_matrix->columns + i] * elim_factor *
+             -1.) +
             res_matrix->data[j * res_matrix->columns + i];
       }
     }
@@ -475,9 +485,10 @@ CmStatusCode cm_matrix_double_minor(const CmMatrixDouble *matrix, size_t row,
                                     size_t col, double *minor_out) {
 
   CM_CHECK_NULL(matrix);
+  CM_MATRIX_BUFF_NULL_CHECK(matrix);
   CM_MATRIX_SQUARE_CHECK(matrix);
 
-  if (matrix->rows == 0 && matrix->columns == 0)
+  if (matrix->rows == 0 || matrix->columns == 0)
     return CM_MATRIX_ERR_ZERO;
 
   if (row > matrix->rows || col > matrix->columns)
@@ -485,6 +496,7 @@ CmStatusCode cm_matrix_double_minor(const CmMatrixDouble *matrix, size_t row,
 
   CmMatrixDouble *block_matrix =
       cm_matrix_double_alloc(matrix->rows - 1, matrix->columns - 1);
+  CM_ALLOC_CHECK_NULL(block_matrix);
 
   size_t block_i = 0;
 
@@ -504,7 +516,6 @@ CmStatusCode cm_matrix_double_minor(const CmMatrixDouble *matrix, size_t row,
   }
 
   cm_matrix_double_det(block_matrix, minor_out);
-
   cm_matrix_double_free(block_matrix);
 
   return CM_SUCCESS;
@@ -513,14 +524,17 @@ CmStatusCode cm_matrix_double_minor(const CmMatrixDouble *matrix, size_t row,
 CmStatusCode cm_matrix_double_cofactor(const CmMatrixDouble *matrix, size_t row,
                                        size_t col, double *cofactor_out) {
 
-  double sign = 1;
-  if ((row + col) && 0x1) {
-    sign = -1.;
-  }
+  CM_CHECK_NULL(matrix);
+  CM_MATRIX_BUFF_NULL_CHECK(matrix);
+
+  double sign = ((row + col) & 0x1) ? -1 : 1;
 
   double minor = 0.;
   CmStatusCode res = cm_matrix_double_minor(matrix, row, col, &minor);
-  *cofactor_out = sign * minor;
+  if (res == CM_SUCCESS) {
+    *cofactor_out = sign * minor;
+    return CM_SUCCESS;
+  }
 
   return res;
 }
@@ -774,15 +788,11 @@ CmStatusCode cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix,
                                     double *res) {
   CM_CHECK_NULL(augmented_matrix);
   CM_CHECK_NULL(res);
+  CM_MATRIX_BUFF_NULL_CHECK(augmented_matrix);
 
   if (augmented_matrix->rows != (augmented_matrix->columns - 1)) {
     return CM_MATRIX_ERR_INVALID_SIZE;
   }
-
-  double matrix_det = 0.;
-  cm_matrix_double_det(augmented_matrix, &matrix_det);
-  if (matrix_det == 0)
-    return CM_MATRIX_ERR_SINGULAR;
 
   CmMatrixDouble *copy_matrix =
       cm_matrix_double_create_from_matrix(augmented_matrix);
@@ -794,17 +804,20 @@ CmStatusCode cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix,
 
     double pivot = copy_matrix->data[k * copy_matrix->columns + k];
 
-    if (pivot == 0.) {
+    if (_cm_double_abs(pivot) < CM_MATRIX_EPS) {
       bool find_non_zero = false;
 
-      for (size_t i = k + 1; i < copy_matrix->rows && !find_non_zero; ++k) {
-        if (copy_matrix->data[i * copy_matrix->columns + k] != 0) {
+      for (size_t i = k + 1; i < copy_matrix->rows && !find_non_zero; ++i) {
+        if (_cm_double_abs(copy_matrix->data[i * copy_matrix->columns + k]) >=
+            CM_MATRIX_EPS) {
 
           find_non_zero = true;
           void *buffer = malloc(copy_matrix->columns * sizeof(double));
 
-          if (!buffer)
+          if (!buffer) {
+            cm_matrix_double_free(copy_matrix);
             return CM_ERR_ALLOC_FAILED;
+          }
 
           memcpy(buffer, copy_matrix->data + (i * copy_matrix->columns),
                  sizeof(double) * copy_matrix->columns);
@@ -815,12 +828,16 @@ CmStatusCode cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix,
 
           memmove(copy_matrix->data + (k * copy_matrix->columns), buffer,
                   sizeof(double) * copy_matrix->columns);
+
+          free(buffer);
         }
       }
 
       if (!find_non_zero) {
-        return CM_FAIL;
+        cm_matrix_double_free(copy_matrix);
+        return CM_MATRIX_ERR_GAUSS_NO_SOLUTIONS;
       }
+      pivot = copy_matrix->data[k * copy_matrix->columns + k];
     }
 
     matrix_double_mult_row(copy_matrix, k, 1. / (pivot));
@@ -829,11 +846,12 @@ CmStatusCode cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix,
       if (j == k)
         continue;
 
-      double pivot = copy_matrix->data[j * copy_matrix->columns + k];
+      double elim_factor = copy_matrix->data[j * copy_matrix->columns + k];
 
       for (size_t i = 0; i < copy_matrix->columns; ++i) {
         copy_matrix->data[j * copy_matrix->columns + i] =
-            (copy_matrix->data[k * copy_matrix->columns + i] * pivot * -1.) +
+            (copy_matrix->data[k * copy_matrix->columns + i] * elim_factor *
+             -1.) +
             copy_matrix->data[j * copy_matrix->columns + i];
       }
     }
