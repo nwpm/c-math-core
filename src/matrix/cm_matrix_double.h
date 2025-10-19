@@ -56,8 +56,8 @@ CmStatusCode cm_matrix_double_sub(CmMatrixDouble *matrix_a,
                                   const CmMatrixDouble *matrix_b);
 CmStatusCode cm_matrix_double_scale(CmMatrixDouble *matrix_a, double scale);
 CmStatusCode cm_matrix_double_mul(const CmMatrixDouble *matrix_a,
-                                     const CmMatrixDouble *matrix_b,
-                                     CmMatrixDouble *result_matrix);
+                                  const CmMatrixDouble *matrix_b,
+                                  CmMatrixDouble *result_matrix);
 
 CmStatusCode cm_matrix_double_pow(CmMatrixDouble **matrix, unsigned exp);
 
@@ -71,6 +71,9 @@ CmStatusCode cm_matrix_double_minor(const CmMatrixDouble *matrix, size_t row,
 /* Cofactor */
 CmStatusCode cm_matrix_double_cofactor(const CmMatrixDouble *matrix, size_t row,
                                        size_t col, double *cofactor_out);
+
+/* Adjacency matrix */
+CmMatrixDouble *cm_matrix_double_adj(const CmMatrixDouble *matrix);
 
 /* Gauss-Jordan */
 CmStatusCode cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix,

@@ -866,6 +866,37 @@ CmStatusCode cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix,
   return CM_SUCCESS;
 }
 
+CmMatrixDouble *cm_matrix_double_adj(const CmMatrixDouble *matrix) {
+
+  if (!matrix || !matrix->data || (matrix->rows != matrix->columns))
+    return NULL;
+
+  CmMatrixDouble *res_matrix =
+      cm_matrix_double_alloc(matrix->rows, matrix->columns);
+  if (!res_matrix)
+    return NULL;
+
+  size_t i = 0;
+  size_t j = 0;
+
+  for (size_t i = 0; i < matrix->rows; ++i) {
+    for (size_t j = 0; j < matrix->columns; ++j) {
+      double current_cofactor = 0.;
+      CmStatusCode res =
+          cm_matrix_double_cofactor(matrix, i, j, &current_cofactor);
+      if (res != CM_SUCCESS) {
+        cm_matrix_double_free(res_matrix);
+        return NULL;
+      }
+      cm_matrix_double_set(res_matrix, i, j, current_cofactor);
+    }
+  }
+
+  cm_matrix_double_transpose(&res_matrix);
+
+  return res_matrix;
+}
+
 CmStatusCode cm_matrix_double_free(CmMatrixDouble *matrix) {
 
   CM_CHECK_NULL(matrix);
