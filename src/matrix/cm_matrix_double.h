@@ -55,8 +55,9 @@ CmStatusCode cm_matrix_double_add(CmMatrixDouble *matrix_a,
 CmStatusCode cm_matrix_double_sub(CmMatrixDouble *matrix_a,
                                   const CmMatrixDouble *matrix_b);
 CmStatusCode cm_matrix_double_scale(CmMatrixDouble *matrix_a, double scale);
-CmMatrixDouble *cm_matrix_double_mul(const CmMatrixDouble *matrix_a,
-                                     const CmMatrixDouble *matrix_b);
+CmStatusCode cm_matrix_double_mul(const CmMatrixDouble *matrix_a,
+                                     const CmMatrixDouble *matrix_b,
+                                     CmMatrixDouble *result_matrix);
 
 CmStatusCode cm_matrix_double_pow(CmMatrixDouble **matrix, unsigned exp);
 
