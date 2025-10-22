@@ -166,13 +166,13 @@ CmMatrixDouble *cm_matrix_double_submatrix(const CmMatrixDouble *source_matrix,
   return submatrix;
 }
 
-CmMatrixDouble *cm_matrix_create_diag(size_t size, double init_val){
+CmMatrixDouble *cm_matrix_create_diag(size_t size, double init_val) {
 
   CmMatrixDouble *diag = cm_matrix_double_calloc(size, size);
-  if(!diag || !diag->data)
+  if (!diag || !diag->data)
     return NULL;
 
-  for(size_t i = 0; i < size; ++i){
+  for (size_t i = 0; i < size; ++i) {
     diag->data[i + i * size] = init_val;
   }
 
@@ -974,6 +974,19 @@ CmMatrixDouble *cm_matrix_double_adj(const CmMatrixDouble *matrix) {
   cm_matrix_double_transpose(&res_matrix);
 
   return res_matrix;
+}
+
+CmStatusCode cm_matrix_double_map(CmMatrixDouble *matrix, CmMatrixMapFunc map) {
+
+  CM_CHECK_NULL(matrix);
+  CM_CHECK_NULL(map);
+  CM_MATRIX_BUFF_NULL_CHECK(matrix);
+
+  for (size_t i = 0; i < matrix->rows * matrix->columns; ++i) {
+    matrix->data[i] = map(matrix->data[i]);
+  }
+
+  return CM_SUCCESS;
 }
 
 CmStatusCode cm_matrix_double_free(CmMatrixDouble *matrix) {

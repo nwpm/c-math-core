@@ -8,12 +8,9 @@
 
 // TODO: cm_matrix_double_set_submatrix(dest, src, row_offset, col_offset)
 // TODO: row_op(main row operation)
-// TODO: copy
 // TODO: resize
-// TODO: map(matrix, func)(use function for all matrix)
 // TODO: LU, QR, Cholesky
 // TODO: cm_matrix_double_equals_eps(a, b, eps)
-// TODO: create_diag_matrix(size, diag)
 // TODO: random_matrix(rows, cols, min, max)
 // TODO: fixed_matrix(3x3, 2x2, 4x4)
 // TODO: cm_matrix_double_from_file
@@ -24,6 +21,8 @@ typedef struct CmMatrixDouble {
   size_t columns;
   double *data;
 } CmMatrixDouble;
+
+typedef double(*CmMatrixMapFunc)(double x);
 
 /* Allocations */
 
@@ -93,6 +92,9 @@ CmStatusCode cm_matrix_double_mul(const CmMatrixDouble *matrix_a,
                                   CmMatrixDouble *result_matrix);
 
 CmStatusCode cm_matrix_double_pow(CmMatrixDouble **matrix, unsigned exp);
+
+/* Apply function to all elements of the matrix */
+CmStatusCode cm_matrix_double_map(CmMatrixDouble *matrix, CmMatrixMapFunc map);
 
 /* Inverse */
 CmMatrixDouble *cm_matrix_double_inverse(const CmMatrixDouble *orig_matrix);
