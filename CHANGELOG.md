@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/nwpm/c-math-core/compare/v1.1.0...v1.2.0) (2025-10-22)
+
+
+### Features
+
+* **matrix:** add 'map' function ([b29c7c0](https://github.com/nwpm/c-math-core/commit/b29c7c0f53b963889c270ad8d8772ea9f936e2ea))
+* **matrix:** add functions 'diag', 'submatrix' ([abdab1c](https://github.com/nwpm/c-math-core/commit/abdab1ce4eeaaaeacca69fdec82e0dc09cd182a3))
+* **matrix:** add functions 'row', 'col' ([b53d17f](https://github.com/nwpm/c-math-core/commit/b53d17fd2672b10f258b558c761e164b8a34ba3e))
+
 ## 1.1.0 (2025-10-19)
 
 
