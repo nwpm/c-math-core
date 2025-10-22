@@ -100,6 +100,45 @@ CmMatrixDouble *cm_matrix_double_calloc(size_t rows, size_t cols) {
   return matrix;
 }
 
+CmMatrixDouble *
+cm_matrix_double_row(const CmMatrixDouble *source_matrix,
+                                        size_t row) {
+
+  if (!source_matrix || !source_matrix->data || row >= source_matrix->rows ||
+      (source_matrix->columns == 0))
+    return NULL;
+
+  CmMatrixDouble *row_matrix =
+      cm_matrix_double_alloc(1, source_matrix->columns);
+  if (!row_matrix)
+    return NULL;
+
+  memcpy(row_matrix->data,
+         source_matrix->data + (row * source_matrix->columns),
+         sizeof(double) * source_matrix->columns);
+
+  return row_matrix;
+}
+
+CmMatrixDouble *
+cm_matrix_double_col(const CmMatrixDouble *source_matrix,
+                                        size_t col) {
+
+  if (!source_matrix || !source_matrix->data || col >= source_matrix->columns ||
+      (source_matrix->rows == 0))
+    return NULL;
+
+  CmMatrixDouble *col_matrix = cm_matrix_double_alloc(source_matrix->rows, 1);
+  if (!col_matrix)
+    return NULL;
+
+  for (size_t i = 0; i < source_matrix->rows; ++i) {
+    col_matrix->data[i] = source_matrix->data[i * source_matrix->columns + col];
+  }
+
+  return col_matrix;
+}
+
 // TODO: use memcpy instead for
 CmMatrixDouble *
 cm_matrix_double_create_from_matrix(const CmMatrixDouble *orig_matrix) {

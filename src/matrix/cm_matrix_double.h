@@ -8,6 +8,20 @@
 
 // TODO: create_row_from_matrix
 // TODO: create_col_from_matrix
+// TODO: cm_matrix_double_extract_submatrix(matrix, row_start, row_end,
+// col_start, col_end)
+// TODO: cm_matrix_double_set_submatrix(dest, src, row_offset, col_offset)
+// TODO: row_op(main row operation)
+// TODO: copy
+// TODO: resize
+// TODO: map(matrix, func)(use function for all matrix)
+// TODO: LU, QR, Cholesky
+// TODO: cm_matrix_double_equals_eps(a, b, eps)
+// TODO: create_diag_matrix(size, diag)
+// TODO: random_matrix(rows, cols, min, max)
+// TODO: fixed_matrix(3x3, 2x2, 4x4)
+// TODO: cm_matrix_double_from_file
+// TODO: cm_matrix_double_to_file
 
 typedef struct CmMatrixDouble {
   size_t rows;
@@ -24,6 +38,13 @@ CmMatrixDouble *
 cm_matrix_double_create_from_matrix(const CmMatrixDouble *orig_matrix);
 CmMatrixDouble *cm_matrix_double_create_from_array(const double **arr,
                                                    size_t rows, size_t cols);
+
+CmMatrixDouble *
+cm_matrix_double_row(const CmMatrixDouble *source_matrix,
+                                        size_t row);
+CmMatrixDouble *
+cm_matrix_double_col(const CmMatrixDouble *source_matrix,
+                                        size_t col);
 
 CmStatusCode cm_matrix_double_free(CmMatrixDouble *matrix);
 
