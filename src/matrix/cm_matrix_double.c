@@ -100,9 +100,8 @@ CmMatrixDouble *cm_matrix_double_calloc(size_t rows, size_t cols) {
   return matrix;
 }
 
-CmMatrixDouble *
-cm_matrix_double_row(const CmMatrixDouble *source_matrix,
-                                        size_t row) {
+CmMatrixDouble *cm_matrix_double_row(const CmMatrixDouble *source_matrix,
+                                     size_t row) {
 
   if (!source_matrix || !source_matrix->data || row >= source_matrix->rows ||
       (source_matrix->columns == 0))
@@ -113,16 +112,14 @@ cm_matrix_double_row(const CmMatrixDouble *source_matrix,
   if (!row_matrix)
     return NULL;
 
-  memcpy(row_matrix->data,
-         source_matrix->data + (row * source_matrix->columns),
+  memcpy(row_matrix->data, source_matrix->data + (row * source_matrix->columns),
          sizeof(double) * source_matrix->columns);
 
   return row_matrix;
 }
 
-CmMatrixDouble *
-cm_matrix_double_col(const CmMatrixDouble *source_matrix,
-                                        size_t col) {
+CmMatrixDouble *cm_matrix_double_col(const CmMatrixDouble *source_matrix,
+                                     size_t col) {
 
   if (!source_matrix || !source_matrix->data || col >= source_matrix->columns ||
       (source_matrix->rows == 0))
@@ -137,6 +134,49 @@ cm_matrix_double_col(const CmMatrixDouble *source_matrix,
   }
 
   return col_matrix;
+}
+
+CmMatrixDouble *cm_matrix_double_submatrix(const CmMatrixDouble *source_matrix,
+                                           size_t row_start, size_t row_end,
+                                           size_t col_start, size_t col_end) {
+
+  if (!source_matrix || !source_matrix->data || row_start > row_end ||
+      col_start > col_end || row_start >= source_matrix->rows ||
+      row_end >= source_matrix->rows || col_start >= source_matrix->columns ||
+      col_end >= source_matrix->columns)
+    return NULL;
+
+  CmMatrixDouble *submatrix =
+      cm_matrix_double_alloc(row_end - row_start + 1, col_end - col_start + 1);
+  if (!submatrix)
+    return NULL;
+
+  size_t k = 0;
+
+  for (size_t i = row_start; i <= row_end; ++i, ++k) {
+    size_t m = 0;
+
+    for (size_t j = col_start; j <= col_end; ++j, ++m) {
+
+      submatrix->data[m + k * submatrix->columns] =
+          source_matrix->data[j + i * source_matrix->columns];
+    }
+  }
+
+  return submatrix;
+}
+
+CmMatrixDouble *cm_matrix_create_diag(size_t size, double init_val){
+
+  CmMatrixDouble *diag = cm_matrix_double_calloc(size, size);
+  if(!diag || !diag->data)
+    return NULL;
+
+  for(size_t i = 0; i < size; ++i){
+    diag->data[i + i * size] = init_val;
+  }
+
+  return diag;
 }
 
 // TODO: use memcpy instead for

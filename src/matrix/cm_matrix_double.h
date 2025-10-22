@@ -6,10 +6,6 @@
 
 #include "../utils/cm_err_codes.h"
 
-// TODO: create_row_from_matrix
-// TODO: create_col_from_matrix
-// TODO: cm_matrix_double_extract_submatrix(matrix, row_start, row_end,
-// col_start, col_end)
 // TODO: cm_matrix_double_set_submatrix(dest, src, row_offset, col_offset)
 // TODO: row_op(main row operation)
 // TODO: copy
@@ -29,23 +25,39 @@ typedef struct CmMatrixDouble {
   double *data;
 } CmMatrixDouble;
 
-/* Allocation */
+/* Allocations */
 
+/* Allocate row matrix with size Rows * Cols */
 CmMatrixDouble *cm_matrix_double_alloc(size_t rows, size_t cols);
+
+/* Allocate zero matrix with size Rows * Cols */
 CmMatrixDouble *cm_matrix_double_calloc(size_t rows, size_t cols);
 
+/* Create copy of source matrix */
 CmMatrixDouble *
 cm_matrix_double_create_from_matrix(const CmMatrixDouble *orig_matrix);
+
+/* Create matrix from double array */
 CmMatrixDouble *cm_matrix_double_create_from_array(const double **arr,
                                                    size_t rows, size_t cols);
 
-CmMatrixDouble *
-cm_matrix_double_row(const CmMatrixDouble *source_matrix,
-                                        size_t row);
-CmMatrixDouble *
-cm_matrix_double_col(const CmMatrixDouble *source_matrix,
-                                        size_t col);
+/* Create row vector from source matrix row */
+CmMatrixDouble *cm_matrix_double_row(const CmMatrixDouble *source_matrix,
+                                     size_t row);
 
+/* Create column vector from source matrix col */
+CmMatrixDouble *cm_matrix_double_col(const CmMatrixDouble *source_matrix,
+                                     size_t col);
+
+/* Extract submatrix from source matrix */
+CmMatrixDouble *cm_matrix_double_submatrix(const CmMatrixDouble *source_matrix,
+                                           size_t row_start, size_t row_end,
+                                           size_t col_start, size_t col_end);
+
+/* Create diagonal matrix with size, and init by val */
+CmMatrixDouble *cm_matrix_create_diag(size_t size, double init_val);
+
+/* Free allocated matrix */
 CmStatusCode cm_matrix_double_free(CmMatrixDouble *matrix);
 
 /* Operations */
