@@ -1,5 +1,6 @@
 #include "cm_matrix_double.h"
 #include "../utils/cm_checkers.h"
+#include "../utils/cm_utils.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -27,16 +28,6 @@ void _cm_matrix_double_printf(const CmMatrixDouble *matrix) { (void)matrix; }
 
 #define CM_GET_MATRIX_ELEM(matrix, row, column)                                \
   ((matrix)->data[(row) * (matrix)->columns + (column)])
-#define CM_MATRIX_EPS 1.0e-20
-
-static void matrix_double_mult_row(CmMatrixDouble *matrix, size_t row,
-                                   double mult_by) {
-  for (size_t i = 0; i < matrix->columns; ++i) {
-    matrix->data[row * matrix->columns + i] *= mult_by;
-  }
-}
-
-static double _cm_double_abs(double x) { return x >= 0 ? x : -1. * x; }
 
 static double _cm_matrix_double_det_less_3(const CmMatrixDouble *matrix) {
 
@@ -428,7 +419,7 @@ CmStatusCode cm_matrix_double_det(const CmMatrixDouble *matrix,
       }
     }
 
-    matrix_double_mult_row(copy_matrix, k, (1. / pivot));
+    cm_matrix_double_scale_row(copy_matrix, k, (1. / pivot));
 
     mult_constants[mult_const_index++] = pivot;
 
@@ -482,14 +473,14 @@ CmMatrixDouble *cm_matrix_double_inverse(const CmMatrixDouble *orig_matrix) {
   for (size_t k = 0; k < copy_matrix->columns; ++k) {
 
     double pivot = copy_matrix->data[k * copy_matrix->columns + k];
-    bool is_pivot_zero = _cm_double_abs(pivot) < CM_MATRIX_EPS;
+    bool is_pivot_zero = _cm_double_equal(pivot, 0);
 
     if (is_pivot_zero) {
       bool find_non_zero = false;
 
       for (size_t i = k + 1; i < copy_matrix->rows && !find_non_zero; ++i) {
-        if (_cm_double_abs(copy_matrix->data[i * copy_matrix->columns + k]) >=
-            CM_MATRIX_EPS) {
+        if (!_cm_double_equal(copy_matrix->data[i * copy_matrix->columns + k],
+                              0)) {
 
           find_non_zero = true;
           void *buffer = malloc(copy_matrix->columns * sizeof(double));
@@ -532,8 +523,8 @@ CmMatrixDouble *cm_matrix_double_inverse(const CmMatrixDouble *orig_matrix) {
       pivot = copy_matrix->data[k * copy_matrix->columns + k];
     }
 
-    matrix_double_mult_row(copy_matrix, k, 1. / (pivot));
-    matrix_double_mult_row(res_matrix, k, 1. / (pivot));
+    cm_matrix_double_scale_row(copy_matrix, k, 1. / (pivot));
+    cm_matrix_double_scale_row(res_matrix, k, 1. / (pivot));
 
     for (size_t j = 0; j < copy_matrix->rows; ++j) {
       if (j == k)
@@ -682,7 +673,7 @@ bool cm_matrix_double_is_null(const CmMatrixDouble *matrix) {
   size_t num_of_elems = matrix->rows * matrix->columns;
 
   for (size_t i = 0; i < num_of_elems; ++i) {
-    if (_cm_double_abs(matrix->data[i]) >= CM_MATRIX_EPS)
+    if (!_cm_double_equal(matrix->data[i], 0))
       return false;
   }
 
@@ -703,19 +694,14 @@ bool cm_matrix_double_is_identity(const CmMatrixDouble *matrix) {
   size_t i = 0;
   size_t j = 0;
 
-  for (; i < matrix->rows;) {
-    double current_elem = matrix->data[i * matrix->columns + j];
-    if (i == j && _cm_double_abs(current_elem - 1.) >= CM_MATRIX_EPS) {
-      return false;
-    } else if (i != j && _cm_double_abs(current_elem) >= CM_MATRIX_EPS) {
-      return false;
-    }
-
-    if (j == matrix->columns) {
-      j = 0;
-      ++i;
-    } else {
-      ++j;
+  for (size_t i = 0; i < matrix->rows; ++i) {
+    for (size_t j = 0; j < matrix->columns; ++j) {
+      double current_elem = matrix->data[i * matrix->columns + j];
+      if (i == j && !_cm_double_equal(current_elem, 1)) {
+        return false;
+      } else if (i != j && !_cm_double_equal(current_elem, 0)) {
+        return false;
+      }
     }
   }
 
@@ -734,22 +720,12 @@ bool cm_matrix_double_is_equal(const CmMatrixDouble *matrix_a,
       (matrix_a->columns != matrix_b->columns))
     return false;
 
-  size_t i = 0;
-  size_t j = 0;
-
-  for (; i < matrix_a->rows;) {
-    double current_elem_a = matrix_a->data[i * matrix_a->columns + j];
-    double current_elem_b = matrix_b->data[i * matrix_b->columns + j];
-
-    if (_cm_double_abs(current_elem_a - current_elem_b) >= CM_MATRIX_EPS) {
-      return false;
-    }
-
-    if (j == matrix_a->columns) {
-      j = 0;
-      ++i;
-    } else {
-      ++j;
+  for (size_t i = 0; i < matrix_a->rows; ++i) {
+    for (size_t j = 0; j < matrix_a->columns; ++j) {
+      double current_elem_a = matrix_a->data[i * matrix_a->columns + j];
+      double current_elem_b = matrix_b->data[i * matrix_b->columns + j];
+      if (!_cm_double_equal(current_elem_a, current_elem_b))
+        return false;
     }
   }
 
@@ -816,7 +792,7 @@ CmStatusCode cm_matrix_double_scale(CmMatrixDouble *matrix, double scale) {
   CM_CHECK_NULL(matrix);
   CM_MATRIX_BUFF_NULL_CHECK(matrix);
 
-  if (_cm_double_abs(scale) <= CM_MATRIX_EPS) {
+  if (_cm_double_equal(scale, 0)) {
     cm_matrix_double_set_zero(matrix);
     return CM_SUCCESS;
   }
@@ -863,6 +839,61 @@ CmStatusCode cm_matrix_double_mul(const CmMatrixDouble *matrix_a,
   return CM_SUCCESS;
 }
 
+CmStatusCode cm_matrix_double_scale_row(CmMatrixDouble *matrix, size_t row,
+                                        size_t scale_by) {
+
+  CM_CHECK_NULL(matrix);
+  CM_MATRIX_BUFF_NULL_CHECK(matrix);
+
+  if (row >= matrix->rows)
+    return CM_MATRIX_ERR_INVALID_ROW;
+
+  for (size_t i = 0; i < matrix->columns; ++i) {
+    matrix->data[i + row * matrix->columns] *= scale_by;
+  }
+
+  return CM_SUCCESS;
+}
+
+CmStatusCode cm_matrix_double_swap_rows(CmMatrixDouble *matrix, size_t row_a,
+                                        size_t row_b) {
+
+  CM_CHECK_NULL(matrix);
+
+  if (row_a >= matrix->rows || row_b >= matrix->rows)
+    return CM_MATRIX_ERR_INVALID_ROW;
+
+  double *buffer = malloc(sizeof(double) * matrix->columns);
+  if (!buffer)
+    return CM_ERR_ALLOC_FAILED;
+
+  size_t row_len = sizeof(double) * matrix->columns;
+
+  memcpy(buffer, matrix->data + row_a * matrix->columns, row_len);
+  memmove(matrix->data + row_a * matrix->columns,
+          matrix->data + row_b * matrix->columns, row_len);
+  memmove(matrix->data + row_b * matrix->columns, buffer, row_len);
+
+  return CM_SUCCESS;
+}
+
+CmStatusCode cm_matrix_double_scale_sum_rows(CmMatrixDouble *matrix,
+                                             size_t row_scaled, size_t row_sum,
+                                             size_t scale_by) {
+
+  CM_CHECK_NULL(matrix);
+
+  if (row_scaled >= matrix->rows || row_sum >= matrix->rows)
+    return CM_MATRIX_ERR_INVALID_ROW;
+
+  for (size_t i = 0; i < matrix->columns; ++i) {
+    matrix->data[i + row_sum * matrix->columns] +=
+        matrix->data[i + row_scaled * matrix->columns] * scale_by;
+  }
+
+  return CM_SUCCESS;
+}
+
 CmStatusCode cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix,
                                     double *res) {
   CM_CHECK_NULL(augmented_matrix);
@@ -883,12 +914,12 @@ CmStatusCode cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix,
 
     double pivot = copy_matrix->data[k * copy_matrix->columns + k];
 
-    if (_cm_double_abs(pivot) < CM_MATRIX_EPS) {
+    if (_cm_double_equal(pivot, 0)) {
       bool find_non_zero = false;
 
       for (size_t i = k + 1; i < copy_matrix->rows && !find_non_zero; ++i) {
-        if (_cm_double_abs(copy_matrix->data[i * copy_matrix->columns + k]) >=
-            CM_MATRIX_EPS) {
+        if (!_cm_double_equal(copy_matrix->data[i * copy_matrix->columns + k],
+                              0)) {
 
           find_non_zero = true;
           void *buffer = malloc(copy_matrix->columns * sizeof(double));
@@ -919,7 +950,7 @@ CmStatusCode cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix,
       pivot = copy_matrix->data[k * copy_matrix->columns + k];
     }
 
-    matrix_double_mult_row(copy_matrix, k, 1. / (pivot));
+    cm_matrix_double_scale_row(copy_matrix, k, 1. / (pivot));
 
     for (size_t j = 0; j < copy_matrix->rows; ++j) {
       if (j == k)
@@ -984,6 +1015,24 @@ CmStatusCode cm_matrix_double_map(CmMatrixDouble *matrix, CmMatrixMapFunc map) {
 
   for (size_t i = 0; i < matrix->rows * matrix->columns; ++i) {
     matrix->data[i] = map(matrix->data[i]);
+  }
+
+  return CM_SUCCESS;
+}
+
+CmStatusCode cm_matrix_double_to_txt(const CmMatrixDouble *matrix,
+                                     const char *filename) {
+
+  CM_CHECK_NULL(matrix);
+  CM_CHECK_NULL(filename);
+  CM_MATRIX_BUFF_NULL_CHECK(matrix);
+
+  FILE *file = fopen(filename, "w");
+  if (!file)
+    return CM_ERR_CREATE_FILE;
+
+  for (size_t i = 0; i < matrix->columns * matrix->rows; ++i) {
+    fprintf(file, "%lf ", matrix->data[i]);
   }
 
   return CM_SUCCESS;
