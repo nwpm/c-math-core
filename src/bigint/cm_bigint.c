@@ -79,12 +79,12 @@ static bool _cm_ensure_capacity(CmBigInt *bigint_num, size_t max_size) {
   if (bigint_num->capacity < max_size) {
 
     bigint_num->capacity = _cm_calc_capacity(max_size);
-    void *new_buffer = realloc(bigint_num->buffer, bigint_num->capacity);
+    void *new_buffer = realloc(bigint_num->data, bigint_num->capacity);
     if (!new_buffer) {
       return false;
     }
 
-    bigint_num->buffer = new_buffer;
+    bigint_num->data = new_buffer;
   }
   return true;
 }
@@ -112,7 +112,7 @@ static bool _cm_bigint_create_from_cstr(CmBigInt *n, const char *cstr,
     alloc_buffer[j++] = cstr[i];
   }
 
-  n->buffer = alloc_buffer;
+  n->data = alloc_buffer;
   n->size = cstr_len;
   n->sign = sign;
 
@@ -128,7 +128,7 @@ static char *_buff_dup(const CmBigInt *num) {
   if (!copy_buff)
     return NULL;
 
-  memcpy(copy_buff, num->buffer, num->size);
+  memcpy(copy_buff, num->data, num->size);
 
   return copy_buff;
 }
@@ -140,9 +140,9 @@ static int _cm_bigint_abs_compare(const CmBigInt *lhs, const CmBigInt *rhs) {
   }
 
   for (size_t i = lhs->size; i > 0; i--) {
-    if (lhs->buffer[i - 1] > rhs->buffer[i - 1])
+    if (lhs->data[i - 1] > rhs->data[i - 1])
       return 1;
-    else if (lhs->buffer[i - 1] < rhs->buffer[i - 1])
+    else if (lhs->data[i - 1] < rhs->data[i - 1])
       return -1;
   }
 
@@ -190,8 +190,8 @@ static CmStatusCode _cm_calculate_sum(CmBigInt *bigint_num,
   size_t i = 0;
 
   while (i < smaller_abs_num->size) {
-    int digit_greater = greater_abs_num->buffer[i] - '0';
-    int digit_smaller = smaller_abs_num->buffer[i] - '0';
+    int digit_greater = greater_abs_num->data[i] - '0';
+    int digit_smaller = smaller_abs_num->data[i] - '0';
     int sum = (digit_greater + digit_smaller + add_part);
 
     if (sum > 9) {
@@ -201,11 +201,11 @@ static CmStatusCode _cm_calculate_sum(CmBigInt *bigint_num,
       add_part = 0;
     }
 
-    bigint_num->buffer[i++] = sum + '0';
+    bigint_num->data[i++] = sum + '0';
   }
 
   while (i < greater_abs_num->size) {
-    int digit_greater = greater_abs_num->buffer[i] - '0';
+    int digit_greater = greater_abs_num->data[i] - '0';
     int sum = digit_greater + add_part;
 
     if (sum > 9) {
@@ -215,11 +215,11 @@ static CmStatusCode _cm_calculate_sum(CmBigInt *bigint_num,
       add_part = 0;
     }
 
-    bigint_num->buffer[i++] = sum + '0';
+    bigint_num->data[i++] = sum + '0';
   }
 
   if (add_part) {
-    bigint_num->buffer[i++] = add_part + '0';
+    bigint_num->data[i++] = add_part + '0';
   }
 
   bigint_num->size = i;
@@ -242,7 +242,7 @@ static CmStatusCode _cm_calculate_inc(CmBigInt *bigint_num, char res_sign) {
 
   do {
 
-    int bigint_digit = bigint_num->buffer[i] - '0';
+    int bigint_digit = bigint_num->data[i] - '0';
     int sum = bigint_digit + add_part;
 
     if (sum > 9) {
@@ -252,12 +252,12 @@ static CmStatusCode _cm_calculate_inc(CmBigInt *bigint_num, char res_sign) {
       add_part = 0;
     }
 
-    bigint_num->buffer[i++] = sum + '0';
+    bigint_num->data[i++] = sum + '0';
 
   } while (add_part && j--);
 
   if (add_part) {
-    bigint_num->buffer[i] = add_part + '0';
+    bigint_num->data[i] = add_part + '0';
     bigint_num->size++;
   }
 
@@ -274,7 +274,7 @@ static CmStatusCode _cm_calculate_dec(CmBigInt *bigint_num, char res_sign) {
 
   do {
 
-    int bigint_digit = bigint_num->buffer[i] - '0';
+    int bigint_digit = bigint_num->data[i] - '0';
     int substr = bigint_digit - substr_part;
 
     if (substr < 0) {
@@ -283,12 +283,12 @@ static CmStatusCode _cm_calculate_dec(CmBigInt *bigint_num, char res_sign) {
     } else {
       substr_part = 0;
     }
-    bigint_num->buffer[i++] = substr + '0';
+    bigint_num->data[i++] = substr + '0';
 
   } while (substr_part && j--);
 
   while (bigint_num->size > 1 &&
-         bigint_num->buffer[bigint_num->size - 1] == '0') {
+         bigint_num->data[bigint_num->size - 1] == '0') {
     bigint_num->size--;
   }
 
@@ -312,8 +312,8 @@ static CmStatusCode _cm_calculate_dif(CmBigInt *bigint_num,
   size_t i = 0;
 
   while (i < smaller_abs_num->size) {
-    int digit_greater = greater_abs_num->buffer[i] - '0';
-    int digit_smaller = smaller_abs_num->buffer[i] - '0';
+    int digit_greater = greater_abs_num->data[i] - '0';
+    int digit_smaller = smaller_abs_num->data[i] - '0';
     int substr = (digit_greater - digit_smaller) - substr_part;
 
     if (substr < 0) {
@@ -322,11 +322,11 @@ static CmStatusCode _cm_calculate_dif(CmBigInt *bigint_num,
     } else {
       substr_part = 0;
     }
-    bigint_num->buffer[i++] = substr + '0';
+    bigint_num->data[i++] = substr + '0';
   }
 
   while (i < greater_abs_num->size) {
-    int digit_greater = greater_abs_num->buffer[i] - '0';
+    int digit_greater = greater_abs_num->data[i] - '0';
     int substr = digit_greater - substr_part;
 
     if (substr < 0) {
@@ -335,13 +335,13 @@ static CmStatusCode _cm_calculate_dif(CmBigInt *bigint_num,
     } else {
       substr_part = 0;
     }
-    bigint_num->buffer[i++] = substr + '0';
+    bigint_num->data[i++] = substr + '0';
   }
 
   bigint_num->size = i;
 
   while (bigint_num->size > 1 &&
-         bigint_num->buffer[bigint_num->size - 1] == '0') {
+         bigint_num->data[bigint_num->size - 1] == '0') {
     bigint_num->size--;
   }
 
@@ -374,14 +374,14 @@ static CmStatusCode _cm_calculate_mult(CmBigInt *bigint_num,
     return CM_ERR_ALLOC_FAILED;
 
   for (size_t i = 0; i < smaller_abs_num->size; ++i) {
-    int digit_smaller = smaller_abs_num->buffer[i] - '0';
+    int digit_smaller = smaller_abs_num->data[i] - '0';
     int mult_part = 0;
     size_t k = 0;
 
-    memset(temp->buffer, 0, temp->capacity);
+    memset(temp->data, 0, temp->capacity);
 
     for (size_t j = 0; j < greater_abs_num->size; ++j) {
-      int digit_greater = greater_abs_num->buffer[j] - '0';
+      int digit_greater = greater_abs_num->data[j] - '0';
 
       int mult = (digit_smaller * digit_greater) + mult_part;
 
@@ -391,10 +391,10 @@ static CmStatusCode _cm_calculate_mult(CmBigInt *bigint_num,
       } else {
         mult_part = 0;
       }
-      temp->buffer[k++] = mult + '0';
+      temp->data[k++] = mult + '0';
     }
     if (mult_part) {
-      temp->buffer[k++] = mult_part + '0';
+      temp->data[k++] = mult_part + '0';
     }
 
     temp->size = k;
@@ -404,8 +404,8 @@ static CmStatusCode _cm_calculate_mult(CmBigInt *bigint_num,
 
   res_of_mult->sign = (bigint_num->sign == multiplier->sign) ? '+' : '-';
 
-  free(bigint_num->buffer);
-  bigint_num->buffer = res_of_mult->buffer;
+  free(bigint_num->data);
+  bigint_num->data = res_of_mult->data;
   bigint_num->size = res_of_mult->size;
   bigint_num->sign = res_of_mult->sign;
   bigint_num->capacity = res_of_mult->capacity;
@@ -422,11 +422,11 @@ static CmStatusCode _cm_calculate_div(const CmBigInt *dividend,
                                       const CmBigInt *divider,
                                       CmBigInt *remainder, CmBigInt *quotient) {
 
-  if (_cm_is_zero_buff(divider->buffer, divider->size))
+  if (_cm_is_zero_buff(divider->data, divider->size))
     return CM_ERR_ZERO_DIVISION;
 
   if (cm_bigint_less(dividend, divider) ||
-      _cm_is_zero_buff(dividend->buffer, dividend->size)) {
+      _cm_is_zero_buff(dividend->data, dividend->size)) {
     return CM_SUCCESS;
   }
 
@@ -463,8 +463,8 @@ CmStatusCode cm_bigint_shift_left(CmBigInt *bigint_num, size_t k) {
   if (!_cm_ensure_capacity(bigint_num, bigint_num->size + k))
     return CM_ERR_ALLOC_FAILED;
 
-  memmove(bigint_num->buffer + k, bigint_num->buffer, bigint_num->size);
-  memset(bigint_num->buffer, 0, k);
+  memmove(bigint_num->data + k, bigint_num->data, bigint_num->size);
+  memset(bigint_num->data, 0, k);
   bigint_num->size += k;
 
   return CM_SUCCESS;
@@ -475,13 +475,13 @@ CmStatusCode cm_bigint_shift_right(CmBigInt *bigint_num, size_t k) {
   CM_CHECK_NULL(bigint_num);
 
   if (k >= bigint_num->size) {
-    bigint_num->buffer[0] = 0;
+    bigint_num->data[0] = 0;
     bigint_num->size = 1;
     bigint_num->sign = '+';
     return CM_SUCCESS;
   }
 
-  memmove(bigint_num->buffer, bigint_num->buffer + k, bigint_num->size);
+  memmove(bigint_num->data, bigint_num->data + k, bigint_num->size);
   bigint_num->size -= k;
 
   return CM_SUCCESS;
@@ -496,7 +496,7 @@ CmBigInt *cm_bigint_alloc() {
 
   bigint_num->size = 0;
   bigint_num->sign = '+';
-  bigint_num->buffer = NULL;
+  bigint_num->data = NULL;
   bigint_num->capacity = CM_BIGINT_START_CAPACITY;
 
   return bigint_num;
@@ -516,14 +516,14 @@ CmBigInt *cm_bigint_create_copy(const CmBigInt *src_num) {
   new_num->sign = src_num->sign;
   new_num->capacity = src_num->capacity;
 
-  if (!src_num->buffer) {
-    new_num->buffer = NULL;
+  if (!src_num->data) {
+    new_num->data = NULL;
     return new_num;
   }
 
-  new_num->buffer = _buff_dup(src_num);
+  new_num->data = _buff_dup(src_num);
 
-  if (!new_num->buffer) {
+  if (!new_num->data) {
     free(new_num);
     return NULL;
   }
@@ -553,7 +553,7 @@ CmBigInt *cm_bigint_create_from_num(long long src_num) {
     abs_num /= 10;
   }
 
-  bigint_num->buffer = alloc_buffer;
+  bigint_num->data = alloc_buffer;
 
   return bigint_num;
 }
@@ -599,9 +599,9 @@ bool cm_bigint_less(const CmBigInt *lhs, const CmBigInt *rhs) {
   }
 
   for (size_t i = lhs->size; i > 0; i--) {
-    if (lhs->buffer[i - 1] != rhs->buffer[i - 1]) {
-      return is_negative ? (lhs->buffer[i - 1] > rhs->buffer[i - 1])
-                         : (lhs->buffer[i - 1] < rhs->buffer[i - 1]);
+    if (lhs->data[i - 1] != rhs->data[i - 1]) {
+      return is_negative ? (lhs->data[i - 1] > rhs->data[i - 1])
+                         : (lhs->data[i - 1] < rhs->data[i - 1]);
     }
   }
 
@@ -636,7 +636,7 @@ bool cm_bigint_is_equal(const CmBigInt *lhs, const CmBigInt *rhs) {
 
   if (lhs->size == rhs->size) {
     if (lhs->sign == rhs->sign) {
-      if (memcmp(lhs->buffer, rhs->buffer, lhs->size))
+      if (memcmp(lhs->data, rhs->data, lhs->size))
         return true;
     }
   }
@@ -669,9 +669,9 @@ bool cm_bigint_less_ll(const CmBigInt *lhs, long long rhs) {
   const char *rhs_str = _cm_itoa(rhs, rhs_digit_number);
 
   for (size_t i = lhs->size; i > 0; i--) {
-    if (lhs->buffer[i - 1] != rhs_str[i - 1]) {
-      return !lhs_is_positive ? (lhs->buffer[i - 1] > rhs_str[i - 1])
-                              : (lhs->buffer[i - 1] < rhs_str[i - 1]);
+    if (lhs->data[i - 1] != rhs_str[i - 1]) {
+      return !lhs_is_positive ? (lhs->data[i - 1] > rhs_str[i - 1])
+                              : (lhs->data[i - 1] < rhs_str[i - 1]);
     }
   }
 
@@ -686,7 +686,7 @@ bool cm_bigint_is_equal_ll(const CmBigInt *lhs, long long rhs) {
 
   if (lhs->size == rhs_digit_number) {
     if (lhs->sign == rhs_sign) {
-      if (memcmp(lhs->buffer, rhs_str, lhs->size))
+      if (memcmp(lhs->data, rhs_str, lhs->size))
         return true;
     }
   }
@@ -719,7 +719,7 @@ bool cm_bigint_greater_or_equal_ll(const CmBigInt *lhs, long long rhs) {
 }
 
 bool cm_bigint_is_zero(const CmBigInt *bigint_num) {
-  return _cm_is_zero_buff(bigint_num->buffer, bigint_num->size);
+  return _cm_is_zero_buff(bigint_num->data, bigint_num->size);
 }
 
 CmStatusCode cm_bigint_add(CmBigInt *bigint_num, const CmBigInt *addend) {
@@ -873,12 +873,12 @@ CmStatusCode cm_bigint_set(CmBigInt *bigint_num, const CmBigInt *setter) {
   if (!new_buffer)
     return NULL;
 
-  free(bigint_num->buffer);
-  bigint_num->buffer = new_buffer;
+  free(bigint_num->data);
+  bigint_num->data = new_buffer;
   bigint_num->size = setter->size;
   bigint_num->capacity = setter->size;
   bigint_num->sign = setter->sign;
-  memcpy(bigint_num->buffer, setter->buffer, setter->size);
+  memcpy(bigint_num->data, setter->data, setter->size);
 
   return CM_SUCCESS;
 }
@@ -896,7 +896,7 @@ CmStatusCode cm_bigint_set_long(CmBigInt *bigint_num, long long setter) {
   }
 
   for (size_t i = 0; i < bigint_num->size; ++i) {
-    bigint_num->buffer[i] = (abs_num % 10) + '0';
+    bigint_num->data[i] = (abs_num % 10) + '0';
     abs_num /= 10;
   }
 
@@ -908,12 +908,12 @@ CmStatusCode cm_bigint_shrink_to_fit(CmBigInt *bigint_num) {
   CM_CHECK_NULL(bigint_num);
 
   if (bigint_num->capacity > bigint_num->size) {
-    void *new_buffer = realloc(bigint_num->buffer, bigint_num->size);
+    void *new_buffer = realloc(bigint_num->data, bigint_num->size);
     if (!new_buffer) {
       return CM_ERR_ALLOC_FAILED;
     }
 
-    bigint_num->buffer = new_buffer;
+    bigint_num->data = new_buffer;
   }
 
   return CM_SUCCESS;
@@ -948,11 +948,13 @@ char *cm_bigint_to_string(const CmBigInt *bigint_num) {
   if (!str)
     return NULL;
 
-  memcpy(str, bigint_num->buffer, bigint_num->size);
+  memcpy(str, bigint_num->data, bigint_num->size);
   return str;
 }
 
-void cm_bigint_free(CmBigInt *bigint_num) {
-  free(bigint_num->buffer);
+CmStatusCode cm_bigint_free(CmBigInt *bigint_num) {
+
+  CM_CHECK_NULL(bigint_num);
+  free(bigint_num->data);
   free(bigint_num);
 }

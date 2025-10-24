@@ -7,21 +7,39 @@
 
 #define CM_BIGINT_START_CAPACITY 4
 
+// TODO: change char* buffer to binary buffer(uint32_t)
+// TODO: cm_bigint_gcd(const CmBigInt *a, const CmBigInt *b, CmBigInt *res)
+// TODO: cm_bigint_extended_gcd(const CmBigInt *a, const CmBigInt *b,
+//                            	CmBigInt *x, CmBigInt *y, CmBigInt *gcd)
+// TODO: cm_bigint_is_even / cm_bigint_is_odd
+// TODO: cm_bigint_num_digits / cm_bigint_num_bits
+// TODO: cm_bigint_to_hex_string
+// TODO: cm_bigint_to_bin_string
+// TODO: cm_bigint_from_hex_string
+// TODO: cm_bigint_from_bin_string
+// TODO: cm_bigint_resize / cm_bigint_reserve
+
 typedef struct CmBigInt {
 
   char sign;
-  char *buffer;
+  char *data;
   size_t size;
   size_t capacity;
 
 } CmBigInt;
 
-/* Allocation */
+/* Allocate row bigint num */
 CmBigInt *cm_bigint_alloc();
+
+/* Create bigint num from X */
 CmBigInt *cm_bigint_create_from_num(long long src_num);
+
+/* Create bigint num from c-string */
 CmBigInt *cm_bigint_create_from_cstr(const char *src_cstr);
+
+/* Create copy of bigint num */
 CmBigInt *cm_bigint_create_copy(const CmBigInt *src_num);
-void cm_bigint_free(CmBigInt *bigint_num);
+CmStatusCode cm_bigint_free(CmBigInt *bigint_num);
 
 /* Compare */
 bool cm_bigint_less(const CmBigInt *lhs, const CmBigInt *rhs);
