@@ -39,10 +39,10 @@
     }                                                                          \
   } while (0)
 
-#define CM_MATRIX_BUFF_NULL_CHECK(matrix)                                      \
+#define CM_BUFF_NULL_CHECK(obj)                                                \
   do {                                                                         \
-    if (((matrix->data) == (NULL))) {                                          \
-      return CM_ERR_NULL_POINTER;                                              \
+    if (((obj->data) == (NULL))) {                                             \
+      return CM_ERR_DATA_BUF_NULL_PTR;                                         \
     }                                                                          \
   } while (0)
 

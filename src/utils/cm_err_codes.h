@@ -9,6 +9,7 @@ typedef enum CmStatusCode {
   CM_ERR_NULL_POINTER,
   CM_ERR_ALLOC_FAILED,
   CM_ERR_CREATE_FILE,
+  CM_ERR_DATA_BUF_NULL_PTR,
 
   // Matrix errors
   CM_MATRIX_ERR_WRONG_POS,

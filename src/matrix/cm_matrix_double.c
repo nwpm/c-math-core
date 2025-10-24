@@ -230,7 +230,7 @@ CmStatusCode cm_matrix_double_set_identity(CmMatrixDouble *matrix) {
 
   CM_CHECK_NULL(matrix);
   CM_MATRIX_SQUARE_CHECK(matrix);
-  CM_MATRIX_BUFF_NULL_CHECK(matrix);
+  CM_BUFF_NULL_CHECK(matrix);
 
   for (size_t i = 0; i < matrix->rows; ++i) {
     for (size_t j = 0; j < matrix->columns; ++j) {
@@ -248,7 +248,7 @@ CmStatusCode cm_matrix_double_set_identity(CmMatrixDouble *matrix) {
 CmStatusCode cm_matrix_double_set_zero(CmMatrixDouble *matrix) {
 
   CM_CHECK_NULL(matrix);
-  CM_MATRIX_BUFF_NULL_CHECK(matrix);
+  CM_BUFF_NULL_CHECK(matrix);
 
   memset(matrix->data, 0, sizeof(double) * matrix->rows * matrix->columns);
 
@@ -258,7 +258,7 @@ CmStatusCode cm_matrix_double_set_zero(CmMatrixDouble *matrix) {
 CmStatusCode cm_matrix_double_set_all(CmMatrixDouble *matrix, double x) {
 
   CM_CHECK_NULL(matrix);
-  CM_MATRIX_BUFF_NULL_CHECK(matrix);
+  CM_BUFF_NULL_CHECK(matrix);
 
   if (x == 0.) {
     cm_matrix_double_set_zero(matrix);
@@ -279,7 +279,7 @@ CmStatusCode cm_matrix_double_max(const CmMatrixDouble *matrix,
 
   CM_CHECK_NULL(matrix);
   CM_CHECK_NULL(max_out);
-  CM_MATRIX_BUFF_NULL_CHECK(matrix);
+  CM_BUFF_NULL_CHECK(matrix);
 
   *max_out = matrix->data[0];
   size_t num_of_elems = matrix->rows * matrix->columns;
@@ -297,7 +297,7 @@ CmStatusCode cm_matrix_double_min(const CmMatrixDouble *matrix,
 
   CM_CHECK_NULL(matrix);
   CM_CHECK_NULL(min_out);
-  CM_MATRIX_BUFF_NULL_CHECK(matrix);
+  CM_BUFF_NULL_CHECK(matrix);
 
   *min_out = matrix->data[0];
   size_t num_of_elems = matrix->rows * matrix->columns;
@@ -315,7 +315,7 @@ CmStatusCode cm_matrix_double_transpose(CmMatrixDouble **matrix) {
 
   CM_CHECK_NULL(matrix);
   CM_CHECK_NULL(*matrix);
-  CM_MATRIX_BUFF_NULL_CHECK((*matrix));
+  CM_BUFF_NULL_CHECK((*matrix));
 
   CmMatrixDouble *tmp_matrix =
       cm_matrix_double_alloc((*matrix)->columns, (*matrix)->rows);
@@ -340,7 +340,7 @@ CmStatusCode cm_matrix_double_trace(const CmMatrixDouble *matrix,
 
   CM_CHECK_NULL(matrix);
   CM_CHECK_NULL(trace_out);
-  CM_MATRIX_BUFF_NULL_CHECK(matrix);
+  CM_BUFF_NULL_CHECK(matrix);
   CM_MATRIX_SQUARE_CHECK(matrix);
 
   size_t num_of_elems = matrix->rows * matrix->columns;
@@ -360,7 +360,7 @@ CmStatusCode cm_matrix_double_det(const CmMatrixDouble *matrix,
 
   CM_CHECK_NULL(matrix);
   CM_MATRIX_SQUARE_CHECK(matrix);
-  CM_MATRIX_BUFF_NULL_CHECK(matrix);
+  CM_BUFF_NULL_CHECK(matrix);
 
   if (matrix->columns <= 3) {
     *det_out = _cm_matrix_double_det_less_3(matrix);
@@ -555,7 +555,7 @@ CmStatusCode cm_matrix_double_minor(const CmMatrixDouble *matrix, size_t row,
                                     size_t col, double *minor_out) {
 
   CM_CHECK_NULL(matrix);
-  CM_MATRIX_BUFF_NULL_CHECK(matrix);
+  CM_BUFF_NULL_CHECK(matrix);
   CM_MATRIX_SQUARE_CHECK(matrix);
 
   if (matrix->rows == 0 || matrix->columns == 0)
@@ -595,7 +595,7 @@ CmStatusCode cm_matrix_double_cofactor(const CmMatrixDouble *matrix, size_t row,
                                        size_t col, double *cofactor_out) {
 
   CM_CHECK_NULL(matrix);
-  CM_MATRIX_BUFF_NULL_CHECK(matrix);
+  CM_BUFF_NULL_CHECK(matrix);
 
   double sign = ((row + col) & 0x1) ? -1 : 1;
 
@@ -737,8 +737,8 @@ CmStatusCode cm_matrix_double_add(CmMatrixDouble *matrix_a,
 
   CM_CHECK_NULL(matrix_a);
   CM_CHECK_NULL(matrix_b);
-  CM_MATRIX_BUFF_NULL_CHECK(matrix_a);
-  CM_MATRIX_BUFF_NULL_CHECK(matrix_b);
+  CM_BUFF_NULL_CHECK(matrix_a);
+  CM_BUFF_NULL_CHECK(matrix_b);
   CM_MATRIX_SIZE_MATCH(matrix_a, matrix_b);
 
   size_t i = 0;
@@ -764,8 +764,8 @@ CmStatusCode cm_matrix_double_sub(CmMatrixDouble *matrix_a,
                                   const CmMatrixDouble *matrix_b) {
   CM_CHECK_NULL(matrix_a);
   CM_CHECK_NULL(matrix_b);
-  CM_MATRIX_BUFF_NULL_CHECK(matrix_a);
-  CM_MATRIX_BUFF_NULL_CHECK(matrix_b);
+  CM_BUFF_NULL_CHECK(matrix_a);
+  CM_BUFF_NULL_CHECK(matrix_b);
   CM_MATRIX_SIZE_MATCH(matrix_a, matrix_b);
 
   size_t i = 0;
@@ -790,7 +790,7 @@ CmStatusCode cm_matrix_double_sub(CmMatrixDouble *matrix_a,
 CmStatusCode cm_matrix_double_scale(CmMatrixDouble *matrix, double scale) {
 
   CM_CHECK_NULL(matrix);
-  CM_MATRIX_BUFF_NULL_CHECK(matrix);
+  CM_BUFF_NULL_CHECK(matrix);
 
   if (_cm_double_equal(scale, 0)) {
     cm_matrix_double_set_zero(matrix);
@@ -816,9 +816,9 @@ CmStatusCode cm_matrix_double_mul(const CmMatrixDouble *matrix_a,
   CM_CHECK_NULL(matrix_a);
   CM_CHECK_NULL(matrix_b);
   CM_CHECK_NULL(result_matrix);
-  CM_MATRIX_BUFF_NULL_CHECK(matrix_a);
-  CM_MATRIX_BUFF_NULL_CHECK(matrix_b);
-  CM_MATRIX_BUFF_NULL_CHECK(result_matrix);
+  CM_BUFF_NULL_CHECK(matrix_a);
+  CM_BUFF_NULL_CHECK(matrix_b);
+  CM_BUFF_NULL_CHECK(result_matrix);
   CM_MATRIX_MULT_SIZE_MATCH(matrix_a, matrix_b);
 
   if ((result_matrix->rows != matrix_a->rows) ||
@@ -843,7 +843,7 @@ CmStatusCode cm_matrix_double_scale_row(CmMatrixDouble *matrix, size_t row,
                                         size_t scale_by) {
 
   CM_CHECK_NULL(matrix);
-  CM_MATRIX_BUFF_NULL_CHECK(matrix);
+  CM_BUFF_NULL_CHECK(matrix);
 
   if (row >= matrix->rows)
     return CM_MATRIX_ERR_INVALID_ROW;
@@ -898,7 +898,7 @@ CmStatusCode cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix,
                                     double *res) {
   CM_CHECK_NULL(augmented_matrix);
   CM_CHECK_NULL(res);
-  CM_MATRIX_BUFF_NULL_CHECK(augmented_matrix);
+  CM_BUFF_NULL_CHECK(augmented_matrix);
 
   if (augmented_matrix->rows != (augmented_matrix->columns - 1)) {
     return CM_MATRIX_ERR_INVALID_SIZE;
@@ -1011,7 +1011,7 @@ CmStatusCode cm_matrix_double_map(CmMatrixDouble *matrix, CmMatrixMapFunc map) {
 
   CM_CHECK_NULL(matrix);
   CM_CHECK_NULL(map);
-  CM_MATRIX_BUFF_NULL_CHECK(matrix);
+  CM_BUFF_NULL_CHECK(matrix);
 
   for (size_t i = 0; i < matrix->rows * matrix->columns; ++i) {
     matrix->data[i] = map(matrix->data[i]);
@@ -1025,7 +1025,7 @@ CmStatusCode cm_matrix_double_to_txt(const CmMatrixDouble *matrix,
 
   CM_CHECK_NULL(matrix);
   CM_CHECK_NULL(filename);
-  CM_MATRIX_BUFF_NULL_CHECK(matrix);
+  CM_BUFF_NULL_CHECK(matrix);
 
   FILE *file = fopen(filename, "w");
   if (!file)
@@ -1041,7 +1041,7 @@ CmStatusCode cm_matrix_double_to_txt(const CmMatrixDouble *matrix,
 CmStatusCode cm_matrix_double_free(CmMatrixDouble *matrix) {
 
   CM_CHECK_NULL(matrix);
-  CM_MATRIX_BUFF_NULL_CHECK(matrix);
+  CM_BUFF_NULL_CHECK(matrix);
 
   free(matrix->data);
   free(matrix);
