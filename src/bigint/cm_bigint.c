@@ -23,7 +23,7 @@ static bool _cm_is_valid_cstr(const char *cstr) {
 static bool _cm_is_zero_buff(const char *buff, size_t size) {
 
   for (size_t i = 0; i < size; ++i) {
-    if (buff[i] != 0)
+    if (buff[i] != '0')
       return false;
   }
 
@@ -43,7 +43,7 @@ static size_t _cm_calc_capacity(size_t size) {
 
 static char *_cm_itoa(long long num, size_t size) {
 
-  char *num_str = calloc(size, sizeof(char));
+  char *num_str = malloc(size * sizeof(char));
   if (!num_str)
     return NULL;
 
@@ -51,7 +51,7 @@ static char *_cm_itoa(long long num, size_t size) {
 
   do {
     int current_digit = num % 10;
-    num_str[i++] = current_digit;
+    num_str[i++] = current_digit + '0';
   } while (num / 10);
 
   return num_str;
@@ -116,7 +116,7 @@ static bool _cm_bigint_create_from_cstr(CmBigInt *n, const char *cstr,
   n->size = cstr_len;
   n->sign = sign;
 
-  return 0;
+  return true;
 }
 
 // Duplicates the buffer of CmBigInt, copying num->size bytes into a new buffer
@@ -171,6 +171,37 @@ static char _cm_calculate_res_sign(const CmBigInt *lhs, const CmBigInt *rhs,
   }
 
   return (lhs->sign == '-' && rhs->sign == '+') ? '-' : '+';
+}
+
+// TODO: refactor
+static char _cm_char_decimal_hex_convert(char *num, size_t size) {
+
+  if (size == 1)
+    return num[0];
+
+  int decimal_num = 10;
+  decimal_num += num[1] - '0';
+
+  char hex_nums[] = "0123456789ABCDEF";
+  return hex_nums[decimal_num];
+}
+
+static char _cm_char_hex_decimal_convert(char num) {
+  if (num >= '0' || num <= '9')
+    return num - '0';
+
+  return (num - 'A') + 10;
+}
+
+static void _cm_reverse_str(char *str) {
+  int end_index = strlen(str) - 1;
+
+  for (int start_index = 0; start_index <= end_index;
+       ++start_index, --end_index) {
+    char tmp = str[start_index];
+    str[start_index] = str[end_index];
+    str[end_index] = tmp;
+  }
 }
 
 static CmStatusCode _cm_calculate_sum(CmBigInt *bigint_num,
@@ -254,7 +285,7 @@ static CmStatusCode _cm_calculate_inc(CmBigInt *bigint_num, char res_sign) {
 
     bigint_num->data[i++] = sum + '0';
 
-  } while (add_part && j--);
+  } while (add_part && i < j);
 
   if (add_part) {
     bigint_num->data[i] = add_part + '0';
@@ -285,7 +316,7 @@ static CmStatusCode _cm_calculate_dec(CmBigInt *bigint_num, char res_sign) {
     }
     bigint_num->data[i++] = substr + '0';
 
-  } while (substr_part && j--);
+  } while (substr_part && i < j);
 
   while (bigint_num->size > 1 &&
          bigint_num->data[bigint_num->size - 1] == '0') {
@@ -376,16 +407,16 @@ static CmStatusCode _cm_calculate_mult(CmBigInt *bigint_num,
   for (size_t i = 0; i < smaller_abs_num->size; ++i) {
     int digit_smaller = smaller_abs_num->data[i] - '0';
     int mult_part = 0;
-    size_t k = 0;
+    size_t k = i;
 
-    memset(temp->data, 0, temp->capacity);
+    memset(temp->data, '0', temp->capacity);
 
     for (size_t j = 0; j < greater_abs_num->size; ++j) {
       int digit_greater = greater_abs_num->data[j] - '0';
 
       int mult = (digit_smaller * digit_greater) + mult_part;
 
-      if (mult > 10) {
+      if (mult >= 10) {
         mult_part = mult / 10;
         mult %= 10;
       } else {
@@ -393,6 +424,7 @@ static CmStatusCode _cm_calculate_mult(CmBigInt *bigint_num,
       }
       temp->data[k++] = mult + '0';
     }
+
     if (mult_part) {
       temp->data[k++] = mult_part + '0';
     }
@@ -450,6 +482,8 @@ static CmStatusCode _cm_calculate_div(const CmBigInt *dividend,
     cm_bigint_shift_right(one, shift);
   }
 
+  quotient->sign = (dividend->sign == divider->sign) ? '+' : '-';
+
   cm_bigint_free(one);
   cm_bigint_free(divider_copy);
 
@@ -459,12 +493,13 @@ static CmStatusCode _cm_calculate_div(const CmBigInt *dividend,
 CmStatusCode cm_bigint_shift_left(CmBigInt *bigint_num, size_t k) {
 
   CM_CHECK_NULL(bigint_num);
+  CM_BUFF_NULL_CHECK(bigint_num);
 
   if (!_cm_ensure_capacity(bigint_num, bigint_num->size + k))
     return CM_ERR_ALLOC_FAILED;
 
   memmove(bigint_num->data + k, bigint_num->data, bigint_num->size);
-  memset(bigint_num->data, 0, k);
+  memset(bigint_num->data, '0', k);
   bigint_num->size += k;
 
   return CM_SUCCESS;
@@ -473,15 +508,16 @@ CmStatusCode cm_bigint_shift_left(CmBigInt *bigint_num, size_t k) {
 CmStatusCode cm_bigint_shift_right(CmBigInt *bigint_num, size_t k) {
 
   CM_CHECK_NULL(bigint_num);
+  CM_BUFF_NULL_CHECK(bigint_num);
 
   if (k >= bigint_num->size) {
-    bigint_num->data[0] = 0;
+    bigint_num->data[0] = '0';
     bigint_num->size = 1;
     bigint_num->sign = '+';
     return CM_SUCCESS;
   }
 
-  memmove(bigint_num->data, bigint_num->data + k, bigint_num->size);
+  memmove(bigint_num->data, bigint_num->data + k, bigint_num->size - k);
   bigint_num->size -= k;
 
   return CM_SUCCESS;
@@ -497,9 +533,229 @@ CmBigInt *cm_bigint_alloc() {
   bigint_num->size = 0;
   bigint_num->sign = '+';
   bigint_num->data = NULL;
-  bigint_num->capacity = CM_BIGINT_START_CAPACITY;
+  bigint_num->capacity = 0;
 
   return bigint_num;
+}
+
+CmStatusCode cm_bigint_reserve(CmBigInt *bigint_num, size_t size) {
+
+  CM_CHECK_NULL(bigint_num);
+  CM_BUFF_NULL_CHECK(bigint_num);
+
+  void *new_buffer = realloc(bigint_num->data, size);
+  if (!new_buffer) {
+    return CM_ERR_ALLOC_FAILED;
+  }
+
+  if (bigint_num->size > size) {
+    bigint_num->size = size;
+  }
+
+  bigint_num->data = new_buffer;
+  bigint_num->capacity = size;
+
+  return CM_SUCCESS;
+}
+
+// TODO: after execution, some unused memory remains
+char *cm_bigint_to_hex_string(const CmBigInt *bigint_num) {
+
+  if (!bigint_num || !bigint_num->data)
+    return NULL;
+
+  if (cm_bigint_is_zero(bigint_num)) {
+    char *zero_str = malloc(2);
+    if (!zero_str)
+      return NULL;
+    zero_str[0] = '0';
+    zero_str[1] = '\0';
+    return zero_str;
+  }
+
+  bool is_negative = (bigint_num->sign == '-');
+
+  size_t alloc_size = bigint_num->size + 1 + (is_negative ? 1 : 0);
+
+  char *res_str = malloc(alloc_size);
+  CmBigInt *copy_bigint = cm_bigint_create_copy(bigint_num);
+  CmBigInt *divider = cm_bigint_create_from_num(16);
+  CmBigInt *remainder = cm_bigint_alloc();
+  CmBigInt *quotient = cm_bigint_alloc();
+
+  if (!res_str || !copy_bigint || !divider || !remainder || !quotient) {
+    free(res_str);
+    cm_bigint_free(copy_bigint);
+    cm_bigint_free(divider);
+    cm_bigint_free(remainder);
+    cm_bigint_free(quotient);
+    return NULL;
+  }
+
+  size_t i = 0;
+  CmStatusCode div_res;
+  cm_bigint_abs(copy_bigint);
+
+  while (!cm_bigint_is_zero(copy_bigint)) {
+
+    div_res = cm_bigint_div_mod(quotient, remainder, copy_bigint, divider);
+    if (div_res != CM_SUCCESS) {
+      free(res_str);
+      cm_bigint_free(copy_bigint);
+      cm_bigint_free(divider);
+      cm_bigint_free(remainder);
+      cm_bigint_free(quotient);
+      return NULL;
+    }
+    cm_bigint_set(copy_bigint, quotient);
+
+    char hex_num =
+        _cm_char_decimal_hex_convert(remainder->data, remainder->size);
+    res_str[i++] = hex_num;
+  }
+
+  if (is_negative) {
+    res_str[i++] = '-';
+  }
+
+  res_str[i] = '\0';
+  _cm_reverse_str(res_str);
+
+  cm_bigint_free(copy_bigint);
+  cm_bigint_free(divider);
+  cm_bigint_free(remainder);
+  cm_bigint_free(quotient);
+
+  return res_str;
+}
+
+char *cm_bigint_to_bin_string(const CmBigInt *bigint_num) {
+  if (!bigint_num || !bigint_num->data)
+    return NULL;
+
+  if (cm_bigint_is_zero(bigint_num)) {
+    char *zero_str = malloc(2);
+    if (!zero_str)
+      return NULL;
+    zero_str[0] = '0';
+    zero_str[1] = '\0';
+    return zero_str;
+  }
+
+  bool is_negative = (bigint_num->sign == '-');
+
+  size_t alloc_size = bigint_num->size + 1 + (is_negative ? 1 : 0);
+
+  char *res_str = malloc(alloc_size);
+  CmBigInt *copy_bigint = cm_bigint_create_copy(bigint_num);
+  CmBigInt *divider = cm_bigint_create_from_num(2);
+  CmBigInt *remainder = cm_bigint_alloc();
+  CmBigInt *quotient = cm_bigint_alloc();
+
+  if (!res_str || !copy_bigint || !divider || !remainder || !quotient) {
+    free(res_str);
+    cm_bigint_free(copy_bigint);
+    cm_bigint_free(divider);
+    cm_bigint_free(remainder);
+    cm_bigint_free(quotient);
+    return NULL;
+  }
+
+  size_t i = 0;
+  CmStatusCode div_res;
+  cm_bigint_abs(copy_bigint);
+
+  while (!cm_bigint_is_zero(copy_bigint)) {
+
+    div_res = cm_bigint_div_mod(quotient, remainder, copy_bigint, divider);
+    if (div_res != CM_SUCCESS) {
+      free(res_str);
+      cm_bigint_free(copy_bigint);
+      cm_bigint_free(divider);
+      cm_bigint_free(remainder);
+      cm_bigint_free(quotient);
+      return NULL;
+    }
+    cm_bigint_set(copy_bigint, quotient);
+
+    char bin_num = cm_bigint_is_zero(remainder) ? 0 : 1;
+    res_str[i++] = bin_num;
+  }
+
+  if (is_negative) {
+    res_str[i++] = '-';
+  }
+
+  res_str[i] = '\0';
+  _cm_reverse_str(res_str);
+
+  cm_bigint_free(copy_bigint);
+  cm_bigint_free(divider);
+  cm_bigint_free(remainder);
+  cm_bigint_free(quotient);
+
+  return res_str;
+}
+
+CmBigInt *cm_bigint_from_bin_string(const char *str) {
+
+  if (!str)
+    return NULL;
+
+  CmBigInt *res = cm_bigint_alloc();
+  CmBigInt *two_base = cm_bigint_create_from_num(2);
+  if (!res || !two_base) {
+    cm_bigint_free(res);
+    cm_bigint_free(two_base);
+    return NULL;
+  }
+
+  size_t str_len = strlen(str);
+
+  for (size_t i = 0; str[i] != '\0'; ++i) {
+    if (str[i] == '1') {
+      cm_bigint_pow(two_base, str_len - 1);
+      cm_bigint_add(res, two_base);
+      cm_bigint_set_long(two_base, 2);
+    }
+  }
+
+  cm_bigint_free(two_base);
+  return res;
+}
+
+CmBigInt *cm_bigint_from_hex_string(const char *str) {
+
+  if (!str)
+    return NULL;
+
+  CmBigInt *res = cm_bigint_alloc();
+  CmBigInt *hex_base = cm_bigint_create_from_num(16);
+  CmBigInt *tmp = cm_bigint_alloc();
+  if (!res || !hex_base || !tmp) {
+    cm_bigint_free(res);
+    cm_bigint_free(hex_base);
+    cm_bigint_free(tmp);
+    return NULL;
+  }
+
+  size_t str_len = strlen(str);
+
+  for (size_t i = 0; str[i] != '\0'; ++i) {
+    if (str[i] != '0') {
+      cm_bigint_pow(hex_base, str_len - 1);
+      cm_bigint_set_long(tmp, str[i] - '0');
+      cm_bigint_multiply(tmp, hex_base);
+
+      cm_bigint_add(res, tmp);
+
+      cm_bigint_set_long(hex_base, 2);
+    }
+  }
+
+  cm_bigint_free(hex_base);
+  cm_bigint_free(tmp);
+  return res;
 }
 
 CmBigInt *cm_bigint_create_copy(const CmBigInt *src_num) {
@@ -516,7 +772,7 @@ CmBigInt *cm_bigint_create_copy(const CmBigInt *src_num) {
   new_num->sign = src_num->sign;
   new_num->capacity = src_num->capacity;
 
-  if (!src_num->data) {
+  if (!src_num->data || (src_num->size == 0)) {
     new_num->data = NULL;
     return new_num;
   }
@@ -531,10 +787,10 @@ CmBigInt *cm_bigint_create_copy(const CmBigInt *src_num) {
   return new_num;
 }
 
+// LLONG_MIN case
 CmBigInt *cm_bigint_create_from_num(long long src_num) {
 
   CmBigInt *bigint_num = cm_bigint_alloc();
-
   if (!bigint_num)
     return NULL;
 
@@ -545,8 +801,10 @@ CmBigInt *cm_bigint_create_from_num(long long src_num) {
   bigint_num->capacity = _cm_calc_capacity(bigint_num->size);
 
   char *alloc_buffer = malloc(bigint_num->capacity);
-  if (!alloc_buffer)
+  if (!alloc_buffer) {
+    cm_bigint_free(bigint_num);
     return NULL;
+  }
 
   for (size_t i = 0; i < bigint_num->size; ++i) {
     alloc_buffer[i] = (abs_num % 10) + '0';
@@ -636,7 +894,7 @@ bool cm_bigint_is_equal(const CmBigInt *lhs, const CmBigInt *rhs) {
 
   if (lhs->size == rhs->size) {
     if (lhs->sign == rhs->sign) {
-      if (memcmp(lhs->data, rhs->data, lhs->size))
+      if (memcmp(lhs->data, rhs->data, lhs->size) == 0)
         return true;
     }
   }
@@ -645,6 +903,10 @@ bool cm_bigint_is_equal(const CmBigInt *lhs, const CmBigInt *rhs) {
 }
 
 bool cm_bigint_is_positive(const CmBigInt *bigint_num) {
+
+  if (!bigint_num)
+    return false;
+
   return bigint_num->sign == '+';
 }
 
@@ -666,7 +928,9 @@ bool cm_bigint_less_ll(const CmBigInt *lhs, long long rhs) {
                             : (lhs->size < rhs_digit_number);
   }
 
-  const char *rhs_str = _cm_itoa(rhs, rhs_digit_number);
+  char *rhs_str = _cm_itoa(_cm_long_abs(rhs), rhs_digit_number);
+  if (!rhs_str)
+    return false;
 
   for (size_t i = lhs->size; i > 0; i--) {
     if (lhs->data[i - 1] != rhs_str[i - 1]) {
@@ -675,21 +939,28 @@ bool cm_bigint_less_ll(const CmBigInt *lhs, long long rhs) {
     }
   }
 
-  return true;
+  free(rhs_str);
+
+  return false;
 }
 
 bool cm_bigint_is_equal_ll(const CmBigInt *lhs, long long rhs) {
 
   size_t rhs_digit_number = _cm_long_digit_count(rhs);
-  const char *rhs_str = _cm_itoa(rhs, rhs_digit_number);
+  char *rhs_str = _cm_itoa(_cm_long_abs(rhs), rhs_digit_number);
+  if (!rhs_str)
+    return false;
+
   char rhs_sign = (rhs >= 0) ? '+' : '-';
 
   if (lhs->size == rhs_digit_number) {
     if (lhs->sign == rhs_sign) {
-      if (memcmp(lhs->data, rhs_str, lhs->size))
+      if (memcmp(lhs->data, rhs_str, lhs->size) == 0)
         return true;
     }
   }
+
+  free(rhs_str);
 
   return false;
 }
@@ -719,6 +990,10 @@ bool cm_bigint_greater_or_equal_ll(const CmBigInt *lhs, long long rhs) {
 }
 
 bool cm_bigint_is_zero(const CmBigInt *bigint_num) {
+
+  if (!bigint_num || !bigint_num->data)
+    return false;
+
   return _cm_is_zero_buff(bigint_num->data, bigint_num->size);
 }
 
@@ -726,6 +1001,8 @@ CmStatusCode cm_bigint_add(CmBigInt *bigint_num, const CmBigInt *addend) {
 
   CM_CHECK_NULL(bigint_num);
   CM_CHECK_NULL(addend);
+  CM_BUFF_NULL_CHECK(bigint_num);
+  CM_BUFF_NULL_CHECK(addend);
 
   CmStatusCode res_code;
   char res_sign = _cm_calculate_res_sign(bigint_num, addend, '+');
@@ -742,29 +1019,39 @@ CmStatusCode cm_bigint_add(CmBigInt *bigint_num, const CmBigInt *addend) {
 CmStatusCode cm_bigint_add_ll(CmBigInt *bigint_num, long long addend) {
 
   CM_CHECK_NULL(bigint_num);
+  CM_BUFF_NULL_CHECK(bigint_num);
 
   CmBigInt *bigint_addend = cm_bigint_create_from_num(addend);
   if (!bigint_addend)
     return CM_ERR_ALLOC_FAILED;
 
-  return cm_bigint_add(bigint_num, bigint_addend);
+  CmStatusCode add_res = cm_bigint_add(bigint_num, bigint_addend);
+  cm_bigint_free(bigint_addend);
+
+  return add_res;
 }
 
 CmStatusCode cm_bigint_sub_ll(CmBigInt *bigint_num, long long subtrc) {
 
   CM_CHECK_NULL(bigint_num);
+  CM_BUFF_NULL_CHECK(bigint_num);
 
   CmBigInt *bigint_subtrc = cm_bigint_create_from_num(subtrc);
   if (!bigint_subtrc)
     return CM_ERR_ALLOC_FAILED;
 
-  return cm_bigint_subtract(bigint_num, bigint_subtrc);
+  CmStatusCode sub_res = cm_bigint_subtract(bigint_num, bigint_subtrc);
+  cm_bigint_free(bigint_subtrc);
+
+  return sub_res;
 }
 
 CmStatusCode cm_bigint_subtract(CmBigInt *bigint_num, const CmBigInt *substr) {
 
   CM_CHECK_NULL(bigint_num);
   CM_CHECK_NULL(substr);
+  CM_BUFF_NULL_CHECK(bigint_num);
+  CM_BUFF_NULL_CHECK(substr);
 
   CmStatusCode res_code;
   char res_sign = _cm_calculate_res_sign(bigint_num, substr, '-');
@@ -783,36 +1070,141 @@ CmStatusCode cm_bigint_multiply(CmBigInt *bigint_num,
 
   CM_CHECK_NULL(bigint_num);
   CM_CHECK_NULL(multiplier);
+  CM_BUFF_NULL_CHECK(bigint_num);
+  CM_BUFF_NULL_CHECK(multiplier);
 
   return _cm_calculate_mult(bigint_num, multiplier);
 }
 
-CmStatusCode cm_bigint_divide(CmBigInt *bigint_num, const CmBigInt *divider) {
+CmStatusCode cm_bigint_pow(CmBigInt *bigint_num, unsigned long long exp) {
+
+  CM_CHECK_NULL(bigint_num);
+  CM_BUFF_NULL_CHECK(bigint_num);
+
+  if (exp == 0) {
+    cm_bigint_set_long(bigint_num, 1);
+    return CM_SUCCESS;
+  }
+
+  if (exp == 1) {
+    return CM_SUCCESS;
+  }
+
+  CmBigInt *res = cm_bigint_create_from_num(1);
+  if (!res) {
+    cm_bigint_free(res);
+    return CM_ERR_ALLOC_FAILED;
+  }
+
+  while (exp > 0) {
+    if (exp & 0x1) {
+      cm_bigint_multiply(res, bigint_num);
+    }
+    cm_bigint_multiply(bigint_num, bigint_num);
+    exp /= 2;
+  }
+
+  cm_bigint_set(bigint_num, res);
+  cm_bigint_free(res);
+
+  return CM_SUCCESS;
+}
+
+CmStatusCode cm_bigint_div(CmBigInt *bigint_num, const CmBigInt *divider) {
 
   CM_CHECK_NULL(bigint_num);
   CM_CHECK_NULL(divider);
+  CM_BUFF_NULL_CHECK(bigint_num);
+  CM_BUFF_NULL_CHECK(divider);
 
   CmBigInt *remainder = cm_bigint_alloc();
-  CM_CHECK_NULL(remainder);
-
   CmBigInt *quotient = cm_bigint_alloc();
-  CM_CHECK_NULL(quotient);
+  if (!remainder || !quotient) {
+    cm_bigint_free(remainder);
+    cm_bigint_free(quotient);
+    return CM_ERR_ALLOC_FAILED;
+  }
 
-  return cm_bigint_div_mod(quotient, remainder, bigint_num, divider);
+  CmStatusCode div_res =
+      cm_bigint_div_mod(quotient, remainder, bigint_num, divider);
+
+  cm_bigint_set(bigint_num, quotient);
+
+  cm_bigint_free(remainder);
+  cm_bigint_free(quotient);
+
+  return div_res;
 }
 
 CmStatusCode cm_bigint_mod(CmBigInt *bigint_num, const CmBigInt *divider) {
 
   CM_CHECK_NULL(bigint_num);
   CM_CHECK_NULL(divider);
+  CM_BUFF_NULL_CHECK(bigint_num);
+  CM_BUFF_NULL_CHECK(divider);
 
   CmBigInt *remainder = cm_bigint_alloc();
-  CM_CHECK_NULL(remainder);
-
   CmBigInt *quotient = cm_bigint_alloc();
-  CM_CHECK_NULL(quotient);
+  if (!remainder || !quotient) {
+    cm_bigint_free(remainder);
+    cm_bigint_free(quotient);
+    return CM_ERR_ALLOC_FAILED;
+  }
 
-  return cm_bigint_div_mod(quotient, remainder, bigint_num, divider);
+  CmStatusCode mod_res =
+      cm_bigint_div_mod(quotient, remainder, bigint_num, divider);
+
+  cm_bigint_set(bigint_num, remainder);
+
+  cm_bigint_free(remainder);
+  cm_bigint_free(quotient);
+
+  return mod_res;
+}
+
+CmStatusCode cm_bigint_gcd(const CmBigInt *bigint_a, const CmBigInt *bigint_b,
+                           CmBigInt *res) {
+
+  CM_CHECK_NULL(bigint_a);
+  CM_CHECK_NULL(bigint_b);
+  CM_CHECK_NULL(res);
+  CM_BUFF_NULL_CHECK(bigint_a);
+  CM_BUFF_NULL_CHECK(bigint_b);
+
+  CmBigInt *copy_a = cm_bigint_create_copy(bigint_a);
+  CmBigInt *copy_b = cm_bigint_create_copy(bigint_b);
+  CmBigInt *tmp = cm_bigint_alloc();
+  if (!tmp || !copy_a || !copy_b) {
+    cm_bigint_free(copy_a);
+    cm_bigint_free(copy_b);
+    cm_bigint_free(tmp);
+    return CM_ERR_ALLOC_FAILED;
+  }
+
+  CmStatusCode div_status;
+
+  while (!cm_bigint_is_zero(copy_b)) {
+
+    div_status = cm_bigint_div_mod(NULL, tmp, copy_a, copy_b);
+    if (div_status != CM_SUCCESS) {
+      cm_bigint_free(copy_a);
+      cm_bigint_free(copy_b);
+      cm_bigint_free(tmp);
+      return div_status;
+    }
+
+    cm_bigint_set(copy_a, copy_b);
+    cm_bigint_set(copy_b, tmp);
+  }
+
+  cm_bigint_set(res, copy_a);
+  res->sign = '+';
+
+  cm_bigint_free(copy_a);
+  cm_bigint_free(copy_b);
+  cm_bigint_free(tmp);
+
+  return CM_SUCCESS;
 }
 
 CmStatusCode cm_bigint_div_mod(CmBigInt *quotient, CmBigInt *remainder,
@@ -823,6 +1215,8 @@ CmStatusCode cm_bigint_div_mod(CmBigInt *quotient, CmBigInt *remainder,
   CM_CHECK_NULL(remainder);
   CM_CHECK_NULL(dividend);
   CM_CHECK_NULL(divider);
+  CM_BUFF_NULL_CHECK(dividend);
+  CM_BUFF_NULL_CHECK(divider);
 
   cm_bigint_set(remainder, dividend);
   cm_bigint_set_long(quotient, 0);
@@ -831,7 +1225,9 @@ CmStatusCode cm_bigint_div_mod(CmBigInt *quotient, CmBigInt *remainder,
 }
 
 CmStatusCode cm_bigint_inc(CmBigInt *bigint_num) {
+
   CM_CHECK_NULL(bigint_num);
+  CM_BUFF_NULL_CHECK(bigint_num);
 
   CmStatusCode res_code;
 
@@ -849,6 +1245,7 @@ CmStatusCode cm_bigint_inc(CmBigInt *bigint_num) {
 CmStatusCode cm_bigint_dec(CmBigInt *bigint_num) {
 
   CM_CHECK_NULL(bigint_num);
+  CM_BUFF_NULL_CHECK(bigint_num);
 
   CmStatusCode res_code;
   bool is_zero = cm_bigint_is_zero(bigint_num);
@@ -856,8 +1253,7 @@ CmStatusCode cm_bigint_dec(CmBigInt *bigint_num) {
   if (bigint_num->sign == '-' || is_zero) {
     res_code = _cm_calculate_inc(bigint_num, '-');
   } else {
-    char res_sign =
-        cm_bigint_is_equal_ll(bigint_num, 0) ? '-' : bigint_num->sign;
+    char res_sign = is_zero ? '-' : bigint_num->sign;
     res_code = _cm_calculate_dec(bigint_num, res_sign);
   }
 
@@ -868,10 +1264,12 @@ CmStatusCode cm_bigint_set(CmBigInt *bigint_num, const CmBigInt *setter) {
 
   CM_CHECK_NULL(bigint_num);
   CM_CHECK_NULL(setter);
+  CM_BUFF_NULL_CHECK(bigint_num);
+  CM_BUFF_NULL_CHECK(setter);
 
   char *new_buffer = malloc(setter->size);
   if (!new_buffer)
-    return NULL;
+    return CM_ERR_ALLOC_FAILED;
 
   free(bigint_num->data);
   bigint_num->data = new_buffer;
@@ -886,6 +1284,7 @@ CmStatusCode cm_bigint_set(CmBigInt *bigint_num, const CmBigInt *setter) {
 CmStatusCode cm_bigint_set_long(CmBigInt *bigint_num, long long setter) {
 
   CM_CHECK_NULL(bigint_num);
+  CM_BUFF_NULL_CHECK(bigint_num);
 
   long long abs_num = _cm_long_abs(setter);
 
@@ -906,6 +1305,7 @@ CmStatusCode cm_bigint_set_long(CmBigInt *bigint_num, long long setter) {
 CmStatusCode cm_bigint_shrink_to_fit(CmBigInt *bigint_num) {
 
   CM_CHECK_NULL(bigint_num);
+  CM_BUFF_NULL_CHECK(bigint_num);
 
   if (bigint_num->capacity > bigint_num->size) {
     void *new_buffer = realloc(bigint_num->data, bigint_num->size);
@@ -914,42 +1314,78 @@ CmStatusCode cm_bigint_shrink_to_fit(CmBigInt *bigint_num) {
     }
 
     bigint_num->data = new_buffer;
+    bigint_num->capacity = bigint_num->size;
   }
 
   return CM_SUCCESS;
 }
 
-CmBigInt *cm_bigint_abs(CmBigInt *bigint_num) {
+CmStatusCode cm_bigint_abs(CmBigInt *bigint_num) {
 
-  if (!bigint_num)
-    return NULL;
-
+  CM_CHECK_NULL(bigint_num);
   bigint_num->sign = '+';
 
-  return bigint_num;
+  return CM_SUCCESS;
 }
 
-CmBigInt *cm_bigint_negate(CmBigInt *bigint_num) {
+CmStatusCode cm_bigint_negate(CmBigInt *bigint_num) {
 
-  if (!bigint_num)
-    return NULL;
+  CM_CHECK_NULL(bigint_num);
+
+  if (cm_bigint_is_zero(bigint_num))
+    return CM_SUCCESS;
 
   bigint_num->sign = (bigint_num->sign == '+') ? '-' : '+';
 
-  return bigint_num;
+  return CM_SUCCESS;
+}
+
+bool cm_bigint_is_odd(const CmBigInt *bigint_num) {
+
+  if (!bigint_num || !bigint_num->data)
+    return false;
+
+  return (bigint_num->data[0] - '0') & 0x1;
+}
+
+bool cm_bigint_is_even(const CmBigInt *bigint_num) {
+  return !cm_bigint_is_odd(bigint_num);
 }
 
 char *cm_bigint_to_string(const CmBigInt *bigint_num) {
 
-  if (!bigint_num)
+  if (!bigint_num || !bigint_num->data)
     return NULL;
 
-  char *str = malloc(bigint_num->size);
+  bool is_negative = (bigint_num->sign == '-');
+
+  size_t alloc_size = bigint_num->size + 1 + (is_negative ? 1 : 0);
+
+  char *str = malloc(alloc_size);
   if (!str)
     return NULL;
 
-  memcpy(str, bigint_num->data, bigint_num->size);
+  if (is_negative) {
+    str[0] = '-';
+  }
+
+  size_t i = bigint_num->size;
+  size_t j = 0;
+  for (; i-- > 0;) {
+    str[j++] = bigint_num->data[i];
+  }
+
+  str[j] = '\0';
+
   return str;
+}
+
+CmStatusCode cm_bigint_num_digits(const CmBigInt *bigint_num, size_t *res) {
+
+  CM_CHECK_NULL(bigint_num);
+  *res = bigint_num->size;
+
+  return CM_SUCCESS;
 }
 
 CmStatusCode cm_bigint_free(CmBigInt *bigint_num) {
@@ -957,4 +1393,5 @@ CmStatusCode cm_bigint_free(CmBigInt *bigint_num) {
   CM_CHECK_NULL(bigint_num);
   free(bigint_num->data);
   free(bigint_num);
+  return CM_SUCCESS;
 }
