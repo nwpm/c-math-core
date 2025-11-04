@@ -4,8 +4,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "../utils/cm_err_codes.h"
-
 // TODO: Hide struct
 typedef struct CmVec2Double {
   double x;
@@ -20,14 +18,13 @@ CmVec2Double *cm_vec2_double_create_from_vec(CmVec2Double *orig_vec);
 void cm_vec2_double_free(CmVec2Double *vec);
 
 /* Operations */
-CmStatusCode cm_vec2_double_sum(CmVec2Double *vec_a, const CmVec2Double *vec_b);
-CmStatusCode cm_vec2_double_sub(CmVec2Double *vec_a, const CmVec2Double *vec_b);
-CmStatusCode cm_vec2_double_scale(CmVec2Double *vec, double scale);
+void cm_vec2_double_sum(CmVec2Double *vec_a, const CmVec2Double *vec_b);
+void cm_vec2_double_sub(CmVec2Double *vec_a, const CmVec2Double *vec_b);
+void cm_vec2_double_scale(CmVec2Double *vec, double scale);
 
-CmStatusCode cm_vec2_double_dot(const CmVec2Double *vec_a,
-                                const CmVec2Double *vec_b, double *dot_res);
-CmStatusCode cm_vec2_double_angle(const CmVec2Double *vec_a,
-                                  const CmVec2Double *vec_b, double *angle);
+double cm_vec2_double_dot(const CmVec2Double *vec_a, const CmVec2Double *vec_b);
+double cm_vec2_double_angle(const CmVec2Double *vec_a,
+                            const CmVec2Double *vec_b);
 
 bool cm_vec2_double_is_null(const CmVec2Double *vec);
 bool cm_vec2_double_is_equal(const CmVec2Double *vec_a,
@@ -37,15 +34,14 @@ CmVec2Double *cm_vec2_double_perpendicular(const CmVec2Double *vec);
 CmVec2Double *cm_vec2_double_rotate(const CmVec2Double *vec, double angle);
 
 /* Norm */
-CmStatusCode cm_vec2_double_norm(const CmVec2Double *vec, double *norm_res);
-CmStatusCode cm_vec2_double_norm_squared(const CmVec2Double *vec,
-                                         double *norm_res);
+double cm_vec2_double_norm(const CmVec2Double *vec);
+double cm_vec2_double_norm_squared(const CmVec2Double *vec);
 double cm_vec2_double_distance(const CmVec2Double *vec_a,
                                const CmVec2Double *vec_b);
 
 /* Normalize */
 CmVec2Double *cm_vec2_double_normalize(const CmVec2Double *vec);
-CmStatusCode cm_vec2_double_normalize_inplace(CmVec2Double *vec);
+void cm_vec2_double_normalize_inplace(CmVec2Double *vec);
 
 /* Project */
 CmVec2Double *cm_vec2_double_project(const CmVec2Double *proj_from,

@@ -4,9 +4,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-// TODO: forward declarations from err codes
-#include "../utils/cm_err_codes.h"
-
 // TODO: Hide struct
 typedef struct CmVec3Double {
   double x;
@@ -22,14 +19,13 @@ CmVec3Double *cm_vec3_double_create_from_vec(CmVec3Double *orig_vec);
 void cm_vec3_double_free(CmVec3Double *vec);
 
 /* Operations */
-CmStatusCode cm_vec3_double_sum(CmVec3Double *vec_a, const CmVec3Double *vec_b);
-CmStatusCode cm_vec3_double_sub(CmVec3Double *vec_a, const CmVec3Double *vec_b);
-CmStatusCode cm_vec3_double_scale(CmVec3Double *vec, double scale);
+void cm_vec3_double_sum(CmVec3Double *vec_a, const CmVec3Double *vec_b);
+void cm_vec3_double_sub(CmVec3Double *vec_a, const CmVec3Double *vec_b);
+void cm_vec3_double_scale(CmVec3Double *vec, double scale);
 
-CmStatusCode cm_vec3_double_dot(const CmVec3Double *vec_a,
-                                const CmVec3Double *vec_b, double *dot_res);
-CmStatusCode cm_vec3_double_angle(const CmVec3Double *vec_a,
-                                  const CmVec3Double *vec_b, double *angle);
+double cm_vec3_double_dot(const CmVec3Double *vec_a, const CmVec3Double *vec_b);
+double cm_vec3_double_angle(const CmVec3Double *vec_a,
+                            const CmVec3Double *vec_b);
 
 bool cm_vec3_double_is_null(const CmVec3Double *vec);
 bool cm_vec3_double_is_equal(const CmVec3Double *vec_a,
@@ -41,14 +37,14 @@ CmVec3Double *cm_vec3_double_cross(const CmVec3Double *vec_a,
                                    const CmVec3Double *vec_b);
 
 /* Norm */
-CmStatusCode cm_vec3_double_norm(const CmVec3Double *vec, double *norm_res);
-CmStatusCode cm_vec3_double_norm_squared(const CmVec3Double *vec, double *norm_res);
+double cm_vec3_double_norm(const CmVec3Double *vec);
+double cm_vec3_double_norm_squared(const CmVec3Double *vec);
 double cm_vec3_double_distance(const CmVec3Double *vec_a,
                                const CmVec3Double *vec_b);
 
 /* Normalize */
 CmVec3Double *cm_vec3_double_normalize(const CmVec3Double *vec);
-CmStatusCode cm_vec3_double_normalize_inplace(CmVec3Double *vec);
+void cm_vec3_double_normalize_inplace(CmVec3Double *vec);
 
 /* Project */
 CmVec3Double *cm_vec3_double_project(const CmVec3Double *proj_from,

@@ -1,7 +1,6 @@
 #ifndef CM_GEOMETRY2D_H
 #define CM_GEOMETRY2D_H
 
-#include "../utils/cm_err_codes.h"
 #include "../vectors/cm_vec2_double.h"
 
 /* Line defined by 2 radius vectors */
@@ -11,6 +10,20 @@ typedef struct CmLine2D {
   CmVec2Double b;
 
 } CmLine2D;
+
+typedef struct CmRay2D {
+
+  CmVec2Double a;
+  CmVec2Double b;
+
+} CmRay3D;
+
+typedef struct CmSegment2D {
+
+  CmVec2Double a;
+  CmVec2Double b;
+
+} CmSegment3D;
 
 typedef struct CmCircle2D {
 
@@ -45,8 +58,7 @@ CmLine2D *cm_geom2d_line_create(const CmVec2Double *v1, const CmVec2Double *v2);
 CmLine2D *cm_geom2d_line_copy(const CmLine2D *source_line);
 
 /* Free allocated 2d line */
-CmStatusCode cm_geom2d_line_free(CmLine2D *line);
-
+void cm_geom2d_line_free(CmLine2D *line);
 /* Circle */
 
 /* Allocate row circle object */
@@ -59,7 +71,7 @@ CmCircle2D *cm_geom2d_circle_create(const CmVec2Double *center, double radius);
 CmCircle2D *cm_geom2d_circle_copy(const CmCircle2D *source_circle);
 
 /* Free allocated circle */
-CmStatusCode cm_geom2d_circle_free(CmCircle2D *circle);
+void cm_geom2d_circle_free(CmCircle2D *circle);
 
 /* Triangle */
 
@@ -75,7 +87,7 @@ CmTriangle2D *cm_geom2d_triangle_create(const CmVec2Double *a,
 CmTriangle2D *cm_geom2d_triangle_copy(const CmTriangle2D *source_triangle);
 
 /* Free allocated 2d triangle */
-CmStatusCode cm_geom2d_triangle_free(CmTriangle2D *triangle);
+void cm_geom2d_triangle_free(CmTriangle2D *triangle);
 
 /* Axis-aligned bounding box */
 
@@ -90,6 +102,6 @@ CmAABB2D *cm_geom2d_aabb_create(const CmVec2Double *min,
 CmAABB2D *cm_geom2d_aabb_copy(const CmAABB2D *source_aabb);
 
 /* Free allocated 2d axis-aligned bounding box */
-CmStatusCode cm_geom2d_aabb_free(CmAABB2D *aabb);
+void cm_geom2d_aabb_free(CmAABB2D *aabb);
 
 #endif

@@ -12,11 +12,11 @@
 //                            	CmBigInt *x, CmBigInt *y, CmBigInt *gcd)
 // TODO: cm_bigint_from_hex_string
 // TODO:
-//CmStatusCode cm_bigint_mod_multiply(CmBigInt *num, const CmBigInt *multiplier,
+// CmStatusCode cm_bigint_mod_multiply(CmBigInt *num, const CmBigInt
+// *multiplier,
 //                                    const CmBigInt *modulus);
-//CmStatusCode cm_bigint_mod_pow(CmBigInt *num, const CmBigInt *exponent,
+// CmStatusCode cm_bigint_mod_pow(CmBigInt *num, const CmBigInt *exponent,
 //                               const CmBigInt *modulus);
-
 
 typedef struct CmBigInt {
 
@@ -43,7 +43,7 @@ CmBigInt *cm_bigint_create_copy(const CmBigInt *src_num);
 CmStatusCode cm_bigint_reserve(CmBigInt *bigint_num, size_t size);
 
 /* Free bigint object */
-CmStatusCode cm_bigint_free(CmBigInt *bigint_num);
+void cm_bigint_free(CmBigInt *bigint_num);
 
 /* lhs < rhs bigint compare result */
 bool cm_bigint_less(const CmBigInt *lhs, const CmBigInt *rhs);
@@ -113,7 +113,7 @@ bool cm_bigint_is_odd(const CmBigInt *bigint_num);
 
 /* Shifts */
 CmStatusCode cm_bigint_shift_left(CmBigInt *bigint_num, size_t k);
-CmStatusCode cm_bigint_shift_right(CmBigInt *bigint_num, size_t k);
+void cm_bigint_shift_right(CmBigInt *bigint_num, size_t k);
 
 /* Convert */
 char *cm_bigint_to_string(const CmBigInt *bigint_num);
@@ -123,11 +123,11 @@ CmStatusCode cm_bigint_set(CmBigInt *bigint_num, const CmBigInt *setter);
 CmStatusCode cm_bigint_set_long(CmBigInt *bigint_num, long long setter);
 
 /* Other */
-CmStatusCode cm_bigint_negate(CmBigInt *bigint_num);
-CmStatusCode cm_bigint_abs(CmBigInt *bigint_num);
+void cm_bigint_negate(CmBigInt *bigint_num);
+void cm_bigint_abs(CmBigInt *bigint_num);
 
 CmStatusCode cm_bigint_shrink_to_fit(CmBigInt *bigint_num);
-CmStatusCode cm_bigint_num_digits(const CmBigInt *bigint_num, size_t *res);
+size_t cm_bigint_num_digits(const CmBigInt *bigint_num);
 
 /* Alloc hex c-string from bigint num */
 char *cm_bigint_to_hex_string(const CmBigInt *bigint_num);
@@ -136,6 +136,6 @@ char *cm_bigint_to_hex_string(const CmBigInt *bigint_num);
 char *cm_bigint_to_bin_string(const CmBigInt *bigint_num);
 
 /* Create bigint num from c-string */
-CmBigInt* cm_bigint_from_bin_string(const char* str);
+CmBigInt *cm_bigint_from_bin_string(const char *str);
 
 #endif

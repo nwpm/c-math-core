@@ -100,9 +100,74 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 
 - `cm_bigint_dec` - removed compare for zero in else, use is_zero variable.
 
+## [0.3]
+
+### Added
+
+- Added base objects for 2D/3D geometry.
+- Added alloc/create functions for 2d primitives
+
+- Added different checkers in debug version of matrix module:
+    NULL matrix ptr;
+    NULL matrix data ptr;
+    zero columns;
+    zero rows;
+
+- `cm_matrix_double_create_identity`
+- `_cm_llong_abs`
+- `_cm_long_abs`
+
+### Removed
+
+- `cm_checkers.h`
+
+### Changed
+
+- Reworked and revised the return code logic.
+  Most NULL checks were moved, they used only in DEBUG mod
+  to improve performance.
+  Return codes are now used only where mathematical
+  errors or internal memory allocation failures may occur.
+
+- Reworked style of internal NULL checks, after memory allocations
+  in matrix module.
+
+- `cm_matrix_double_add`                - refactored matrix sum.
+- `cm_matrix_double_sub`                - refactored matrix subtract.
+- `cm_matrix_double_create_from_matrix` - refactored, use memcpy instead loop.
+
+- `cm_matrix_double_transpose`,
+  `cm_matrix_double_pow`                - refactored, use ptr to matrix
+                                          instead double ptr;
+
+- `_cm_long_abs`            - moved to utils module
+- `cm_matrix_double_calloc` - renamed to 'cm_matrix_double_create_zero'
+
+
+### Fixed
+
+- `cm_matrix_double_set_all`   - fixed double zero check, use epsilon
+                                 compare
+- `cm_matrix_double_pow`       - fixed memory leak(free for tmp matrix).
+
+- `cm_matrix_double_det`,
+  `cm_matrix_double_swap_rows`- fixed memory leak(free for buffer).
+
+### Optimized
+
+- `cm_matrix_double_inverse`,
+  `cm_matrix_double_gauss`,
+  `cm_matrix_double_det`      - moved buffer allocation outside the loop.
+
+- `cm_bigint_create_from_num` - inner buffer alloc memory equal len of number.
+
 ### Planned
 
 - Optimize division algorithm
 - Remove all check macro and replace them by inline functions
 - Make common algorithm for hex/bin string conversion
 - Make common algorithm for hex/bin creation from string
+- Add user data check in DEBUG mod
+- Add DEBUG common data checkers
+- Remove all NULL alloc checks and zero checks
+- Remove all CmStatusCode
