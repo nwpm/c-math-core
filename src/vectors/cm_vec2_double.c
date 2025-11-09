@@ -1,44 +1,9 @@
 #include "cm_vec2_double.h"
 #include <assert.h>
 #include <math.h>
-#include <stdlib.h>
 
-CmVec2Double *cm_vec2_double_alloc() {
-
-  CmVec2Double *vec = malloc(sizeof(CmVec2Double));
-  if (!vec)
-    return NULL;
-
-  return vec;
-}
-
-CmVec2Double *cm_vec2_double_init(double x, double y) {
-
-  CmVec2Double *vec = cm_vec2_double_alloc();
-  if (!vec)
-    return NULL;
-
-  vec->x = x;
-  vec->y = y;
-
-  return vec;
-}
-
-CmVec2Double *cm_vec2_double_create_from_vec(CmVec2Double *orig_vec) {
-
-  CmVec2Double *vec = cm_vec2_double_alloc();
-  if (!vec)
-    return NULL;
-
-  vec->x = orig_vec->x;
-  vec->y = orig_vec->y;
-
-  return vec;
-}
-
-void cm_vec2_double_free(CmVec2Double *vec) { free(vec); }
-
-void cm_vec2_double_sum(CmVec2Double *vec_a, const CmVec2Double *vec_b) {
+void cm_vec2_double_sum_inplace(CmVec2Double *vec_a,
+                                const CmVec2Double *vec_b) {
 
 #ifdef CM_DEBUG
   assert(!vec_a && "Vec_a is NULL");
@@ -49,7 +14,8 @@ void cm_vec2_double_sum(CmVec2Double *vec_a, const CmVec2Double *vec_b) {
   vec_a->y += vec_b->y;
 }
 
-void cm_vec2_double_sub(CmVec2Double *vec_a, const CmVec2Double *vec_b) {
+void cm_vec2_double_sub_inplace(CmVec2Double *vec_a,
+                                const CmVec2Double *vec_b) {
 
 #ifdef CM_DEBUG
   assert(!vec_a && "Vec_a is NULL");
@@ -60,7 +26,7 @@ void cm_vec2_double_sub(CmVec2Double *vec_a, const CmVec2Double *vec_b) {
   vec_a->y -= vec_b->y;
 }
 
-void cm_vec2_double_scale(CmVec2Double *vec, double scale) {
+void cm_vec2_double_scale_inplace(CmVec2Double *vec, double scale) {
 
 #ifdef CM_DEBUG
   assert(!vec && "Vec is NULL");
@@ -70,42 +36,31 @@ void cm_vec2_double_scale(CmVec2Double *vec, double scale) {
   vec->y *= scale;
 }
 
-double cm_vec2_double_norm(const CmVec2Double *vec) {
-
-#ifdef CM_DEBUG
-  assert(!vec && "Vec is NULL");
-#endif
-
-  return sqrt(vec->x * vec->x + vec->y * vec->y);
+CmVec2Double cm_vec2_double_sum(CmVec2Double vec_a, CmVec2Double vec_b) {
+  return (CmVec2Double){vec_a.x + vec_b.x, vec_a.y + vec_b.y};
 }
 
-double cm_vec2_double_norm_squared(const CmVec2Double *vec) {
-
-#ifdef CM_DEBUG
-  assert(!vec && "Vec is NULL");
-#endif
-
-  return vec->x * vec->x + vec->y * vec->y;
+CmVec2Double cm_vec2_double_sub(CmVec2Double vec_a, CmVec2Double vec_b) {
+  return (CmVec2Double){vec_a.x - vec_b.x, vec_a.y - vec_b.y};
 }
 
-double cm_vec2_double_dot(const CmVec2Double *vec_a,
-                          const CmVec2Double *vec_b) {
-
-#ifdef CM_DEBUG
-  assert(!vec_a && "Vec_a is NULL");
-  assert(!vec_b && "Vec_b is NULL");
-#endif
-
-  return vec_a->x * vec_b->x + vec_a->y * vec_b->y;
+CmVec2Double cm_vec2_double_scale(CmVec2Double vec, double scale) {
+  return (CmVec2Double){vec.x * scale, vec.y * scale};
 }
 
-double cm_vec2_double_angle(const CmVec2Double *vec_a,
-                            const CmVec2Double *vec_b) {
+double cm_vec2_double_norm(CmVec2Double vec) {
+  return sqrt(vec.x * vec.x + vec.y * vec.y);
+}
 
-#ifdef CM_DEBUG
-  assert(!vec_a && "Vec_a is NULL");
-  assert(!vec_b && "Vec_b is NULL");
-#endif
+double cm_vec2_double_norm_squared(CmVec2Double vec) {
+  return vec.x * vec.x + vec.y * vec.y;
+}
+
+double cm_vec2_double_dot(CmVec2Double vec_a, CmVec2Double vec_b) {
+  return vec_a.x * vec_b.x + vec_a.y * vec_b.y;
+}
+
+double cm_vec2_double_angle(CmVec2Double vec_a, CmVec2Double vec_b) {
 
   double norm_vec_a = cm_vec2_double_norm(vec_a);
   double norm_vec_b = cm_vec2_double_norm(vec_b);
@@ -116,41 +71,20 @@ double cm_vec2_double_angle(const CmVec2Double *vec_a,
   return acos(angle);
 }
 
-CmVec2Double *cm_vec2_double_project(const CmVec2Double *proj_from,
-                                     const CmVec2Double *proj_to) {
-
-#ifdef CM_DEBUG
-  assert(!proj_from && "proj_from is NULL");
-  assert(!proj_to && "proj_to is NULL");
-#endif
-
-  CmVec2Double *res = cm_vec2_double_alloc();
-  if (!res)
-    return NULL;
+CmVec2Double cm_vec2_double_project(CmVec2Double proj_from,
+                                    CmVec2Double proj_to) {
 
   double dot_product = cm_vec2_double_dot(proj_from, proj_to);
   double len_vec_to = cm_vec2_double_norm_squared(proj_to);
-
   double scalar = dot_product / len_vec_to;
-  cm_vec2_double_scale(res, scalar);
 
-  return res;
+  return (CmVec2Double){proj_to.x * scalar, proj_to.y * scalar};
 }
 
-CmVec2Double *cm_vec2_double_normalize(const CmVec2Double *vec) {
-
-#ifdef CM_DEBUG
-  assert(!vec && "Vec is NULL");
-#endif
+CmVec2Double cm_vec2_double_normalize(CmVec2Double vec) {
 
   double vec_norm = cm_vec2_double_norm(vec);
-
-  CmVec2Double *normalized =
-      cm_vec2_double_init(vec->x / vec_norm, vec->y / vec_norm);
-  if (!normalized)
-    return NULL;
-
-  return normalized;
+  return (CmVec2Double){vec.x / vec_norm, vec.y / vec_norm};
 }
 
 void cm_vec2_double_normalize_inplace(CmVec2Double *vec) {
@@ -159,24 +93,35 @@ void cm_vec2_double_normalize_inplace(CmVec2Double *vec) {
   assert(!vec && "Vec is NULL");
 #endif
 
-  double vec_norm = cm_vec2_double_norm(vec);
-  cm_vec2_double_scale(vec, 1. / vec_norm);
+  double vec_norm = cm_vec2_double_norm(*vec);
+  vec->x /= vec_norm;
+  vec->y /= vec_norm;
 }
 
-bool cm_vec2_double_is_null(const CmVec2Double *vec) {
+bool cm_vec2_double_is_zero(const CmVec2Double vec) { return !vec.x && !vec.y; }
+
+CmVec2Double cm_vec2_double_rotate(CmVec2Double vec, double angle) {
+  double t_c = cos(angle);
+  double t_s = sin(angle);
+  return (CmVec2Double){vec.x * t_c - vec.y * t_s, vec.x * t_s + vec.y * t_c};
+}
+
+void cm_vec2_double_rotate_inplace(CmVec2Double *vec, double angle) {
 
 #ifdef CM_DEBUG
   assert(!vec && "Vec is NULL");
 #endif
 
-  return !vec->x && !vec->y;
+  double t_c = cos(angle);
+  double t_s = sin(angle);
+  vec->x = vec->x * t_c - vec->y * t_s;
+  vec->y = vec->x * t_s + vec->y * t_c;
 }
 
-bool cm_vec2_double_is_equal(const CmVec2Double *vec_a,
-                             const CmVec2Double *vec_b) {
-#ifdef CM_DEBUG
-  assert(!vec_a && "Vec_a is NULL");
-  assert(!vec_b && "Vec_b is NULL");
-#endif
-  return (vec_a->x == vec_b->x) && (vec_a->y == vec_b->y);
+double cm_vec2_double_distance(CmVec2Double vec_a, CmVec2Double vec_b) {
+  return cm_vec2_double_norm(cm_vec2_double_sub(vec_a, vec_b));
+}
+
+bool cm_vec2_double_is_equal(CmVec2Double vec_a, CmVec2Double vec_b) {
+  return (vec_a.x == vec_b.x) && (vec_a.y == vec_b.y);
 }
