@@ -100,7 +100,7 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 
 - `cm_bigint_dec` - removed compare for zero in else, use is_zero variable.
 
-## [0.3]
+## [0.3] 04.11.2025
 
 ### Added
 
@@ -161,6 +161,33 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 
 - `cm_bigint_create_from_num` - inner buffer alloc memory equal len of number.
 
+## [0.4]
+
+### Added
+
+- `cm_vec2_double_rotate`
+- `cm_vec2_double_rotate_inplace`
+- `cm_vec2_double_distance`
+- `cm_vec2_double_sum_inplace`
+- `cm_vec2_double_sub_inplace`
+- `cm_vec2_double_scale_inplace`
+
+- `cm_vec3_double_distance`
+- `cm_vec3_double_sum_inplace`
+- `cm_vec3_double_sub_inplace`
+- `cm_vec3_double_scale_inplace`
+
+- Added short documentation for vec2/vec3 functions
+
+### Remowed
+
+- Remowed heap allocation functions for vec2/vec3.
+
+### Changed
+
+- `cm_vec2_double_is_null`,
+- `cm_vec3_double_is_null`- renamed to 'cm_vec2_double_is_zero'
+
 ### Planned
 
 - Optimize division algorithm
@@ -171,3 +198,4 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 - Add DEBUG common data checkers
 - Remove all NULL alloc checks and zero checks
 - Remove all CmStatusCode
+- Create simple objects on stack, heavy object allocate.
