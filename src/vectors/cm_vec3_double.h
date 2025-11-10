@@ -11,44 +11,60 @@ typedef struct CmVec3Double {
   double z;
 } CmVec3Double;
 
-/* Allocation */
-CmVec3Double *cm_vec3_double_alloc();
-CmVec3Double *cm_vec3_double_init(double x, double y, double z);
-CmVec3Double *cm_vec3_double_create_from_vec(CmVec3Double *orig_vec);
+/* Inplace add vec B to vec A */
+void cm_vec3_double_sum_inplace(CmVec3Double *vec_a, const CmVec3Double *vec_b);
 
-void cm_vec3_double_free(CmVec3Double *vec);
+/* Inplace subtract vec B from vec A */
+void cm_vec3_double_sub_inplace(CmVec3Double *vec_a, const CmVec3Double *vec_b);
 
-/* Operations */
-void cm_vec3_double_sum(CmVec3Double *vec_a, const CmVec3Double *vec_b);
-void cm_vec3_double_sub(CmVec3Double *vec_a, const CmVec3Double *vec_b);
-void cm_vec3_double_scale(CmVec3Double *vec, double scale);
+/* Inplace scale vec by X */
+void cm_vec3_double_scale_inplace(CmVec3Double *vec, double scale);
 
-double cm_vec3_double_dot(const CmVec3Double *vec_a, const CmVec3Double *vec_b);
-double cm_vec3_double_angle(const CmVec3Double *vec_a,
-                            const CmVec3Double *vec_b);
+/* Sum vec B to vec A */
+CmVec3Double cm_vec3_double_sum(CmVec3Double vec_a, CmVec3Double vec_b);
 
-bool cm_vec3_double_is_null(const CmVec3Double *vec);
-bool cm_vec3_double_is_equal(const CmVec3Double *vec_a,
-                             const CmVec3Double *vec_b);
+/* Subtract vec B from vec A */
+CmVec3Double cm_vec3_double_sub(CmVec3Double vec_a, CmVec3Double vec_b);
 
-CmVec3Double *cm_vec3_double_perpendicular(const CmVec3Double *vec);
-CmVec3Double *cm_vec3_double_rotate(const CmVec3Double *vec, double angle);
-CmVec3Double *cm_vec3_double_cross(const CmVec3Double *vec_a,
-                                   const CmVec3Double *vec_b);
+/* Scale vec by X */
+CmVec3Double cm_vec3_double_scale(CmVec3Double vec, double scale);
 
-/* Norm */
-double cm_vec3_double_norm(const CmVec3Double *vec);
-double cm_vec3_double_norm_squared(const CmVec3Double *vec);
-double cm_vec3_double_distance(const CmVec3Double *vec_a,
-                               const CmVec3Double *vec_b);
+/* Dot product of vec A and vec B */
+double cm_vec3_double_dot(CmVec3Double vec_a, CmVec3Double vec_b);
 
-/* Normalize */
-CmVec3Double *cm_vec3_double_normalize(const CmVec3Double *vec);
-void cm_vec3_double_normalize_inplace(CmVec3Double *vec);
+/* Get angle between vec A and vec B */
+double cm_vec3_double_angle(CmVec3Double vec_a, CmVec3Double vec_b);
 
-/* Project */
-CmVec3Double *cm_vec3_double_project(const CmVec3Double *proj_from,
-                                     const CmVec3Double *proj_to);
+/* Zero check for vec */
+bool cm_vec3_double_is_zero(CmVec3Double vec);
+
+/* Check is vectors equal */
+bool cm_vec3_double_is_equal(CmVec3Double vec_a, CmVec3Double vec_b);
+
+/* Rotate vec by X angle */
+CmVec3Double cm_vec3_double_rotate(CmVec3Double vec, double angle);
+
+/* Get cross product of vec A and vec B */
+CmVec3Double cm_vec3_double_cross(CmVec3Double vec_a, CmVec3Double vec_b);
+
+/* Get norm of vec */
+double cm_vec3_double_norm(CmVec3Double vec);
+
+/* Get squared norm of vec */
+double cm_vec3_double_norm_squared(CmVec3Double vec);
+
+/* Get distance between vec A and vec B */
+double cm_vec3_double_distance(CmVec3Double vec_a, CmVec3Double vec_b);
+
+/* Normalize vec */
+CmVec3Double cm_vec3_double_normalize(CmVec3Double vec);
+
+/* Inplace normalize vec */
+void cm_vec3_double_normalize_inplace(CmVec3Double vec);
+
+/* Project of vec A to vec B */
+CmVec3Double cm_vec3_double_project(CmVec3Double proj_from,
+                                    CmVec3Double proj_to);
 
 /* Reflect */
 CmVec3Double *cm_vec3_double_reflect(const CmVec3Double *vec);

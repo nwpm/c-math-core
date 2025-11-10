@@ -9,7 +9,7 @@ typedef struct CmVec2Double {
   double y;
 } CmVec2Double;
 
-/* Inplace sum vec B to vec A */
+/* Inplace add vec B to vec A */
 void cm_vec2_double_sum_inplace(CmVec2Double *vec_a, const CmVec2Double *vec_b);
 
 /* Inplace subtract vec B from vec A */
