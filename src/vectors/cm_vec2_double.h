@@ -64,6 +64,9 @@ void cm_vec2_double_normalize_inplace(CmVec2Double *vec);
 CmVec2Double cm_vec2_double_project(CmVec2Double proj_from,
                                     CmVec2Double proj_to);
 
+/* Find the orthononal vec */
+CmVec2Double cm_vec2_double_perp(CmVec2Double vec);
+
 /* TODO: Reflect */
 CmVec2Double *cm_vec2_double_reflect(const CmVec2Double *vec);
 

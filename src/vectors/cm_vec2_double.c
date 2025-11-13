@@ -106,6 +106,10 @@ CmVec2Double cm_vec2_double_rotate(CmVec2Double vec, double angle) {
   return (CmVec2Double){vec.x * t_c - vec.y * t_s, vec.x * t_s + vec.y * t_c};
 }
 
+CmVec2Double cm_vec2_double_perp(CmVec2Double vec){
+  return (CmVec2Double){(-vec.y * vec.y) / vec.x, vec.y};
+}
+
 void cm_vec2_double_rotate_inplace(CmVec2Double *vec, double angle) {
 
 #ifdef CM_DEBUG

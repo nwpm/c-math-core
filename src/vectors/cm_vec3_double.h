@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-// TODO: Hide struct
 typedef struct CmVec3Double {
   double x;
   double y;
@@ -65,6 +64,9 @@ void cm_vec3_double_normalize_inplace(CmVec3Double vec);
 /* Project of vec A to vec B */
 CmVec3Double cm_vec3_double_project(CmVec3Double proj_from,
                                     CmVec3Double proj_to);
+
+/* Find the orthononal vec */
+CmVec3Double cm_vec3_double_perp(CmVec3Double vec);
 
 /* Reflect */
 CmVec3Double *cm_vec3_double_reflect(const CmVec3Double *vec);

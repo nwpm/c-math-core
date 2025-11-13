@@ -108,6 +108,11 @@ CmVec3Double cm_vec3_double_rotate(CmVec3Double vec, double angle) {
   return (CmVec3Double){};
 }
 
+CmVec3Double cm_vec3_double_perp(CmVec3Double vec) {
+  return (CmVec3Double){(- (vec.y * vec.y) - (vec.z * vec.z)) / vec.x, vec.y,
+                        vec.z};
+}
+
 CmVec3Double cm_vec3_double_cross(CmVec3Double vec_a, CmVec3Double vec_b) {
 
   double det_x = (vec_a.y * vec_b.z) - (vec_a.z * vec_b.y);
