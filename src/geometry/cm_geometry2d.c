@@ -1,8 +1,11 @@
 #include "cm_geometry2d.h"
+#include "../utils/cm_utils.h"
 #include <math.h>
 
-CmLine2D cm_line2d_from_points(CmVec2Double v1, CmVec2Double v2) {
-  return (CmLine2D){v1, v2};
+/********************** Line **********************/
+
+CmLine2D cm_line2d_from_points(CmVec2Double a, CmVec2Double b) {
+  return (CmLine2D){a.x - b.x, a.y - b.x};
 }
 
 double cm_line2d_distance_point(CmLine2D l, CmVec2Double p) {
@@ -43,7 +46,7 @@ bool cm_line2d_intersect_line(CmLine2D l1, CmLine2D l2, CmVec2Double *out) {
   CmVec2Double direct2 = {l2.a.x - l2.b.x, l2.a.y - l2.b.y};
 
   double det = (direct1.x * (-direct2.y)) - (direct1.y * (-direct2.x));
-  if (!det) {
+  if (_cm_double_equal(det, 0.)) {
     out = NULL;
     return false;
   }
@@ -87,18 +90,228 @@ bool cm_line2d_intersect_circle(CmLine2D l, CmCircle2D c, CmVec2Double *out1,
 bool cm_line2d_intersect_aabb(CmAABB2D box, CmLine2D line, CmVec2Double *out1,
                               CmVec2Double *out2);
 
+/********************** Ray **********************/
 
-CmRay2D cm_ray2d_from_points(CmVec2Double origin, CmVec2Double through){
+CmRay2D cm_ray2d_from_points(CmVec2Double origin, CmVec2Double through) {
   return (CmRay2D){through.x - origin.x, through.y - origin.y};
 }
 
-CmVec2Double cm_ray2d_point(CmRay2D r, double t){
+CmVec2Double cm_ray2d_point(CmRay2D r, double t) {
   CmVec2Double direct = {r.a.x - r.b.x, r.a.y - r.b.y};
   return cm_vec2_double_sum(r.a, cm_vec2_double_scale(direct, t));
 }
 
+double cm_ray2d_distance_point(CmRay2D r, CmVec2Double p) {
 
+  CmVec2Double w = {p.x - r.a.x, p.y - r.a.y};
+  CmVec2Double direct = {r.a.x - r.b.x, r.a.y - r.b.y};
 
+  double dot = cm_vec2_double_dot(w, direct);
+  double direct_square = cm_vec2_double_norm_squared(direct);
 
+  CmVec2Double distance =
+      cm_vec2_double_sub(w, cm_vec2_double_scale(direct, dot / direct_square));
 
+  return cm_vec2_double_norm(distance);
+}
 
+bool cm_ray2d_intersect_line(CmRay2D r, CmLine2D l, CmVec2Double *out) {
+
+  CmVec2Double direct_ray = {r.a.x - r.b.x, r.a.y - r.b.y};
+  CmVec2Double direct_line = {l.a.x - l.b.x, l.a.y - l.b.y};
+
+  double det = (direct_ray.y * direct_line.x) - (direct_ray.x * direct_line.y);
+  if (_cm_double_equal(det, 0.)) {
+    out = NULL;
+    return false;
+  }
+
+  double t =
+      (-direct_line.y * (l.a.x - r.a.x) - direct_line.x * (l.a.y - r.a.y)) /
+      det;
+
+  if (t < 0) {
+    out = NULL;
+    return false;
+  }
+
+  out->x = r.a.x + t * direct_ray.x;
+  out->y = r.a.y + t * direct_ray.y;
+
+  return true;
+}
+
+bool cm_ray2d_intersect_segment(CmRay2D r, CmSegment2D s, CmVec2Double *out) {
+
+  CmVec2Double direct_ray = {r.a.x - r.b.x, r.a.y - r.b.y};
+  CmVec2Double direct_segment = {s.a.x - s.b.x, s.a.y - s.b.y};
+
+  double det =
+      (direct_ray.y * direct_segment.x) - (direct_ray.x * direct_segment.y);
+  if (_cm_double_equal(det, 0.)) {
+    out = NULL;
+    return false;
+  }
+
+  double t = (-direct_segment.y * (s.a.x - r.a.x)) +
+             (direct_segment.x * (s.a.y - r.a.y)) / det;
+
+  double m = (-direct_ray.y * (s.a.x - r.a.x)) +
+             (direct_ray.x * (s.a.y - r.a.y)) / det;
+
+  if (t < 0 || (m > 1 || m < 0)) {
+    out = NULL;
+    return false;
+  }
+
+  out->x = r.a.x + t * direct_ray.x;
+  out->y = r.a.y + t * direct_ray.y;
+
+  return true;
+}
+
+bool cm_ray2d_intersect_circle(CmRay2D r, CmCircle2D c, CmVec2Double *out1,
+                               CmVec2Double *out2) {
+
+  CmVec2Double m = {r.a.x - c.center.x, r.a.y - c.center.y};
+  CmVec2Double direct = {r.a.x - r.b.x, r.a.y - r.b.y};
+
+  double a = cm_vec2_double_dot(direct, direct);
+  double b = 2 * cm_vec2_double_dot(m, direct);
+  double e = cm_vec2_double_dot(m, m) - (c.radius * c.radius);
+  double d = (b * b) - (4 * a * e);
+
+  if (d < 0) {
+    out1 = NULL;
+    out2 = NULL;
+    return false;
+  }
+
+  double t1 = (-b + sqrt(d)) / (2 * a);
+  double t2 = (-b - sqrt(d)) / (2 * a);
+
+  out1->x = r.a.x + t1 * direct.x;
+  out1->y = r.a.y + t1 * direct.y;
+
+  out2->x = r.a.x + t2 * direct.x;
+  out2->y = r.a.y + t2 * direct.y;
+
+  return true;
+}
+
+/********************** Segment **********************/
+
+CmSegment2D cm_segment2d_from_points(CmVec2Double a, CmVec2Double b) {
+  return (CmSegment2D){a.x - b.x, a.y - b.y};
+}
+
+double cm_segment2d_length(CmSegment2D s) {
+  return cm_vec2_double_distance(s.a, s.b);
+}
+
+double cm_segment2d_distance_point(CmSegment2D s, CmVec2Double p) {
+
+  CmVec2Double w = {p.x - s.a.x, p.y - s.a.y};
+  CmVec2Double direct = {s.a.x - s.b.x, s.a.y - s.b.y};
+
+  double dot = cm_vec2_double_dot(w, direct);
+  double direct_square = cm_vec2_double_norm_squared(direct);
+
+  CmVec2Double distance =
+      cm_vec2_double_sub(w, cm_vec2_double_scale(direct, dot / direct_square));
+
+  return cm_vec2_double_norm(distance);
+}
+
+bool cm_segment2d_intersect_segment(CmSegment2D s1, CmSegment2D s2,
+                                    CmVec2Double *out) {
+
+  CmVec2Double direct_s1 = {s1.a.x - s1.b.x, s1.a.y - s1.b.y};
+  CmVec2Double direct_s2 = {s2.a.x - s2.b.x, s2.a.y - s2.b.y};
+
+  double det = (direct_s1.y * direct_s2.x) - (direct_s1.x * direct_s2.y);
+  if (_cm_double_equal(det, 0.)) {
+    out = NULL;
+    return false;
+  }
+
+  double t = (-direct_s2.y * (s2.a.x - s1.a.x)) +
+             (direct_s2.x * (s2.a.y - s1.a.y)) / det;
+
+  double m = (-direct_s1.y * (s2.a.x - s1.a.x)) +
+             (direct_s1.x * (s2.a.y - s1.a.y)) / det;
+
+  if ((t > 1 || t < 0) || (m > 1 || m < 0)) {
+    out = NULL;
+    return false;
+  }
+
+  out->x = s1.a.x + t * direct_s1.x;
+  out->y = s1.a.y + t * direct_s1.y;
+
+  return true;
+}
+
+bool cm_segment2d_intersect_circle(CmSegment2D s, CmCircle2D c,
+                                   CmVec2Double *out1, CmVec2Double *out2) {
+
+  CmVec2Double m = {s.a.x - c.center.x, s.a.y - c.center.y};
+  CmVec2Double direct = {s.a.x - s.b.x, s.a.y - s.b.y};
+
+  double a = cm_vec2_double_dot(direct, direct);
+  double b = 2 * cm_vec2_double_dot(m, direct);
+  double e = cm_vec2_double_dot(m, m) - (c.radius * c.radius);
+  double d = (b * b) - (4 * a * e);
+
+  if (d < 0) {
+    out1 = NULL;
+    out2 = NULL;
+    return false;
+  }
+
+  double t1 = (-b + sqrt(d)) / (2 * a);
+  double t2 = (-b - sqrt(d)) / (2 * a);
+
+  out1->x = s.a.x + t1 * direct.x;
+  out1->y = s.a.y + t1 * direct.y;
+
+  out2->x = s.a.x + t2 * direct.x;
+  out2->y = s.a.y + t2 * direct.y;
+
+  return true;
+}
+
+CmVec2Double cm_segment2d_midpoint(CmSegment2D s) {
+  return (CmVec2Double){(s.a.x - s.b.y) / 2, (s.a.y - s.b.y) / 2};
+}
+
+/********************** Circle **********************/
+
+CmCircle2D cm_circle2d_make(CmVec2Double center, double r) {
+  return (CmCircle2D){center, r};
+}
+
+bool cm_circle2d_contains_point(CmCircle2D c, CmVec2Double p) {
+  double v = cm_vec2_double_norm_squared(
+      (CmVec2Double){p.x - c.center.x, p.y - c.center.y});
+  return _cm_double_equal(v, c.radius * c.radius);
+}
+
+bool cm_circle2d_intersect_circle(CmCircle2D c1, CmCircle2D c2,
+                                  CmVec2Double *out1, CmVec2Double *out2) {
+
+  CmVec2Double centers_vec = {c1.center.x - c2.center.x, c1.center.y - c2.center.y};
+  double centers_vec_norm = cm_vec2_double_norm(centers_vec);
+
+  if(centers_vec_norm > c1.radius + c1.radius){
+    out1 = NULL;
+    out2 = NULL;
+    return false;
+  }else if(true){
+    // One circle in other
+  }
+
+  
+
+  return true;
+}
