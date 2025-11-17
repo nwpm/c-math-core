@@ -146,10 +146,23 @@ static inline double cm_circle2d_circumference(CmCircle2D c) {
   return 2 * CM_PI * c.radius;
 }
 
+/* Get intersection point of two circles */
 bool cm_circle2d_intersect_circle(CmCircle2D c1, CmCircle2D c2,
                                   CmVec2Double *out1, CmVec2Double *out2);
 
+/* TODO: Get intersection point of circle and aabb */
+bool cm_circle2d_intersect_aabb(CmCircle2D c, CmAABB2D ab,
+                                  CmVec2Double *out1, CmVec2Double *out2);
+
 /* Triangle */
+
+/* Create triangle */
+CmTriangle2D cm_triangle2d_make(CmVec2Double p1, CmVec2Double p2,
+                                CmVec2Double p3);
+
+/* Get area of triangle */
+double cm_triangle2d_area(CmTriangle2D t);
+
 
 /* Axis-aligned bounding box */
 

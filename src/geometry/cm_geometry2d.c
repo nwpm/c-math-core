@@ -300,18 +300,46 @@ bool cm_circle2d_contains_point(CmCircle2D c, CmVec2Double p) {
 bool cm_circle2d_intersect_circle(CmCircle2D c1, CmCircle2D c2,
                                   CmVec2Double *out1, CmVec2Double *out2) {
 
-  CmVec2Double centers_vec = {c1.center.x - c2.center.x, c1.center.y - c2.center.y};
+  CmVec2Double centers_vec = {c1.center.x - c2.center.x,
+                              c1.center.y - c2.center.y};
   double centers_vec_norm = cm_vec2_double_norm(centers_vec);
 
-  if(centers_vec_norm > c1.radius + c1.radius){
+  bool not_intersect = centers_vec_norm > c1.radius + c1.radius;
+  bool centers_coincide = centers_vec_norm == 0;
+  bool inside = centers_vec_norm < (_cm_double_abs(c1.radius - c2.radius));
+
+  if (not_intersect || centers_coincide || inside) {
     out1 = NULL;
     out2 = NULL;
     return false;
-  }else if(true){
-    // One circle in other
   }
 
-  
+  CmVec2Double e = cm_vec2_double_normalize(centers_vec);
+
+  double k = ((c1.radius * c1.radius) - (c2.radius * c2.radius) +
+              (centers_vec_norm * centers_vec_norm)) /
+             (2 * centers_vec_norm);
+
+  CmVec2Double p = cm_vec2_double_sum(c1.center, cm_vec2_double_scale(e, k));
+  double h = sqrt(c1.radius * c1.radius - k * k);
+
+  CmVec2Double n = {-e.y, e.x};
+
+  *out1 = cm_vec2_double_sum(p, cm_vec2_double_scale(n, h));
+  *out2 = cm_vec2_double_sub(p, cm_vec2_double_scale(n, h));
 
   return true;
+}
+
+/********************** Triangle **********************/
+
+CmTriangle2D cm_triangle2d_make(CmVec2Double p1, CmVec2Double p2,
+                                CmVec2Double p3) {
+  return (CmTriangle2D){p1, p2, p3};
+}
+
+double cm_triangle2d_area(CmTriangle2D t) {
+  return ((t.b.x * t.c.y - t.c.x * t.b.y) - (t.a.x * t.c.y - t.c.x * t.a.y) +
+          (t.a.x * t.b.y - t.b.x * t.a.y)) /
+         2.;
 }
