@@ -4,8 +4,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "../utils/cm_err_codes.h"
-
 // TODO: cm_matrix_double_set_submatrix(dest, src, row_offset, col_offset)
 // TODO: resize
 // TODO: LU, QR, Cholesky
@@ -72,7 +70,7 @@ void cm_matrix_double_swap(CmMatrixDouble **matrix_a,
                            CmMatrixDouble **matrix_b);
 
 /* Transpose current matrix */
-CmStatusCode cm_matrix_double_transpose(CmMatrixDouble *matrix);
+void cm_matrix_double_transpose(CmMatrixDouble *matrix);
 
 /* Find max element of matrix */
 double cm_matrix_double_max(const CmMatrixDouble *matrix);
@@ -84,8 +82,7 @@ double cm_matrix_double_min(const CmMatrixDouble *matrix);
 double cm_matrix_double_trace(const CmMatrixDouble *matrix);
 
 /* Calculate matrix determinant */
-CmStatusCode cm_matrix_double_det(const CmMatrixDouble *matrix,
-                                  double *det_out);
+double cm_matrix_double_det(const CmMatrixDouble *matrix);
 
 /* Check is null matrix */
 bool cm_matrix_double_is_null(const CmMatrixDouble *matrix);
@@ -113,20 +110,19 @@ void cm_matrix_double_mul(const CmMatrixDouble *matrix_a,
                           CmMatrixDouble *result_matrix);
 
 /* Calculate matrix A pow */
-CmStatusCode cm_matrix_double_pow(CmMatrixDouble *matrix, unsigned exp);
+void cm_matrix_double_pow(CmMatrixDouble *matrix, unsigned exp);
 
 /* Scale row by X */
 void cm_matrix_double_scale_row(CmMatrixDouble *matrix, size_t row,
                                 size_t scale_by);
 
 /* Swap rows A and B */
-CmStatusCode cm_matrix_double_swap_rows(CmMatrixDouble *matrix, size_t row_a,
-                                        size_t row_b);
+void cm_matrix_double_swap_rows(CmMatrixDouble *matrix, size_t row_a,
+                                size_t row_b);
 
 /* Scale row A by X and sum with row B */
-void cm_matrix_double_scale_sum_rows(CmMatrixDouble *matrix,
-                                             size_t row_scaled, size_t row_sum,
-                                             size_t scale_by);
+void cm_matrix_double_scale_sum_rows(CmMatrixDouble *matrix, size_t row_scaled,
+                                     size_t row_sum, size_t scale_by);
 
 /* Apply function to all elements of the matrix */
 void cm_matrix_double_map(CmMatrixDouble *matrix, CmMatrixMapFunc map);
@@ -135,8 +131,8 @@ void cm_matrix_double_map(CmMatrixDouble *matrix, CmMatrixMapFunc map);
 CmMatrixDouble *cm_matrix_double_inverse(const CmMatrixDouble *orig_matrix);
 
 /* Calculate minor of current matrix */
-CmStatusCode cm_matrix_double_minor(const CmMatrixDouble *matrix, size_t row,
-                                    size_t col, double *minor_out);
+double cm_matrix_double_minor(const CmMatrixDouble *matrix, size_t row,
+                              size_t col);
 
 /* Calculate cofactor of current matrix */
 double cm_matrix_double_cofactor(const CmMatrixDouble *matrix, size_t row,
@@ -146,12 +142,12 @@ double cm_matrix_double_cofactor(const CmMatrixDouble *matrix, size_t row,
 CmMatrixDouble *cm_matrix_double_adj(const CmMatrixDouble *matrix);
 
 /* Gauss-Jordan */
-CmStatusCode cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix,
-                                    double *res);
+void cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix,
+                            double *res);
 
 /* Save current matrix to txt file */
-CmStatusCode cm_matrix_double_to_txt(const CmMatrixDouble *matrix,
-                                     const char *filename);
+void cm_matrix_double_to_txt(const CmMatrixDouble *matrix,
+                             const char *filename);
 
 /* Getter/Setter */
 

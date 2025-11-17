@@ -31,13 +31,13 @@ static bool _cm_is_zero_buff(const char *buff, size_t size) {
 }
 
 static size_t _cm_calc_capacity(size_t size) {
-  if (size < 100) {
+  if (size < 100)
     return size * 2;
-  } else if (size < 10000) {
+  else if (size < 10000)
     return size + size / 2;
-  } else if (size < 1000000) {
+  else if (size < 1000000)
     return size + size / 10;
-  }
+
   return size + (size / 20);
 }
 
@@ -76,9 +76,8 @@ static bool _cm_ensure_capacity(CmBigInt *bigint_num, size_t max_size) {
 
     bigint_num->capacity = _cm_calc_capacity(max_size);
     void *new_buffer = realloc(bigint_num->data, bigint_num->capacity);
-    if (!new_buffer) {
+    if (!new_buffer)
       return false;
-    }
 
     bigint_num->data = new_buffer;
   }
@@ -88,15 +87,13 @@ static bool _cm_ensure_capacity(CmBigInt *bigint_num, size_t max_size) {
 static bool _cm_bigint_create_from_cstr(CmBigInt *n, const char *cstr,
                                         char sign) {
 
-  if (!_cm_is_valid_cstr(cstr)) {
+  if (!_cm_is_valid_cstr(cstr))
     return false;
-  }
 
   size_t cstr_len = strlen(cstr);
 
-  if (cstr_len >= n->capacity) {
+  if (cstr_len >= n->capacity)
     n->capacity = _cm_calc_capacity(cstr_len);
-  }
 
   char *alloc_buffer = malloc(n->capacity);
   if (!alloc_buffer)
@@ -104,9 +101,9 @@ static bool _cm_bigint_create_from_cstr(CmBigInt *n, const char *cstr,
 
   size_t j = 0;
   size_t i = cstr_len;
-  while (i-- > 0) {
+
+  while (i-- > 0)
     alloc_buffer[j++] = cstr[i];
-  }
 
   n->data = alloc_buffer;
   n->size = cstr_len;
@@ -131,9 +128,8 @@ static char *_buff_dup(const CmBigInt *num) {
 
 static int _cm_bigint_abs_compare(const CmBigInt *lhs, const CmBigInt *rhs) {
 
-  if (lhs->size != rhs->size) {
+  if (lhs->size != rhs->size)
     return (lhs->size > rhs->size) ? 1 : -1;
-  }
 
   for (size_t i = lhs->size; i > 0; i--) {
     if (lhs->data[i - 1] > rhs->data[i - 1])
@@ -377,9 +373,6 @@ CmBigInt *cm_bigint_alloc() {
 
   CmBigInt *bigint_num = malloc(sizeof(CmBigInt));
 
-  if (!bigint_num)
-    return NULL;
-
   bigint_num->size = 0;
   bigint_num->sign = '+';
   bigint_num->data = NULL;
@@ -396,8 +389,6 @@ CmBigInt *cm_bigint_create_copy(const CmBigInt *src_num) {
 #endif
 
   CmBigInt *new_num = cm_bigint_alloc();
-  if (!new_num)
-    return NULL;
 
   new_num->size = src_num->size;
   new_num->sign = src_num->sign;
@@ -410,11 +401,6 @@ CmBigInt *cm_bigint_create_copy(const CmBigInt *src_num) {
 
   new_num->data = _buff_dup(src_num);
 
-  if (!new_num->data) {
-    free(new_num);
-    return NULL;
-  }
-
   return new_num;
 }
 
@@ -426,11 +412,6 @@ CmBigInt *cm_bigint_create_from_num(long long src_num) {
 
   CmBigInt *bigint_num = cm_bigint_alloc();
   char *alloc_buffer = malloc(num_len);
-  if (!bigint_num || !alloc_buffer) {
-    cm_bigint_free(bigint_num);
-    free(alloc_buffer);
-    return NULL;
-  }
 
   bigint_num->sign = (src_num < 0) ? '-' : '+';
   bigint_num->size = num_len;
@@ -453,21 +434,12 @@ CmBigInt *cm_bigint_create_from_cstr(const char *cstr) {
 #endif
 
   CmBigInt *bigint_num = cm_bigint_alloc();
-  if (!bigint_num)
-    return NULL;
-
-  bool is_created = false;
 
   if (cstr[0] == '-' || cstr[0] == '+') {
     const char *magnitude = cstr + 1;
-    is_created = _cm_bigint_create_from_cstr(bigint_num, magnitude, cstr[0]);
+    _cm_bigint_create_from_cstr(bigint_num, magnitude, cstr[0]);
   } else {
-    is_created = _cm_bigint_create_from_cstr(bigint_num, cstr, '+');
-  }
-
-  if (!is_created) {
-    free(bigint_num);
-    return NULL;
+    _cm_bigint_create_from_cstr(bigint_num, cstr, '+');
   }
 
   return bigint_num;
@@ -533,8 +505,6 @@ char *cm_bigint_to_hex_string(const CmBigInt *bigint_num) {
 
   if (cm_bigint_is_zero(bigint_num)) {
     char *zero_str = malloc(2);
-    if (!zero_str)
-      return NULL;
     zero_str[0] = '0';
     zero_str[1] = '\0';
     return zero_str;
@@ -586,8 +556,6 @@ char *cm_bigint_to_bin_string(const CmBigInt *bigint_num) {
 
   if (cm_bigint_is_zero(bigint_num)) {
     char *zero_str = malloc(2);
-    if (!zero_str)
-      return NULL;
     zero_str[0] = '0';
     zero_str[1] = '\0';
     return zero_str;
@@ -638,11 +606,6 @@ CmBigInt *cm_bigint_from_bin_string(const char *str) {
 
   CmBigInt *res = cm_bigint_alloc();
   CmBigInt *two_base = cm_bigint_create_from_num(2);
-  if (!res || !two_base) {
-    cm_bigint_free(res);
-    cm_bigint_free(two_base);
-    return NULL;
-  }
 
   size_t str_len = strlen(str);
 
@@ -667,12 +630,6 @@ CmBigInt *cm_bigint_from_hex_string(const char *str) {
   CmBigInt *res = cm_bigint_alloc();
   CmBigInt *hex_base = cm_bigint_create_from_num(16);
   CmBigInt *tmp = cm_bigint_alloc();
-  if (!res || !hex_base || !tmp) {
-    cm_bigint_free(res);
-    cm_bigint_free(hex_base);
-    cm_bigint_free(tmp);
-    return NULL;
-  }
 
   size_t str_len = strlen(str);
 
@@ -827,8 +784,6 @@ bool cm_bigint_less_ll(const CmBigInt *lhs, long long rhs) {
   }
 
   char *rhs_str = _cm_itoa(_cm_long_abs(rhs), rhs_digit_number);
-  if (!rhs_str)
-    return false;
 
   for (size_t i = lhs->size; i > 0; i--) {
     if (lhs->data[i - 1] != rhs_str[i - 1]) {
@@ -851,9 +806,6 @@ bool cm_bigint_is_equal_ll(const CmBigInt *lhs, long long rhs) {
 
   size_t rhs_digit_number = _cm_long_digit_count(rhs);
   char *rhs_str = _cm_itoa(_cm_long_abs(rhs), rhs_digit_number);
-  if (!rhs_str)
-    return false;
-
   char rhs_sign = (rhs >= 0) ? '+' : '-';
 
   if (lhs->size == rhs_digit_number) {
@@ -1342,8 +1294,6 @@ char *cm_bigint_to_string(const CmBigInt *bigint_num) {
   size_t alloc_size = bigint_num->size + 1 + (is_negative ? 1 : 0);
 
   char *str = malloc(alloc_size);
-  if (!str)
-    return NULL;
 
   if (is_negative) {
     str[0] = '-';
