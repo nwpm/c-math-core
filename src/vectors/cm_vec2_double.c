@@ -71,6 +71,10 @@ double cm_vec2_double_angle(CmVec2Double vec_a, CmVec2Double vec_b) {
   return acos(angle);
 }
 
+double cm_vec2_double_cross(CmVec2Double v1, CmVec2Double v2){
+  return v1.x * v2.y - v1.y * v2.x;
+}
+
 CmVec2Double cm_vec2_double_project(CmVec2Double proj_from,
                                     CmVec2Double proj_to) {
 

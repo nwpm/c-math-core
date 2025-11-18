@@ -51,6 +51,9 @@ double cm_vec2_double_norm(CmVec2Double vec);
 /* Get squared norm of vec */
 double cm_vec2_double_norm_squared(CmVec2Double vec);
 
+/* Get 2d vec cross product len */
+double cm_vec2_double_cross(CmVec2Double v1, CmVec2Double v2);
+
 /* Get distance between vec A and vec B */
 double cm_vec2_double_distance(CmVec2Double vec_a, CmVec2Double vec_b);
 
