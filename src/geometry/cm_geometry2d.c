@@ -343,3 +343,33 @@ double cm_triangle2d_area(CmTriangle2D t) {
           (t.a.x * t.b.y - t.b.x * t.a.y)) /
          2.;
 }
+
+CmVec2Double cm_triangle2d_centroid(CmTriangle2D t) {
+  return (CmVec2Double){(t.a.x + t.b.x + t.c.x) / 3,
+                        (t.a.y + t.b.y + t.c.y) / 3};
+}
+
+// NOTE: Clockwise orientation
+bool cm_triangle2d_contains_point(CmTriangle2D t, CmVec2Double p){
+
+  CmVec2Double v1 = {t.b.x - t.a.x, t.b.y - t.a.y};
+  CmVec2Double v2 = {t.c.x - t.b.x, t.c.x - t.b.y};
+  CmVec2Double v3 = {t.a.x - t.c.x, t.a.y - t.c.y};
+
+  CmVec2Double pv1 = {p.x - t.a.x, p.y - t.a.y};
+  CmVec2Double pv2 = {p.x - t.b.x, p.y - t.b.y};
+  CmVec2Double pv3 = {p.x - t.c.x, p.y - t.c.y};
+
+  double c1 = cm_vec2_double_cross(v1, pv1);
+  double c2 = cm_vec2_double_cross(v2, pv2);
+  double c3 = cm_vec2_double_cross(v3, pv3);
+
+  if(c1 <= 0 && c2 <= 0 && c3 <= 0)
+    return true;
+
+  return false;
+}
+
+
+
+

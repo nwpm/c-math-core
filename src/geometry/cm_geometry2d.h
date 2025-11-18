@@ -163,6 +163,11 @@ CmTriangle2D cm_triangle2d_make(CmVec2Double p1, CmVec2Double p2,
 /* Get area of triangle */
 double cm_triangle2d_area(CmTriangle2D t);
 
+/* Get triangle centroid */
+CmVec2Double cm_triangle2d_centroid(CmTriangle2D t);
+
+/* Check if a given point belongs to a triangle */
+bool cm_triangle2d_contains_point(CmTriangle2D t, CmVec2Double p);
 
 /* Axis-aligned bounding box */
 
