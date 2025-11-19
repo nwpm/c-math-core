@@ -4,7 +4,18 @@
 #include "../utils/cm_constants.h"
 #include "../vectors/cm_vec2_double.h"
 
-// TODO: aabb intersect
+// TODO: line - origin + direction
+// TODO: cm_ray_intersect_aabb
+// TODO: cm_segment_intersect_aabb
+// TODO: cm_circle_distance_point
+// TODO: cm_circle_aabb
+// TODO: cm_triangle_aabb
+// TODO: cm_triangle_intersect_circle
+// TODO: cm_triangle_intersect_segment
+// TODO: cm_aabb_intersect_aabb
+// TODO: cm_aabb_intersect_circle
+// TODO: cm_aabb_expand
+// TODO: cm_aabb_merge
 
 /* Line defined by 2 radius vectors */
 typedef struct CmLine2D {
@@ -169,6 +180,27 @@ CmVec2Double cm_triangle2d_centroid(CmTriangle2D t);
 /* Check if a given point belongs to a triangle */
 bool cm_triangle2d_contains_point(CmTriangle2D t, CmVec2Double p);
 
+/* Get circumcircle of triangle */
+CmCircle2D cm_triangle2d_circumcircle(CmTriangle2D t);
+
+/* Get incircle of triangle */
+CmCircle2D cm_triangle2d_incircle(CmTriangle2D t);
+
 /* Axis-aligned bounding box */
+
+/* Create AABB from min - a and max - b points */
+CmAABB2D cm_aabb2d_from_points(CmVec2Double a, CmVec2Double b);
+
+/* Check if a given point belongs to a AABB */
+bool cm_aabb2d_contains_point(CmAABB2D b, CmVec2Double p);
+
+/* Get AABB area */
+double cm_aabb2d_area(CmAABB2D b);
+
+/* Get AABB edge */
+CmSegment2D cm_aabb2d_edge(CmAABB2D b, int index);
+
+/* Get AABB center */
+CmVec2Double cm_aabb2d_center(CmAABB2D b);
 
 #endif

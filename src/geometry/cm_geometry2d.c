@@ -350,7 +350,7 @@ CmVec2Double cm_triangle2d_centroid(CmTriangle2D t) {
 }
 
 // NOTE: Clockwise orientation
-bool cm_triangle2d_contains_point(CmTriangle2D t, CmVec2Double p){
+bool cm_triangle2d_contains_point(CmTriangle2D t, CmVec2Double p) {
 
   CmVec2Double v1 = {t.b.x - t.a.x, t.b.y - t.a.y};
   CmVec2Double v2 = {t.c.x - t.b.x, t.c.x - t.b.y};
@@ -364,12 +364,104 @@ bool cm_triangle2d_contains_point(CmTriangle2D t, CmVec2Double p){
   double c2 = cm_vec2_double_cross(v2, pv2);
   double c3 = cm_vec2_double_cross(v3, pv3);
 
-  if(c1 <= 0 && c2 <= 0 && c3 <= 0)
+  if (c1 <= 0 && c2 <= 0 && c3 <= 0)
     return true;
 
   return false;
 }
 
+CmCircle2D cm_triangle2d_circumcircle(CmTriangle2D t) {
 
+  double det = 2 * (t.a.x * (t.b.y - t.c.y) + t.b.x * (t.c.y - t.a.y) +
+                    t.c.x * (t.a.y - t.b.y));
 
+  double s_a = t.a.x * t.a.x + t.a.y * t.a.y;
+  double s_b = t.b.x * t.b.x + t.b.y * t.b.y;
+  double s_c = t.c.x * t.c.x + t.c.y * t.c.y;
 
+  double center_x =
+      (s_a * (t.b.y - t.c.y) + s_b * (t.c.y - t.a.y) + s_c * (t.a.y - t.b.y)) /
+      det;
+
+  double center_y =
+      (s_a * (t.c.x - t.b.x) + s_b * (t.a.x - t.c.x) + s_c * (t.b.x - t.a.x)) /
+      det;
+
+  CmVec2Double center = {center_x, center_y};
+
+  double rad =
+      cm_vec2_double_norm((CmVec2Double){t.a.x - center.x, t.a.y - center.y});
+
+  return (CmCircle2D){center, rad};
+}
+
+CmCircle2D cm_triangle2d_incircle(CmTriangle2D t) {
+
+  CmVec2Double v_ab = {t.b.x - t.a.x, t.b.y - t.a.y};
+  CmVec2Double v_bc = {t.c.x - t.b.x, t.c.y - t.b.y};
+  CmVec2Double v_ca = {t.a.x - t.c.x, t.a.y - t.c.y};
+
+  double len_ab = cm_vec2_double_norm(v_ab);
+  double len_bc = cm_vec2_double_norm(v_bc);
+  double len_ca = cm_vec2_double_norm(v_ca);
+  double perim = len_ab + len_bc + len_ca;
+
+  double center_x = (len_ab * t.a.x + len_bc * t.b.x + len_ca * t.c.x) / perim;
+  double center_y = (len_ab * t.a.y + len_bc * t.b.y + len_ca * t.c.y) / perim;
+
+  CmVec2Double center = {center_x, center_y};
+  double trig_area = cm_triangle2d_area(t);
+  double half_per = perim / 2.;
+  double rad = trig_area / half_per;
+
+  return (CmCircle2D){center, rad};
+}
+
+/********************** AABB **********************/
+
+CmAABB2D cm_aabb2d_from_points(CmVec2Double a, CmVec2Double b) {
+  return (CmAABB2D){a, b};
+}
+
+bool cm_aabb2d_contains_point(CmAABB2D b, CmVec2Double p) {
+
+  if ((p.x >= b.min.x && p.x <= b.max.x) && (p.y >= b.min.y && p.y <= b.max.y))
+    return true;
+
+  return true;
+}
+
+double cm_aabb2d_area(CmAABB2D b) {
+
+  CmVec2Double third_vert = {b.min.x, b.max.y};
+
+  CmVec2Double edge_a = {b.max.x - third_vert.x, b.max.y - third_vert.y};
+  CmVec2Double edge_b = {third_vert.x - b.min.x, third_vert.y - b.min.y};
+
+  return cm_vec2_double_norm(edge_a) * cm_vec2_double_norm(edge_b);
+}
+
+/* NOTE:
+ * 0 - bottom
+ * 1 - up
+ * 2 - left
+ * 3 - right
+ */
+CmSegment2D cm_aabb2d_edge(CmAABB2D b, int index) {
+
+  switch (index) {
+  case 0:
+    return (CmSegment2D){{b.max.x, b.min.y}, {b.min.x, b.min.y}};
+  case 1:
+    return (CmSegment2D){{b.max.x, b.max.y}, {b.min.x, b.max.y}};
+  case 2:
+    return (CmSegment2D){{b.min.x, b.max.y}, {b.min.x, b.min.y}};
+  case 3:
+    return (CmSegment2D){{b.max.x, b.max.y}, {b.max.x, b.min.y}};
+  }
+  return (CmSegment2D){0};
+}
+
+CmVec2Double cm_aabb2d_center(CmAABB2D b) {
+  return (CmVec2Double){(b.max.x + b.min.x) / 2, (b.max.y + b.min.y) / 2};
+}
