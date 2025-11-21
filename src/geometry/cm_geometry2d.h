@@ -20,15 +20,15 @@
 /* Line defined by 2 radius vectors */
 typedef struct CmLine2D {
 
-  CmVec2Double a;
-  CmVec2Double b;
+  CmVec2Double origin;
+  CmVec2Double direction;
 
 } CmLine2D;
 
 typedef struct CmRay2D {
 
-  CmVec2Double a;
-  CmVec2Double b;
+  CmVec2Double origin;
+  CmVec2Double direction;
 
 } CmRay2D;
 
@@ -68,9 +68,6 @@ CmLine2D cm_line2d_from_points(CmVec2Double a, CmVec2Double b);
 /* Get distance from 2d line to point */
 double cm_line2d_distance_point(CmLine2D l, CmVec2Double p);
 
-/* Get direction of current line */
-CmVec2Double cm_line2d_direction(CmLine2D l);
-
 /* Get the intersection point of a perpendicular and a line */
 CmVec2Double cm_line2d_project_point(CmLine2D l, CmVec2Double p);
 
@@ -90,10 +87,7 @@ bool cm_line2d_intersect_aabb(CmAABB2D box, CmLine2D line, CmVec2Double *out1,
 /* Create 2d ray by origin and direction */
 CmRay2D cm_ray2d_from_points(CmVec2Double origin, CmVec2Double through);
 
-/*
- * Get point on the ray
- * t >= 0
- */
+/* Get point on the ray */
 CmVec2Double cm_ray2d_point(CmRay2D r, double t);
 
 /* Get distance from 2d line to point */
