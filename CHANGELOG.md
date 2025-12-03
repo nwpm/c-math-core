@@ -161,7 +161,7 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 
 - `cm_bigint_create_from_num` - inner buffer alloc memory equal len of number.
 
-## [0.4]
+## [0.4] 10.11.2025
 
 ### Added
 
@@ -188,14 +188,73 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 - `cm_vec2_double_is_null`,
 - `cm_vec3_double_is_null`- renamed to 'cm_vec2_double_is_zero'
 
+## [0.5]
+
+### Added
+
+- `cm_vec2_double_perp`
+- `cm_vec3_double_perp`
+
+- `cm_vec2_double_cross`
+
+- `cm_line2d_from_points`
+- `cm_line2d_distance_point`
+- `cm_line2d_direction`
+- `cm_line2d_project_point`
+- `cm_line2d_intersect_line`
+- `cm_line2d_intersect_circle`
+
+- `cm_ray2d_from_points`
+- `cm_ray2d_point`
+- `cm_ray2d_intersect_line`
+- `cm_ray2d_intersect_segment`
+- `cm_ray2d_intersect_circle`
+- `cm_ray2d_distance_point`
+
+- `cm_segment2d_from_points`
+- `cm_segment2d_length`
+- `cm_segment2d_intersect_segment`
+- `cm_segment2d_intersect_circle`
+- `cm_segment2d_midpoint`
+
+- `cm_circle2d_make`
+- `cm_circle2d_contains_point`
+- `cm_circle2d_area`
+- `cm_circle2d_circumference`
+- `cm_circle2d_intersect_circle`
+
+- `cm_triangle2d_make`
+- `cm_triangle2d_area`
+- `cm_triangle2d_centroid`
+- `cm_triangle2d_contains_point`
+- `cm_triangle2d_circumcircle`
+- `cm_triangle2d_incircle`
+
+- `cm_aabb2d_from_points`
+- `cm_aabb2d_contains_point`
+- `cm_aabb2d_area`
+- `cm_aabb2d_edge`
+- `cm_aabb2d_center`
+- `cm_aabb2d_expand`
+
+### Remowed
+
+- Removed 'cm_err_codes.h'
+- Removed all status codes from 'matrix' and 'bigint' modules.
+- Removed allocation functions for geom2d
+
+- Removed all allocation fails checks in 'matrix' and 'bigint'.
+
+### Changed
+
+- `cm_bigint_subtract` - renamed to 'cm_bigint_sub'
+- `cm_bigint_multiply` - renamed to 'cm_bigint_mult'
+
 ### Planned
 
 - Optimize division algorithm
-- Remove all check macro and replace them by inline functions
 - Make common algorithm for hex/bin string conversion
 - Make common algorithm for hex/bin creation from string
 - Add user data check in DEBUG mod
-- Add DEBUG common data checkers
-- Remove all NULL alloc checks and zero checks
-- Remove all CmStatusCode
 - Create simple objects on stack, heavy object allocate.
+- Better double equal compare
