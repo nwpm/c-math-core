@@ -4,7 +4,6 @@
 #include "../utils/cm_constants.h"
 #include "../vectors/cm_vec2_double.h"
 
-// TODO: line - origin + direction
 // TODO: cm_ray_intersect_aabb
 // TODO: cm_segment_intersect_aabb
 // TODO: cm_circle_distance_point
@@ -14,7 +13,6 @@
 // TODO: cm_triangle_intersect_segment
 // TODO: cm_aabb_intersect_aabb
 // TODO: cm_aabb_intersect_circle
-// TODO: cm_aabb_expand
 // TODO: cm_aabb_merge
 
 /* Line defined by 2 radius vectors */
@@ -196,5 +194,8 @@ CmSegment2D cm_aabb2d_edge(CmAABB2D b, int index);
 
 /* Get AABB center */
 CmVec2Double cm_aabb2d_center(CmAABB2D b);
+
+/* Expand AABB border */
+void cm_aabb2d_expand(CmAABB2D b, CmVec2Double new_max);
 
 #endif
