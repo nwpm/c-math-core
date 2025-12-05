@@ -19,7 +19,8 @@
  *
  */
 typedef struct cm_matrix2 {
-  float data[4];
+  float m00, m01;
+  float m10, m11;
 } cm_matrix2;
 
 void cm_mat2_make(float *src, cm_matrix2 dest);
