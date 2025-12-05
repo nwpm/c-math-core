@@ -1,6 +1,8 @@
 #ifndef CM_IVEC2_H
 #define CM_IVEC2_H
 
+#include <stdbool.h>
+
 #define CM_GET_ZERO_IVEC2 ((cm_ivec2){0, 0})
 #define CM_GET_E1_IVEC2 ((cm_ivec2){1, 0})
 #define CM_GET_E2_IVEC2 ((cm_ivec2){0, 1})
@@ -16,8 +18,15 @@ void cm_ivec2_sub(cm_ivec2 a, cm_ivec2 b, cm_ivec2 dest);
 
 void cm_ivec2_scale(cm_ivec2 v, int s, cm_ivec2 dest);
 void cm_ivec2_fill(cm_ivec2 v, int val);
+void cm_ivec2_abs(cm_ivec2 v, cm_ivec2 dest);
+void cm_ivec2_max(cm_ivec2 a, cm_ivec2 b, cm_ivec2 dest);
+
+void cm_ivec2_min(cm_ivec2 a, cm_ivec2 b, cm_ivec2 dest);
 
 int cm_ivec2_dot(cm_ivec2 a, cm_ivec2 b);
 int cm_ivec2_cross(cm_ivec2 a, cm_ivec2 b);
+int cm_ivec2_dist_squared(cm_ivec2 a, cm_ivec2 b);
+
+float cm_ivec2_dist(cm_ivec2 a, cm_ivec2 b);
 
 #endif
