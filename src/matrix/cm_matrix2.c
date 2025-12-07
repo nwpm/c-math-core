@@ -64,8 +64,38 @@ void cm_mat2_inv(cm_matrix2 mat, cm_matrix2 dest) {
   cm_mat2_scale(dest, s);
 }
 
+void cm_mat2_swap_col(cm_matrix2 mat){
+  float tmp = mat.m00;
+  mat.m00 = mat.m01;
+  mat.m01 = tmp;
+
+  tmp = mat.m10;
+  mat.m10 = mat.m11;
+  mat.m11 = tmp;
+}
+
+void cm_mat2_swap_row(cm_matrix2 mat){
+  float tmp = mat.m00;
+  mat.m00 = mat.m10;
+  mat.m10 = tmp;
+
+  tmp = mat.m01;
+  mat.m01 = mat.m11;
+  mat.m11 = tmp;
+}
+
 float cm_mat2_det(cm_matrix2 mat) {
   return mat.m00 * mat.m11 - mat.m10 * mat.m01;
 }
 
 float cm_mat2_trace(cm_matrix2 mat) { return mat.m00 + mat.m11; }
+
+void cm_mat2_mulv(cm_matrix2 mat, cm_vec2 v, cm_vec2 dest) {
+  dest.x = mat.m00 * v.x + mat.m01 * v.y;
+  dest.y = mat.m10 * v.x + mat.m11 * v.y;
+}
+
+float mat2_rmc(cm_vec2 r, cm_matrix2 mat, cm_vec2 c) {
+  cm_vec2 v = {mat.m00 * r.x + mat.m10 * r.y, mat.m01 * r.x + mat.m11 * r.y};
+  return v.x * c.x + v.y * c.y;
+}
