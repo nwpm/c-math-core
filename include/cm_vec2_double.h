@@ -4,10 +4,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-typedef struct CmVec2Double {
-  double x;
-  double y;
-} CmVec2Double;
+typedef struct CmVec2Double CmVec2Double;
 
 /* Inplace add vec B to vec A */
 void cm_vec2_double_sum_inplace(CmVec2Double *vec_a, const CmVec2Double *vec_b);
@@ -78,17 +75,11 @@ CmVec2Double *cm_vec2_double_lerp(const CmVec2Double *start,
                                   const CmVec2Double *end, double t);
 
 /* Setter */
-static inline void cm_vec2_double_set_x(CmVec2Double *vec, double x_val) {
-  vec->x = x_val;
-}
-
-static inline void cm_vec2_double_set_y(CmVec2Double *vec, double y_val) {
-  vec->y = y_val;
-}
+void cm_vec2_double_set_x(CmVec2Double *vec, double x_val);
+void cm_vec2_double_set_y(CmVec2Double *vec, double y_val);
 
 /* Getter */
-static inline double cm_vec2_double_get_x(CmVec2Double *vec) { return vec->x; }
-
-static inline double cm_vec2_double_get_y(CmVec2Double *vec) { return vec->y; }
+double cm_vec2_double_get_x(CmVec2Double *vec);
+double cm_vec2_double_get_y(CmVec2Double *vec);
 
 #endif

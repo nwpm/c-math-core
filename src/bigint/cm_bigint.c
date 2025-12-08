@@ -1,10 +1,11 @@
-#include "cm_bigint.h"
+#include "../../include/cm_bigint.h"
+#include "../utils/cm_utils.h"
+#include "cm_bigint_internal.h"
+
 #include <assert.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "../utils/cm_utils.h"
 
 static bool _cm_is_valid_cstr(const char *cstr) {
 

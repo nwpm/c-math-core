@@ -1,5 +1,6 @@
-#include "cm_geometry2d.h"
+#include "../../include/cm_vec2_double.h"
 #include "../utils/cm_utils.h"
+#include "cm_geometry2d_internal.h"
 #include <math.h>
 
 /********************** Line **********************/
@@ -453,6 +454,4 @@ CmVec2Double cm_aabb2d_center(CmAABB2D b) {
   return (CmVec2Double){(b.max.x + b.min.x) / 2, (b.max.y + b.min.y) / 2};
 }
 
-void cm_aabb2d_expand(CmAABB2D b, CmVec2Double new_max){
-  b.max = new_max;
-}
+void cm_aabb2d_expand(CmAABB2D b, CmVec2Double new_max) { b.max = new_max; }

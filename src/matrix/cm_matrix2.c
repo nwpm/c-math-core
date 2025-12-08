@@ -1,4 +1,4 @@
-#include "cm_matrix2.h"
+#include "cm_matrix2_internal.h"
 
 void cm_mat2_make(float *src, cm_matrix2 dest) {
   dest.m00 = src[0];
@@ -55,6 +55,10 @@ void cm_mat2_scale(cm_matrix2 mat, float s) {
   mat.m11 *= s;
 }
 
+float cm_mat2_det(cm_matrix2 mat) {
+  return mat.m00 * mat.m11 - mat.m10 * mat.m01;
+}
+
 void cm_mat2_inv(cm_matrix2 mat, cm_matrix2 dest) {
   float s = 1.f / cm_mat2_det(mat);
   dest.m00 = mat.m11;
@@ -64,7 +68,7 @@ void cm_mat2_inv(cm_matrix2 mat, cm_matrix2 dest) {
   cm_mat2_scale(dest, s);
 }
 
-void cm_mat2_swap_col(cm_matrix2 mat){
+void cm_mat2_swap_col(cm_matrix2 mat) {
   float tmp = mat.m00;
   mat.m00 = mat.m01;
   mat.m01 = tmp;
@@ -74,7 +78,7 @@ void cm_mat2_swap_col(cm_matrix2 mat){
   mat.m11 = tmp;
 }
 
-void cm_mat2_swap_row(cm_matrix2 mat){
+void cm_mat2_swap_row(cm_matrix2 mat) {
   float tmp = mat.m00;
   mat.m00 = mat.m10;
   mat.m10 = tmp;
@@ -82,10 +86,6 @@ void cm_mat2_swap_row(cm_matrix2 mat){
   tmp = mat.m01;
   mat.m01 = mat.m11;
   mat.m11 = tmp;
-}
-
-float cm_mat2_det(cm_matrix2 mat) {
-  return mat.m00 * mat.m11 - mat.m10 * mat.m01;
 }
 
 float cm_mat2_trace(cm_matrix2 mat) { return mat.m00 + mat.m11; }

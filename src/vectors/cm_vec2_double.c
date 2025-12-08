@@ -1,4 +1,4 @@
-#include "cm_vec2_double.h"
+#include "cm_vec2_double_internal.h"
 #include <assert.h>
 #include <math.h>
 

@@ -1,5 +1,5 @@
 #include "../utils/cm_utils.h"
-#include "cm_vec2.h"
+#include "cm_vec2_internal.h"
 
 // For sqrt
 #include <math.h>
@@ -54,12 +54,12 @@ float cm_vec2_dot(cm_vec2 a, cm_vec2 b) { return a.x * b.x + a.y * b.y; }
 
 float cm_vec2_cross(cm_vec2 a, cm_vec2 b) { return a.x * b.y - a.y * b.x; }
 
-float cm_vec2_dist(cm_vec2 a, cm_vec2 b) {
-  return sqrt((float)cm_vec2_dist_squared(a, b));
-}
-
 float cm_vec2_dist_squared(cm_vec2 a, cm_vec2 b) {
   float xd = a.x - b.x;
   float yd = a.y - b.y;
   return (xd * xd + yd * yd);
+}
+
+float cm_vec2_dist(cm_vec2 a, cm_vec2 b) {
+  return sqrt((float)cm_vec2_dist_squared(a, b));
 }

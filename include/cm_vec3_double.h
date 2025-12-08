@@ -4,11 +4,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-typedef struct CmVec3Double {
-  double x;
-  double y;
-  double z;
-} CmVec3Double;
+typedef struct CmVec3Double CmVec3Double;
 
 /* Inplace add vec B to vec A */
 void cm_vec3_double_sum_inplace(CmVec3Double *vec_a, const CmVec3Double *vec_b);
@@ -76,17 +72,13 @@ CmVec3Double *cm_vec3_double_lerp(const CmVec3Double *start,
                                   const CmVec3Double *end, double t);
 
 /* Setter */
-static inline void cm_vec3_double_set_x(CmVec3Double *vec, double x_val) {
-  vec->x = x_val;
-}
-
-static inline void cm_vec3_double_set_y(CmVec3Double *vec, double y_val) {
-  vec->y = y_val;
-}
+void cm_vec3_double_set_x(CmVec3Double *vec, double x_val);
+void cm_vec3_double_set_y(CmVec3Double *vec, double y_val);
+void cm_vec3_double_set_z(CmVec3Double *vec, double y_val);
 
 /* Getter */
-static inline double cm_vec3_double_get_x(CmVec3Double *vec) { return vec->x; }
-
-static inline double cm_vec3_double_get_y(CmVec3Double *vec) { return vec->y; }
+double cm_vec3_double_get_x(CmVec3Double *vec);
+double cm_vec3_double_get_y(CmVec3Double *vec);
+double cm_vec3_double_get_z(CmVec3Double *vec);
 
 #endif

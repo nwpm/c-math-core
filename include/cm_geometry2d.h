@@ -1,62 +1,14 @@
 #ifndef CM_GEOMETRY2D_H
 #define CM_GEOMETRY2D_H
 
-#include "../utils/cm_constants.h"
-#include "../vectors/cm_vec2_double.h"
+#include "cm_vec2_double.h"
 
-// TODO: cm_ray_intersect_aabb
-// TODO: cm_segment_intersect_aabb
-// TODO: cm_circle_distance_point
-// TODO: cm_circle_aabb
-// TODO: cm_triangle_aabb
-// TODO: cm_triangle_intersect_circle
-// TODO: cm_triangle_intersect_segment
-// TODO: cm_aabb_intersect_aabb
-// TODO: cm_aabb_intersect_circle
-// TODO: cm_aabb_merge
-
-/* Line defined by 2 radius vectors */
-typedef struct CmLine2D {
-
-  CmVec2Double origin;
-  CmVec2Double direction;
-
-} CmLine2D;
-
-typedef struct CmRay2D {
-
-  CmVec2Double origin;
-  CmVec2Double direction;
-
-} CmRay2D;
-
-typedef struct CmSegment2D {
-
-  CmVec2Double a;
-  CmVec2Double b;
-
-} CmSegment2D;
-
-typedef struct CmCircle2D {
-
-  CmVec2Double center;
-  double radius;
-
-} CmCircle2D;
-
-typedef struct CmAABB2D {
-
-  CmVec2Double min;
-  CmVec2Double max;
-
-} CmAABB2D;
-
-typedef struct CmTriangle2D {
-
-  CmVec2Double a;
-  CmVec2Double b;
-  CmVec2Double c;
-} CmTriangle2D;
+typedef struct CmLine2D CmLine2D;
+typedef struct CmRay2D CmRay2D;
+typedef struct CmSegment2D CmSegment2D;
+typedef struct CmCircle2D CmCircle2D;
+typedef struct CmAABB2D CmAABB2D;
+typedef struct CmTriangle2D CmTriangle2D;
 
 /* Line */
 
@@ -140,22 +92,18 @@ CmCircle2D cm_circle2d_make(CmVec2Double center, double r);
 bool cm_circle2d_contains_point(CmCircle2D c, CmVec2Double p);
 
 /* Get area of circle */
-static inline double cm_circle2d_area(CmCircle2D c) {
-  return CM_PI * (c.radius * c.radius);
-}
+double cm_circle2d_area(CmCircle2D c);
 
 /* Get circumference */
-static inline double cm_circle2d_circumference(CmCircle2D c) {
-  return 2 * CM_PI * c.radius;
-}
+double cm_circle2d_circumference(CmCircle2D c);
 
 /* Get intersection point of two circles */
 bool cm_circle2d_intersect_circle(CmCircle2D c1, CmCircle2D c2,
                                   CmVec2Double *out1, CmVec2Double *out2);
 
 /* TODO: Get intersection point of circle and aabb */
-bool cm_circle2d_intersect_aabb(CmCircle2D c, CmAABB2D ab,
-                                  CmVec2Double *out1, CmVec2Double *out2);
+bool cm_circle2d_intersect_aabb(CmCircle2D c, CmAABB2D ab, CmVec2Double *out1,
+                                CmVec2Double *out2);
 
 /* Triangle */
 

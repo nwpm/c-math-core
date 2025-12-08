@@ -4,20 +4,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-// TODO: cm_matrix_double_set_submatrix(dest, src, row_offset, col_offset)
-// TODO: resize
-// TODO: LU, QR, Cholesky
-// TODO: random_matrix(rows, cols, min, max)
-// TODO: fixed_matrix(3x3, 2x2, 4x4)
-// TODO: cm_matrix_double_from_file
-
 /* Matrix double type */
-typedef struct CmMatrixDouble {
-  size_t rows;
-  size_t columns;
-  double *data;
-} CmMatrixDouble;
-
+typedef struct CmMatrixDouble CmMatrixDouble;
 typedef double (*CmMatrixMapFunc)(double x);
 
 /* Allocate row matrix with size Rows * Cols */
@@ -152,19 +140,9 @@ void cm_matrix_double_to_txt(const CmMatrixDouble *matrix,
 /* Getter/Setter */
 
 /* Get element of matrix */
-static inline double cm_matrix_double_get(const CmMatrixDouble *matrix,
-                                          size_t row, size_t col) {
-  return matrix->data[row * matrix->columns + col];
-}
-
+double cm_matrix_double_get(const CmMatrixDouble *matrix, size_t row,
+                            size_t col);
 /* Set element of matrix to X */
-static inline void cm_matrix_double_set(CmMatrixDouble *matrix, size_t row,
-                                        size_t col, double x) {
-  matrix->data[row * matrix->columns + col] = x;
-}
-
-#ifdef CM_DEBUG
-void _cm_matrix_double_printf(const CmMatrixDouble *matrix);
-#endif
-
+void cm_matrix_double_set(CmMatrixDouble *matrix, size_t row, size_t col,
+                          double x);
 #endif
