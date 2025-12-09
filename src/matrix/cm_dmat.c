@@ -1,5 +1,5 @@
 #include "../utils/cm_utils.h"
-#include "cm_matrix_double_intarnal.h"
+#include "cm_dmat_internal.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -16,7 +16,7 @@
 // functiuons
 
 #ifdef CM_DEBUG
-void _cm_matrix_double_printf(const CmMatrixDouble *matrix) {
+void _cm_matrix_double_printf(const cm_dmat_t *matrix) {
 
   for (size_t i = 0; i < matrix->rows; ++i) {
     for (size_t j = 0; j < matrix->columns; ++j) {
@@ -27,7 +27,7 @@ void _cm_matrix_double_printf(const CmMatrixDouble *matrix) {
 }
 #endif
 
-static double _cm_matrix_double_det_less_3(const CmMatrixDouble *matrix) {
+static double _cm_matrix_double_det_less_3(const cm_dmat_t *matrix) {
 
   double det_out = 0.;
 
@@ -49,9 +49,9 @@ static double _cm_matrix_double_det_less_3(const CmMatrixDouble *matrix) {
 
 /********************** Allocations **********************/
 
-CmMatrixDouble *cm_matrix_double_alloc(size_t rows, size_t cols) {
+cm_dmat_t *cm_matrix_double_alloc(size_t rows, size_t cols) {
 
-  CmMatrixDouble *matrix = malloc(sizeof(CmMatrixDouble));
+  cm_dmat_t *matrix = malloc(sizeof(cm_dmat_t));
   double *data = malloc(sizeof(double) * rows * cols);
 
   matrix->columns = cols;
@@ -61,9 +61,9 @@ CmMatrixDouble *cm_matrix_double_alloc(size_t rows, size_t cols) {
   return matrix;
 }
 
-CmMatrixDouble *cm_matrix_double_create_zero(size_t rows, size_t cols) {
+cm_dmat_t *cm_matrix_double_create_zero(size_t rows, size_t cols) {
 
-  CmMatrixDouble *matrix = malloc(sizeof(CmMatrixDouble));
+  cm_dmat_t *matrix = malloc(sizeof(cm_dmat_t));
   double *data = calloc(rows * cols, sizeof(double));
 
   matrix->columns = cols;
@@ -73,7 +73,7 @@ CmMatrixDouble *cm_matrix_double_create_zero(size_t rows, size_t cols) {
   return matrix;
 }
 
-CmMatrixDouble *cm_matrix_double_row(const CmMatrixDouble *source_matrix,
+cm_dmat_t *cm_matrix_double_row(const cm_dmat_t *source_matrix,
                                      size_t row) {
 
 #ifdef CM_DEBUG
@@ -84,7 +84,7 @@ CmMatrixDouble *cm_matrix_double_row(const CmMatrixDouble *source_matrix,
   assert((row >= source_matrix->rows) && "Invalid row argument");
 #endif
 
-  CmMatrixDouble *row_matrix =
+  cm_dmat_t *row_matrix =
       cm_matrix_double_alloc(1, source_matrix->columns);
 
   memcpy(row_matrix->data, source_matrix->data + (row * source_matrix->columns),
@@ -93,7 +93,7 @@ CmMatrixDouble *cm_matrix_double_row(const CmMatrixDouble *source_matrix,
   return row_matrix;
 }
 
-CmMatrixDouble *cm_matrix_double_col(const CmMatrixDouble *source_matrix,
+cm_dmat_t *cm_matrix_double_col(const cm_dmat_t *source_matrix,
                                      size_t col) {
 
 #ifdef CM_DEBUG
@@ -104,7 +104,7 @@ CmMatrixDouble *cm_matrix_double_col(const CmMatrixDouble *source_matrix,
   assert((col >= source_matrix->columns) && "Invalid col argument");
 #endif
 
-  CmMatrixDouble *col_matrix = cm_matrix_double_alloc(source_matrix->rows, 1);
+  cm_dmat_t *col_matrix = cm_matrix_double_alloc(source_matrix->rows, 1);
 
   for (size_t i = 0; i < source_matrix->rows; ++i)
     col_matrix->data[i] = source_matrix->data[i * source_matrix->columns + col];
@@ -112,7 +112,7 @@ CmMatrixDouble *cm_matrix_double_col(const CmMatrixDouble *source_matrix,
   return col_matrix;
 }
 
-CmMatrixDouble *cm_matrix_double_submatrix(const CmMatrixDouble *source_matrix,
+cm_dmat_t *cm_matrix_double_submatrix(const cm_dmat_t *source_matrix,
                                            size_t row_start, size_t row_end,
                                            size_t col_start, size_t col_end) {
 
@@ -127,7 +127,7 @@ CmMatrixDouble *cm_matrix_double_submatrix(const CmMatrixDouble *source_matrix,
          "Invalid submatrix position");
 #endif
 
-  CmMatrixDouble *submatrix =
+  cm_dmat_t *submatrix =
       cm_matrix_double_alloc(row_end - row_start + 1, col_end - col_start + 1);
 
   size_t k = 0;
@@ -144,9 +144,9 @@ CmMatrixDouble *cm_matrix_double_submatrix(const CmMatrixDouble *source_matrix,
   return submatrix;
 }
 
-CmMatrixDouble *cm_matrix_double_create_diag(size_t size, double init_val) {
+cm_dmat_t *cm_matrix_double_create_diag(size_t size, double init_val) {
 
-  CmMatrixDouble *diag = cm_matrix_double_create_zero(size, size);
+  cm_dmat_t *diag = cm_matrix_double_create_zero(size, size);
 
   for (size_t i = 0; i < size; ++i)
     diag->data[i + i * size] = init_val;
@@ -154,9 +154,9 @@ CmMatrixDouble *cm_matrix_double_create_diag(size_t size, double init_val) {
   return diag;
 }
 
-CmMatrixDouble *cm_matrix_double_create_identity(size_t size) {
+cm_dmat_t *cm_matrix_double_create_identity(size_t size) {
 
-  CmMatrixDouble *identity = cm_matrix_double_create_zero(size, size);
+  cm_dmat_t *identity = cm_matrix_double_create_zero(size, size);
 
   for (size_t i = 0; i < identity->rows; ++i) {
     for (size_t j = 0; j < identity->columns; ++j) {
@@ -170,15 +170,15 @@ CmMatrixDouble *cm_matrix_double_create_identity(size_t size) {
   return identity;
 }
 
-CmMatrixDouble *
-cm_matrix_double_create_from_matrix(const CmMatrixDouble *orig_matrix) {
+cm_dmat_t *
+cm_matrix_double_create_from_matrix(const cm_dmat_t *orig_matrix) {
 
 #ifdef CM_DEBUG
   assert(!orig_matrix && "Matrix argument is NULL");
   assert(!orig_matrix->data && "Matrix argument data is NULL");
 #endif
 
-  CmMatrixDouble *copy_matrix =
+  cm_dmat_t *copy_matrix =
       cm_matrix_double_alloc(orig_matrix->rows, orig_matrix->columns);
 
   for (size_t i = 0; i < copy_matrix->rows; ++i) {
@@ -190,14 +190,14 @@ cm_matrix_double_create_from_matrix(const CmMatrixDouble *orig_matrix) {
   return copy_matrix;
 }
 
-CmMatrixDouble *cm_matrix_double_create_from_array(const double **arr,
+cm_dmat_t *cm_matrix_double_create_from_array(const double **arr,
                                                    size_t rows, size_t cols) {
 
 #ifdef CM_DEBUG
   assert(!arr && "Double array argument is NULL pointer");
 #endif
 
-  CmMatrixDouble *matrix = cm_matrix_double_alloc(rows, cols);
+  cm_dmat_t *matrix = cm_matrix_double_alloc(rows, cols);
 
   for (size_t i = 0; i < rows; ++i) {
     for (size_t j = 0; j < cols; ++j) {
@@ -208,14 +208,14 @@ CmMatrixDouble *cm_matrix_double_create_from_array(const double **arr,
   return matrix;
 }
 
-void cm_matrix_double_free(CmMatrixDouble *matrix) {
+void cm_matrix_double_free(cm_dmat_t *matrix) {
   free(matrix->data);
   free(matrix);
 }
 
 /********************** Set matrix **********************/
 
-void cm_matrix_double_set_identity(CmMatrixDouble *matrix) {
+void cm_matrix_double_set_identity(cm_dmat_t *matrix) {
 
 #ifdef CM_DEBUG
   assert(!matrix && "Matrix argument is NULL");
@@ -235,7 +235,7 @@ void cm_matrix_double_set_identity(CmMatrixDouble *matrix) {
   }
 }
 
-void cm_matrix_double_set_zero(CmMatrixDouble *matrix) {
+void cm_matrix_double_set_zero(cm_dmat_t *matrix) {
 
 #ifdef CM_DEBUG
   assert(!matrix && "Matrix argument is NULL");
@@ -245,7 +245,7 @@ void cm_matrix_double_set_zero(CmMatrixDouble *matrix) {
   memset(matrix->data, 0, sizeof(double) * matrix->rows * matrix->columns);
 }
 
-void cm_matrix_double_set_all(CmMatrixDouble *matrix, double x) {
+void cm_matrix_double_set_all(cm_dmat_t *matrix, double x) {
 
 #ifdef CM_DEBUG
   assert(!matrix && "Matrix argument is NULL");
@@ -261,14 +261,14 @@ void cm_matrix_double_set_all(CmMatrixDouble *matrix, double x) {
     matrix->data[i] = x;
 }
 
-void cm_matrix_double_set(CmMatrixDouble *matrix, size_t row, size_t col,
+void cm_matrix_double_set(cm_dmat_t *matrix, size_t row, size_t col,
                           double x) {
   matrix->data[row * matrix->columns + col] = x;
 }
 
 /********************** Matrix operations **********************/
 
-void cm_matrix_double_scale_row(CmMatrixDouble *matrix, size_t row,
+void cm_matrix_double_scale_row(cm_dmat_t *matrix, size_t row,
                                 size_t scale_by) {
 
 #ifdef CM_DEBUG
@@ -281,8 +281,8 @@ void cm_matrix_double_scale_row(CmMatrixDouble *matrix, size_t row,
     matrix->data[i + row * matrix->columns] *= scale_by;
 }
 
-void cm_matrix_double_swap(CmMatrixDouble **matrix_a,
-                           CmMatrixDouble **matrix_b) {
+void cm_matrix_double_swap(cm_dmat_t **matrix_a,
+                           cm_dmat_t **matrix_b) {
 
 #ifdef CM_DEBUG
   assert(!matrix_a && "Matrix A pointer argument is NULL");
@@ -292,14 +292,14 @@ void cm_matrix_double_swap(CmMatrixDouble **matrix_a,
   assert(!*matrix_b && "Matrix B argument is NULL");
 #endif
 
-  CmMatrixDouble *tmp = *matrix_a;
+  cm_dmat_t *tmp = *matrix_a;
   *matrix_a = *matrix_b;
   *matrix_b = tmp;
 }
 
-void cm_matrix_double_mul(const CmMatrixDouble *matrix_a,
-                          const CmMatrixDouble *matrix_b,
-                          CmMatrixDouble *result_matrix) {
+void cm_matrix_double_mul(const cm_dmat_t *matrix_a,
+                          const cm_dmat_t *matrix_b,
+                          cm_dmat_t *result_matrix) {
 
 #ifdef CM_DEBUG
   assert(!matrix_a && "Matrix A argument is NULL");
@@ -330,7 +330,7 @@ void cm_matrix_double_mul(const CmMatrixDouble *matrix_a,
   }
 }
 
-double cm_matrix_double_max(const CmMatrixDouble *matrix) {
+double cm_matrix_double_max(const cm_dmat_t *matrix) {
 
 #ifdef CM_DEBUG
   assert(!matrix && "Matrix argument is NULL");
@@ -348,7 +348,7 @@ double cm_matrix_double_max(const CmMatrixDouble *matrix) {
   return max_out;
 }
 
-double cm_matrix_double_min(const CmMatrixDouble *matrix) {
+double cm_matrix_double_min(const cm_dmat_t *matrix) {
 
 #ifdef CM_DEBUG
   assert(!matrix && "Matrix argument is NULL");
@@ -367,7 +367,7 @@ double cm_matrix_double_min(const CmMatrixDouble *matrix) {
 }
 
 // NOTE: fine for general, but mem-heavy for large rect
-void cm_matrix_double_transpose(CmMatrixDouble *matrix) {
+void cm_matrix_double_transpose(cm_dmat_t *matrix) {
 
 #ifdef CM_DEBUG
   assert(!matrix && "Matrix pointer argument is NULL");
@@ -375,7 +375,7 @@ void cm_matrix_double_transpose(CmMatrixDouble *matrix) {
   assert(!(*matrix)->data && "Matrix argument data is NULL");
 #endif
 
-  CmMatrixDouble *tmp_matrix =
+  cm_dmat_t *tmp_matrix =
       cm_matrix_double_alloc(matrix->columns, matrix->rows);
 
   for (size_t i = 0; i < matrix->rows; ++i) {
@@ -390,7 +390,7 @@ void cm_matrix_double_transpose(CmMatrixDouble *matrix) {
   free(tmp_matrix);
 }
 
-double cm_matrix_double_trace(const CmMatrixDouble *matrix) {
+double cm_matrix_double_trace(const cm_dmat_t *matrix) {
 
 #ifdef CM_DEBUG
   assert(!matrix && "Matrix argument is NULL");
@@ -410,7 +410,7 @@ double cm_matrix_double_trace(const CmMatrixDouble *matrix) {
 
 // NOTE: fine for small matrix
 // TODO: change get to direct data access
-double cm_matrix_double_det(const CmMatrixDouble *matrix) {
+double cm_matrix_double_det(const cm_dmat_t *matrix) {
 
 #ifdef CM_DEBUG
   assert(!matrix && "Matrix argument is NULL");
@@ -423,7 +423,7 @@ double cm_matrix_double_det(const CmMatrixDouble *matrix) {
   if (matrix->columns <= 3)
     return _cm_matrix_double_det_less_3(matrix);
 
-  CmMatrixDouble *copy_matrix = cm_matrix_double_create_from_matrix(matrix);
+  cm_dmat_t *copy_matrix = cm_matrix_double_create_from_matrix(matrix);
   double *mult_constants = malloc(copy_matrix->columns * sizeof(double));
 
   int mult_const_index = 0;
@@ -499,7 +499,7 @@ double cm_matrix_double_det(const CmMatrixDouble *matrix) {
 }
 
 // TODO: if pivot 1e-20 unstable
-CmMatrixDouble *cm_matrix_double_inverse(const CmMatrixDouble *orig_matrix) {
+cm_dmat_t *cm_matrix_double_inverse(const cm_dmat_t *orig_matrix) {
 
 #ifdef CM_DEBUG
   assert(!matrix && "Matrix argument is NULL");
@@ -509,9 +509,9 @@ CmMatrixDouble *cm_matrix_double_inverse(const CmMatrixDouble *orig_matrix) {
          "Invalid matrix type, must be square");
 #endif
 
-  CmMatrixDouble *copy_matrix =
+  cm_dmat_t *copy_matrix =
       cm_matrix_double_create_from_matrix(orig_matrix);
-  CmMatrixDouble *res_matrix =
+  cm_dmat_t *res_matrix =
       cm_matrix_double_create_identity(orig_matrix->rows);
 
   for (size_t k = 0; k < copy_matrix->columns; ++k) {
@@ -591,7 +591,7 @@ CmMatrixDouble *cm_matrix_double_inverse(const CmMatrixDouble *orig_matrix) {
   return res_matrix;
 }
 
-double cm_matrix_double_minor(const CmMatrixDouble *matrix, size_t row,
+double cm_matrix_double_minor(const cm_dmat_t *matrix, size_t row,
                               size_t col) {
 
 #ifdef CM_DEBUG
@@ -602,7 +602,7 @@ double cm_matrix_double_minor(const CmMatrixDouble *matrix, size_t row,
          "Invalid matrix type, must be square");
 #endif
 
-  CmMatrixDouble *block_matrix =
+  cm_dmat_t *block_matrix =
       cm_matrix_double_alloc(matrix->rows - 1, matrix->columns - 1);
 
   size_t block_i = 0;
@@ -628,7 +628,7 @@ double cm_matrix_double_minor(const CmMatrixDouble *matrix, size_t row,
   return res;
 }
 
-double cm_matrix_double_cofactor(const CmMatrixDouble *matrix, size_t row,
+double cm_matrix_double_cofactor(const cm_dmat_t *matrix, size_t row,
                                  size_t col) {
 
 #ifdef CM_DEBUG
@@ -645,7 +645,7 @@ double cm_matrix_double_cofactor(const CmMatrixDouble *matrix, size_t row,
   return sign * minor;
 }
 
-void cm_matrix_double_pow(CmMatrixDouble *matrix, unsigned exp) {
+void cm_matrix_double_pow(cm_dmat_t *matrix, unsigned exp) {
 
 #ifdef CM_DEBUG
   assert(!matrix && "Matrix argument is NULL");
@@ -660,8 +660,8 @@ void cm_matrix_double_pow(CmMatrixDouble *matrix, unsigned exp) {
   else if (exp == 0)
     cm_matrix_double_set_identity(matrix);
 
-  CmMatrixDouble *res = cm_matrix_double_create_identity(matrix->rows);
-  CmMatrixDouble *tmp = cm_matrix_double_alloc(matrix->rows, matrix->columns);
+  cm_dmat_t *res = cm_matrix_double_create_identity(matrix->rows);
+  cm_dmat_t *tmp = cm_matrix_double_alloc(matrix->rows, matrix->columns);
 
   while (exp > 0) {
     if (exp & 0x1) {
@@ -681,7 +681,7 @@ void cm_matrix_double_pow(CmMatrixDouble *matrix, unsigned exp) {
 
 // TODO: NaN/Inf handling weak (NaN compare false may pass as null, bad). EPS
 // fixed 1e-20 arbitrary (better relative eps * max_elem or ULPs)
-bool cm_matrix_double_is_null(const CmMatrixDouble *matrix) {
+bool cm_matrix_double_is_null(const cm_dmat_t *matrix) {
 
 #ifdef CM_DEBUG
   assert(!matrix && "Matrix argument is NULL");
@@ -700,7 +700,7 @@ bool cm_matrix_double_is_null(const CmMatrixDouble *matrix) {
 
 // TODO: NaN/Inf handling weak (NaN compare false may pass as null, bad). EPS
 // fixed 1e-20 arbitrary (better relative eps * max_elem or ULPs)
-bool cm_matrix_double_is_identity(const CmMatrixDouble *matrix) {
+bool cm_matrix_double_is_identity(const cm_dmat_t *matrix) {
 
 #ifdef CM_DEBUG
   assert(!matrix && "Matrix argument is NULL");
@@ -728,8 +728,8 @@ bool cm_matrix_double_is_identity(const CmMatrixDouble *matrix) {
 
 // TODO: NaN/Inf handling weak (NaN compare false may pass as null, bad). EPS
 // fixed 1e-20 arbitrary (better relative eps * max_elem or ULPs)
-bool cm_matrix_double_is_equal(const CmMatrixDouble *matrix_a,
-                               const CmMatrixDouble *matrix_b) {
+bool cm_matrix_double_is_equal(const cm_dmat_t *matrix_a,
+                               const cm_dmat_t *matrix_b) {
 
 #ifdef CM_DEBUG
   assert(!matrix_a && "Matrix A argument is NULL");
@@ -755,8 +755,8 @@ bool cm_matrix_double_is_equal(const CmMatrixDouble *matrix_a,
   return true;
 }
 
-void cm_matrix_double_add(CmMatrixDouble *matrix_a,
-                          const CmMatrixDouble *matrix_b) {
+void cm_matrix_double_add(cm_dmat_t *matrix_a,
+                          const cm_dmat_t *matrix_b) {
 
 #ifdef CM_DEBUG
   assert(!matrix_a && "Matrix A argument is NULL");
@@ -776,8 +776,8 @@ void cm_matrix_double_add(CmMatrixDouble *matrix_a,
     matrix_a->data[i] += matrix_b->data[i];
 }
 
-void cm_matrix_double_sub(CmMatrixDouble *matrix_a,
-                          const CmMatrixDouble *matrix_b) {
+void cm_matrix_double_sub(cm_dmat_t *matrix_a,
+                          const cm_dmat_t *matrix_b) {
 
 #ifdef CM_DEBUG
   assert(!matrix_a && "Matrix A argument is NULL");
@@ -797,7 +797,7 @@ void cm_matrix_double_sub(CmMatrixDouble *matrix_a,
     matrix_a->data[i] -= matrix_b->data[i];
 }
 
-void cm_matrix_double_scale(CmMatrixDouble *matrix, double scale) {
+void cm_matrix_double_scale(cm_dmat_t *matrix, double scale) {
 
 #ifdef CM_DEBUG
   assert(!matrix && "Matrix argument is NULL");
@@ -815,7 +815,7 @@ void cm_matrix_double_scale(CmMatrixDouble *matrix, double scale) {
     matrix->data[i] *= scale;
 }
 
-void cm_matrix_double_swap_rows(CmMatrixDouble *matrix, size_t row_a,
+void cm_matrix_double_swap_rows(cm_dmat_t *matrix, size_t row_a,
                                 size_t row_b) {
 
 #ifdef CM_DEBUG
@@ -837,7 +837,7 @@ void cm_matrix_double_swap_rows(CmMatrixDouble *matrix, size_t row_a,
   free(buffer);
 }
 
-void cm_matrix_double_scale_sum_rows(CmMatrixDouble *matrix, size_t row_scaled,
+void cm_matrix_double_scale_sum_rows(cm_dmat_t *matrix, size_t row_scaled,
                                      size_t row_sum, size_t scale_by) {
 
 #ifdef CM_DEBUG
@@ -853,7 +853,7 @@ void cm_matrix_double_scale_sum_rows(CmMatrixDouble *matrix, size_t row_scaled,
   }
 }
 
-void cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix,
+void cm_matrix_double_gauss(const cm_dmat_t *augmented_matrix,
                             double *res) {
 
 #ifdef CM_DEBUG
@@ -866,7 +866,7 @@ void cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix,
          "Invalid augmented_matrix size");
 #endif
 
-  CmMatrixDouble *copy_matrix =
+  cm_dmat_t *copy_matrix =
       cm_matrix_double_create_from_matrix(augmented_matrix);
 
   for (size_t k = 0; k < copy_matrix->columns; ++k) {
@@ -932,7 +932,7 @@ void cm_matrix_double_gauss(const CmMatrixDouble *augmented_matrix,
   cm_matrix_double_free(copy_matrix);
 }
 
-CmMatrixDouble *cm_matrix_double_adj(const CmMatrixDouble *matrix) {
+cm_dmat_t *cm_matrix_double_adj(const cm_dmat_t *matrix) {
 
 #ifdef CM_DEBUG
   assert(!matrix && "Matrix argument is NULL");
@@ -942,7 +942,7 @@ CmMatrixDouble *cm_matrix_double_adj(const CmMatrixDouble *matrix) {
          "Invalid matrix type, must be square");
 #endif
 
-  CmMatrixDouble *res_matrix =
+  cm_dmat_t *res_matrix =
       cm_matrix_double_alloc(matrix->rows, matrix->columns);
 
   for (size_t i = 0; i < matrix->rows; ++i) {
@@ -957,7 +957,7 @@ CmMatrixDouble *cm_matrix_double_adj(const CmMatrixDouble *matrix) {
   return res_matrix;
 }
 
-void cm_matrix_double_map(CmMatrixDouble *matrix, CmMatrixMapFunc map) {
+void cm_matrix_double_map(cm_dmat_t *matrix, CmMatrixMapFunc map) {
 
 #ifdef CM_DEBUG
   assert(!matrix && "Matrix argument is NULL");
@@ -970,7 +970,7 @@ void cm_matrix_double_map(CmMatrixDouble *matrix, CmMatrixMapFunc map) {
     matrix->data[i] = map(matrix->data[i]);
 }
 
-void cm_matrix_double_to_txt(const CmMatrixDouble *matrix,
+void cm_matrix_double_to_txt(const cm_dmat_t *matrix,
                              const char *filename) {
 
 #ifdef CM_DEBUG

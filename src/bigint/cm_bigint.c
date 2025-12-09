@@ -71,7 +71,7 @@ static size_t _cm_long_digit_count(long long num) {
   return result;
 }
 
-static bool _cm_ensure_capacity(CmBigInt *bigint_num, size_t max_size) {
+static bool _cm_ensure_capacity(cm_bigint_t *bigint_num, size_t max_size) {
 
   if (bigint_num->capacity < max_size) {
 
@@ -85,7 +85,7 @@ static bool _cm_ensure_capacity(CmBigInt *bigint_num, size_t max_size) {
   return true;
 }
 
-static bool _cm_bigint_create_from_cstr(CmBigInt *n, const char *cstr,
+static bool _cm_bigint_create_from_cstr(cm_bigint_t *n, const char *cstr,
                                         char sign) {
 
   if (!_cm_is_valid_cstr(cstr))
@@ -113,9 +113,9 @@ static bool _cm_bigint_create_from_cstr(CmBigInt *n, const char *cstr,
   return true;
 }
 
-// Duplicates the buffer of CmBigInt, copying num->size bytes into a new buffer
+// Duplicates the buffer of cm_bigint_t, copying num->size bytes into a new buffer
 // of size num->capacity.
-static char *_buff_dup(const CmBigInt *num) {
+static char *_buff_dup(const cm_bigint_t *num) {
 
   char *copy_buff = malloc(num->capacity);
 
@@ -127,7 +127,7 @@ static char *_buff_dup(const CmBigInt *num) {
   return copy_buff;
 }
 
-static int _cm_bigint_abs_compare(const CmBigInt *lhs, const CmBigInt *rhs) {
+static int _cm_bigint_abs_compare(const cm_bigint_t *lhs, const cm_bigint_t *rhs) {
 
   if (lhs->size != rhs->size)
     return (lhs->size > rhs->size) ? 1 : -1;
@@ -142,7 +142,7 @@ static int _cm_bigint_abs_compare(const CmBigInt *lhs, const CmBigInt *rhs) {
   return 0;
 }
 
-static char _cm_calculate_res_sign(const CmBigInt *lhs, const CmBigInt *rhs,
+static char _cm_calculate_res_sign(const cm_bigint_t *lhs, const cm_bigint_t *rhs,
                                    char operation) {
 
   int compare_res = _cm_bigint_abs_compare(lhs, rhs);
@@ -197,13 +197,13 @@ static void _cm_reverse_str(char *str) {
   }
 }
 
-static void _cm_calculate_sum(CmBigInt *bigint_num, const CmBigInt *addend,
+static void _cm_calculate_sum(cm_bigint_t *bigint_num, const cm_bigint_t *addend,
                               char res_sign) {
 
   int compare_res = _cm_bigint_abs_compare(bigint_num, addend);
 
-  const CmBigInt *smaller_abs_num = (compare_res >= 0) ? addend : bigint_num;
-  const CmBigInt *greater_abs_num = (compare_res >= 0) ? bigint_num : addend;
+  const cm_bigint_t *smaller_abs_num = (compare_res >= 0) ? addend : bigint_num;
+  const cm_bigint_t *greater_abs_num = (compare_res >= 0) ? bigint_num : addend;
 
   size_t max_size = greater_abs_num->size + 1;
 
@@ -250,7 +250,7 @@ static void _cm_calculate_sum(CmBigInt *bigint_num, const CmBigInt *addend,
   bigint_num->sign = res_sign;
 }
 
-static void _cm_calculate_inc(CmBigInt *bigint_num, char res_sign) {
+static void _cm_calculate_inc(cm_bigint_t *bigint_num, char res_sign) {
 
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
@@ -290,7 +290,7 @@ static void _cm_calculate_inc(CmBigInt *bigint_num, char res_sign) {
   bigint_num->sign = res_sign;
 }
 
-static void _cm_calculate_dec(CmBigInt *bigint_num, char res_sign) {
+static void _cm_calculate_dec(cm_bigint_t *bigint_num, char res_sign) {
 
   int substr_part = 1;
   size_t i = 0;
@@ -319,13 +319,13 @@ static void _cm_calculate_dec(CmBigInt *bigint_num, char res_sign) {
   bigint_num->sign = res_sign;
 }
 
-static void _cm_calculate_dif(CmBigInt *bigint_num, const CmBigInt *substr,
+static void _cm_calculate_dif(cm_bigint_t *bigint_num, const cm_bigint_t *substr,
                               char res_sign) {
 
   int compare_res = _cm_bigint_abs_compare(bigint_num, substr);
 
-  const CmBigInt *smaller_abs_num = (compare_res >= 0) ? substr : bigint_num;
-  const CmBigInt *greater_abs_num = (compare_res >= 0) ? bigint_num : substr;
+  const cm_bigint_t *smaller_abs_num = (compare_res >= 0) ? substr : bigint_num;
+  const cm_bigint_t *greater_abs_num = (compare_res >= 0) ? bigint_num : substr;
 
   if (!_cm_ensure_capacity(bigint_num, greater_abs_num->size))
     return;
@@ -370,9 +370,9 @@ static void _cm_calculate_dif(CmBigInt *bigint_num, const CmBigInt *substr,
   bigint_num->sign = res_sign;
 }
 
-CmBigInt *cm_bigint_alloc() {
+cm_bigint_t *cm_bigint_alloc() {
 
-  CmBigInt *bigint_num = malloc(sizeof(CmBigInt));
+  cm_bigint_t *bigint_num = malloc(sizeof(cm_bigint_t));
 
   bigint_num->size = 0;
   bigint_num->sign = '+';
@@ -382,14 +382,14 @@ CmBigInt *cm_bigint_alloc() {
   return bigint_num;
 }
 
-CmBigInt *cm_bigint_create_copy(const CmBigInt *src_num) {
+cm_bigint_t *cm_bigint_create_copy(const cm_bigint_t *src_num) {
 
 #ifdef CM_DEBUG
   assert(!src_num && "Bigint num argument is NULL");
   assert(!src_num->data && "Bigint num argument data is NULL");
 #endif
 
-  CmBigInt *new_num = cm_bigint_alloc();
+  cm_bigint_t *new_num = cm_bigint_alloc();
 
   new_num->size = src_num->size;
   new_num->sign = src_num->sign;
@@ -406,12 +406,12 @@ CmBigInt *cm_bigint_create_copy(const CmBigInt *src_num) {
 }
 
 // LLONG_MIN case
-CmBigInt *cm_bigint_create_from_num(long long src_num) {
+cm_bigint_t *cm_bigint_create_from_num(long long src_num) {
 
   long long abs_num = _cm_llong_abs(src_num);
   size_t num_len = _cm_long_digit_count(abs_num);
 
-  CmBigInt *bigint_num = cm_bigint_alloc();
+  cm_bigint_t *bigint_num = cm_bigint_alloc();
   char *alloc_buffer = malloc(num_len);
 
   bigint_num->sign = (src_num < 0) ? '-' : '+';
@@ -428,13 +428,13 @@ CmBigInt *cm_bigint_create_from_num(long long src_num) {
   return bigint_num;
 }
 
-CmBigInt *cm_bigint_create_from_cstr(const char *cstr) {
+cm_bigint_t *cm_bigint_create_from_cstr(const char *cstr) {
 
 #ifdef CM_DEBUG
   assert(!cstr && "C-string is NULL");
 #endif
 
-  CmBigInt *bigint_num = cm_bigint_alloc();
+  cm_bigint_t *bigint_num = cm_bigint_alloc();
 
   if (cstr[0] == '-' || cstr[0] == '+') {
     const char *magnitude = cstr + 1;
@@ -446,7 +446,7 @@ CmBigInt *cm_bigint_create_from_cstr(const char *cstr) {
   return bigint_num;
 }
 
-void cm_bigint_reserve(CmBigInt *bigint_num, size_t size) {
+void cm_bigint_reserve(cm_bigint_t *bigint_num, size_t size) {
 
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
@@ -463,7 +463,7 @@ void cm_bigint_reserve(CmBigInt *bigint_num, size_t size) {
   bigint_num->capacity = size;
 }
 
-void cm_bigint_shift_left(CmBigInt *bigint_num, size_t k) {
+void cm_bigint_shift_left(cm_bigint_t *bigint_num, size_t k) {
 
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
@@ -478,7 +478,7 @@ void cm_bigint_shift_left(CmBigInt *bigint_num, size_t k) {
   bigint_num->size += k;
 }
 
-void cm_bigint_shift_right(CmBigInt *bigint_num, size_t k) {
+void cm_bigint_shift_right(cm_bigint_t *bigint_num, size_t k) {
 
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
@@ -497,7 +497,7 @@ void cm_bigint_shift_right(CmBigInt *bigint_num, size_t k) {
 }
 
 // TODO: after execution, some unused memory remains
-char *cm_bigint_to_hex_string(const CmBigInt *bigint_num) {
+char *cm_bigint_to_hex_string(const cm_bigint_t *bigint_num) {
 
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
@@ -515,10 +515,10 @@ char *cm_bigint_to_hex_string(const CmBigInt *bigint_num) {
   size_t alloc_size = bigint_num->size + 1 + (is_negative ? 1 : 0);
 
   char *res_str = malloc(alloc_size);
-  CmBigInt *copy_bigint = cm_bigint_create_copy(bigint_num);
-  CmBigInt *divider = cm_bigint_create_from_num(16);
-  CmBigInt *remainder = cm_bigint_alloc();
-  CmBigInt *quotient = cm_bigint_alloc();
+  cm_bigint_t *copy_bigint = cm_bigint_create_copy(bigint_num);
+  cm_bigint_t *divider = cm_bigint_create_from_num(16);
+  cm_bigint_t *remainder = cm_bigint_alloc();
+  cm_bigint_t *quotient = cm_bigint_alloc();
 
   size_t i = 0;
   cm_bigint_abs(copy_bigint);
@@ -548,7 +548,7 @@ char *cm_bigint_to_hex_string(const CmBigInt *bigint_num) {
   return res_str;
 }
 
-char *cm_bigint_to_bin_string(const CmBigInt *bigint_num) {
+char *cm_bigint_to_bin_string(const cm_bigint_t *bigint_num) {
 
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
@@ -567,10 +567,10 @@ char *cm_bigint_to_bin_string(const CmBigInt *bigint_num) {
   size_t alloc_size = bigint_num->size + 1 + (is_negative ? 1 : 0);
 
   char *res_str = malloc(alloc_size);
-  CmBigInt *copy_bigint = cm_bigint_create_copy(bigint_num);
-  CmBigInt *divider = cm_bigint_create_from_num(2);
-  CmBigInt *remainder = cm_bigint_alloc();
-  CmBigInt *quotient = cm_bigint_alloc();
+  cm_bigint_t *copy_bigint = cm_bigint_create_copy(bigint_num);
+  cm_bigint_t *divider = cm_bigint_create_from_num(2);
+  cm_bigint_t *remainder = cm_bigint_alloc();
+  cm_bigint_t *quotient = cm_bigint_alloc();
 
   size_t i = 0;
   cm_bigint_abs(copy_bigint);
@@ -599,14 +599,14 @@ char *cm_bigint_to_bin_string(const CmBigInt *bigint_num) {
   return res_str;
 }
 
-CmBigInt *cm_bigint_from_bin_string(const char *str) {
+cm_bigint_t *cm_bigint_from_bin_string(const char *str) {
 
 #ifdef CM_DEBUG
   assert(!str && "Binary string is NULL");
 #endif
 
-  CmBigInt *res = cm_bigint_alloc();
-  CmBigInt *two_base = cm_bigint_create_from_num(2);
+  cm_bigint_t *res = cm_bigint_alloc();
+  cm_bigint_t *two_base = cm_bigint_create_from_num(2);
 
   size_t str_len = strlen(str);
 
@@ -622,15 +622,15 @@ CmBigInt *cm_bigint_from_bin_string(const char *str) {
   return res;
 }
 
-CmBigInt *cm_bigint_from_hex_string(const char *str) {
+cm_bigint_t *cm_bigint_from_hex_string(const char *str) {
 
 #ifdef CM_DEBUG
   assert(!str && "Hex string is NULL");
 #endif
 
-  CmBigInt *res = cm_bigint_alloc();
-  CmBigInt *hex_base = cm_bigint_create_from_num(16);
-  CmBigInt *tmp = cm_bigint_alloc();
+  cm_bigint_t *res = cm_bigint_alloc();
+  cm_bigint_t *hex_base = cm_bigint_create_from_num(16);
+  cm_bigint_t *tmp = cm_bigint_alloc();
 
   size_t str_len = strlen(str);
 
@@ -651,7 +651,7 @@ CmBigInt *cm_bigint_from_hex_string(const char *str) {
   return res;
 }
 
-bool cm_bigint_less(const CmBigInt *lhs, const CmBigInt *rhs) {
+bool cm_bigint_less(const cm_bigint_t *lhs, const cm_bigint_t *rhs) {
 
 #ifdef CM_DEBUG
   assert(!lhs && "Lhs num argument is NULL");
@@ -682,7 +682,7 @@ bool cm_bigint_less(const CmBigInt *lhs, const CmBigInt *rhs) {
   return false;
 }
 
-bool cm_bigint_less_or_equal(const CmBigInt *lhs, const CmBigInt *rhs) {
+bool cm_bigint_less_or_equal(const cm_bigint_t *lhs, const cm_bigint_t *rhs) {
 
 #ifdef CM_DEBUG
   assert(!lhs && "Lhs num argument is NULL");
@@ -700,7 +700,7 @@ bool cm_bigint_less_or_equal(const CmBigInt *lhs, const CmBigInt *rhs) {
   return true;
 }
 
-bool cm_bigint_greater(const CmBigInt *lhs, const CmBigInt *rhs) {
+bool cm_bigint_greater(const cm_bigint_t *lhs, const cm_bigint_t *rhs) {
 
 #ifdef CM_DEBUG
   assert(!lhs && "Lhs num argument is NULL");
@@ -713,7 +713,7 @@ bool cm_bigint_greater(const CmBigInt *lhs, const CmBigInt *rhs) {
   return !cm_bigint_less_or_equal(lhs, rhs);
 }
 
-bool cm_bigint_greater_or_equal(const CmBigInt *lhs, const CmBigInt *rhs) {
+bool cm_bigint_greater_or_equal(const cm_bigint_t *lhs, const cm_bigint_t *rhs) {
 
 #ifdef CM_DEBUG
   assert(!lhs && "Lhs num argument is NULL");
@@ -731,7 +731,7 @@ bool cm_bigint_greater_or_equal(const CmBigInt *lhs, const CmBigInt *rhs) {
   return true;
 }
 
-bool cm_bigint_is_equal(const CmBigInt *lhs, const CmBigInt *rhs) {
+bool cm_bigint_is_equal(const cm_bigint_t *lhs, const cm_bigint_t *rhs) {
 
 #ifdef CM_DEBUG
   assert(!lhs && "Lhs num argument is NULL");
@@ -751,7 +751,7 @@ bool cm_bigint_is_equal(const CmBigInt *lhs, const CmBigInt *rhs) {
   return false;
 }
 
-bool cm_bigint_is_positive(const CmBigInt *bigint_num) {
+bool cm_bigint_is_positive(const cm_bigint_t *bigint_num) {
 
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
@@ -761,7 +761,7 @@ bool cm_bigint_is_positive(const CmBigInt *bigint_num) {
   return bigint_num->sign == '+';
 }
 
-bool cm_bigint_less_ll(const CmBigInt *lhs, long long rhs) {
+bool cm_bigint_less_ll(const cm_bigint_t *lhs, long long rhs) {
 
 #ifdef CM_DEBUG
   assert(!lhs && "Lhs num argument is NULL");
@@ -798,7 +798,7 @@ bool cm_bigint_less_ll(const CmBigInt *lhs, long long rhs) {
   return false;
 }
 
-bool cm_bigint_is_equal_ll(const CmBigInt *lhs, long long rhs) {
+bool cm_bigint_is_equal_ll(const cm_bigint_t *lhs, long long rhs) {
 
 #ifdef CM_DEBUG
   assert(!lhs && "Lhs num argument is NULL");
@@ -821,7 +821,7 @@ bool cm_bigint_is_equal_ll(const CmBigInt *lhs, long long rhs) {
   return false;
 }
 
-bool cm_bigint_less_or_equal_ll(const CmBigInt *lhs, long long rhs) {
+bool cm_bigint_less_or_equal_ll(const cm_bigint_t *lhs, long long rhs) {
 
 #ifdef CM_DEBUG
   assert(!lhs && "Lhs num argument is NULL");
@@ -836,7 +836,7 @@ bool cm_bigint_less_or_equal_ll(const CmBigInt *lhs, long long rhs) {
   return true;
 }
 
-bool cm_bigint_greater_ll(const CmBigInt *lhs, long long rhs) {
+bool cm_bigint_greater_ll(const cm_bigint_t *lhs, long long rhs) {
 
 #ifdef CM_DEBUG
   assert(!lhs && "Lhs num argument is NULL");
@@ -846,7 +846,7 @@ bool cm_bigint_greater_ll(const CmBigInt *lhs, long long rhs) {
   return !cm_bigint_less_or_equal_ll(lhs, rhs);
 }
 
-bool cm_bigint_greater_or_equal_ll(const CmBigInt *lhs, long long rhs) {
+bool cm_bigint_greater_or_equal_ll(const cm_bigint_t *lhs, long long rhs) {
 
 #ifdef CM_DEBUG
   assert(!lhs && "Lhs num argument is NULL");
@@ -861,7 +861,7 @@ bool cm_bigint_greater_or_equal_ll(const CmBigInt *lhs, long long rhs) {
   return true;
 }
 
-bool cm_bigint_is_zero(const CmBigInt *bigint_num) {
+bool cm_bigint_is_zero(const cm_bigint_t *bigint_num) {
 
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
@@ -871,7 +871,7 @@ bool cm_bigint_is_zero(const CmBigInt *bigint_num) {
   return _cm_is_zero_buff(bigint_num->data, bigint_num->size);
 }
 
-void cm_bigint_add(CmBigInt *bigint_num, const CmBigInt *addend) {
+void cm_bigint_add(cm_bigint_t *bigint_num, const cm_bigint_t *addend) {
 
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
@@ -890,33 +890,33 @@ void cm_bigint_add(CmBigInt *bigint_num, const CmBigInt *addend) {
   }
 }
 
-void cm_bigint_add_ll(CmBigInt *bigint_num, long long addend) {
+void cm_bigint_add_ll(cm_bigint_t *bigint_num, long long addend) {
 
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
   assert(!bigint_num->data && "Bigint num argument data is NULL");
 #endif
 
-  CmBigInt *bigint_addend = cm_bigint_create_from_num(addend);
+  cm_bigint_t *bigint_addend = cm_bigint_create_from_num(addend);
 
   cm_bigint_add(bigint_num, bigint_addend);
   cm_bigint_free(bigint_addend);
 }
 
-void cm_bigint_sub_ll(CmBigInt *bigint_num, long long subtrc) {
+void cm_bigint_sub_ll(cm_bigint_t *bigint_num, long long subtrc) {
 
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
   assert(!bigint_num->data && "Bigint num argument data is NULL");
 #endif
 
-  CmBigInt *bigint_subtrc = cm_bigint_create_from_num(subtrc);
+  cm_bigint_t *bigint_subtrc = cm_bigint_create_from_num(subtrc);
 
   cm_bigint_sub(bigint_num, bigint_subtrc);
   cm_bigint_free(bigint_subtrc);
 }
 
-void cm_bigint_sub(CmBigInt *bigint_num, const CmBigInt *substr) {
+void cm_bigint_sub(cm_bigint_t *bigint_num, const cm_bigint_t *substr) {
 
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
@@ -935,7 +935,7 @@ void cm_bigint_sub(CmBigInt *bigint_num, const CmBigInt *substr) {
   }
 }
 
-void cm_bigint_mult(CmBigInt *bigint_num, const CmBigInt *multiplier) {
+void cm_bigint_mult(cm_bigint_t *bigint_num, const cm_bigint_t *multiplier) {
 
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
@@ -947,15 +947,15 @@ void cm_bigint_mult(CmBigInt *bigint_num, const CmBigInt *multiplier) {
 
   int compare_res = _cm_bigint_abs_compare(bigint_num, multiplier);
 
-  const CmBigInt *smaller_abs_num =
+  const cm_bigint_t *smaller_abs_num =
       (compare_res >= 0) ? multiplier : bigint_num;
-  const CmBigInt *greater_abs_num =
+  const cm_bigint_t *greater_abs_num =
       (compare_res >= 0) ? bigint_num : multiplier;
 
   size_t max_size = greater_abs_num->size + smaller_abs_num->size;
 
-  CmBigInt *res_of_mult = cm_bigint_alloc();
-  CmBigInt *temp = cm_bigint_alloc();
+  cm_bigint_t *res_of_mult = cm_bigint_alloc();
+  cm_bigint_t *temp = cm_bigint_alloc();
   if (!_cm_ensure_capacity(temp, max_size))
     return;
 
@@ -1001,7 +1001,7 @@ void cm_bigint_mult(CmBigInt *bigint_num, const CmBigInt *multiplier) {
   cm_bigint_free(temp);
 }
 
-void cm_bigint_pow(CmBigInt *bigint_num, unsigned long long exp) {
+void cm_bigint_pow(cm_bigint_t *bigint_num, unsigned long long exp) {
 
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
@@ -1016,7 +1016,7 @@ void cm_bigint_pow(CmBigInt *bigint_num, unsigned long long exp) {
   if (exp == 1)
     return;
 
-  CmBigInt *res = cm_bigint_create_from_num(1);
+  cm_bigint_t *res = cm_bigint_create_from_num(1);
 
   while (exp > 0) {
     if (exp & 0x1) {
@@ -1030,7 +1030,7 @@ void cm_bigint_pow(CmBigInt *bigint_num, unsigned long long exp) {
   cm_bigint_free(res);
 }
 
-void cm_bigint_div(CmBigInt *bigint_num, const CmBigInt *divider) {
+void cm_bigint_div(cm_bigint_t *bigint_num, const cm_bigint_t *divider) {
 
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
@@ -1040,8 +1040,8 @@ void cm_bigint_div(CmBigInt *bigint_num, const CmBigInt *divider) {
   assert(!divider->data && "divider num argument data is NULL");
 #endif
 
-  CmBigInt *remainder = cm_bigint_alloc();
-  CmBigInt *quotient = cm_bigint_alloc();
+  cm_bigint_t *remainder = cm_bigint_alloc();
+  cm_bigint_t *quotient = cm_bigint_alloc();
 
   cm_bigint_div_mod(quotient, remainder, bigint_num, divider);
 
@@ -1051,7 +1051,7 @@ void cm_bigint_div(CmBigInt *bigint_num, const CmBigInt *divider) {
   cm_bigint_free(quotient);
 }
 
-void cm_bigint_mod(CmBigInt *bigint_num, const CmBigInt *divider) {
+void cm_bigint_mod(cm_bigint_t *bigint_num, const cm_bigint_t *divider) {
 
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
@@ -1061,8 +1061,8 @@ void cm_bigint_mod(CmBigInt *bigint_num, const CmBigInt *divider) {
   assert(!divider->data && "divider num argument data is NULL");
 #endif
 
-  CmBigInt *remainder = cm_bigint_alloc();
-  CmBigInt *quotient = cm_bigint_alloc();
+  cm_bigint_t *remainder = cm_bigint_alloc();
+  cm_bigint_t *quotient = cm_bigint_alloc();
 
   cm_bigint_div_mod(quotient, remainder, bigint_num, divider);
   cm_bigint_set(bigint_num, remainder);
@@ -1071,7 +1071,7 @@ void cm_bigint_mod(CmBigInt *bigint_num, const CmBigInt *divider) {
   cm_bigint_free(quotient);
 }
 
-CmBigInt *cm_bigint_gcd(const CmBigInt *bigint_a, const CmBigInt *bigint_b) {
+cm_bigint_t *cm_bigint_gcd(const cm_bigint_t *bigint_a, const cm_bigint_t *bigint_b) {
 
 #ifdef CM_DEBUG
   assert(!bigint_a && "Bigint A num argument is NULL");
@@ -1084,10 +1084,10 @@ CmBigInt *cm_bigint_gcd(const CmBigInt *bigint_a, const CmBigInt *bigint_b) {
   assert(!res->data && "Res num argument data is NULL");
 #endif
 
-  CmBigInt *res = cm_bigint_alloc();
-  CmBigInt *copy_a = cm_bigint_create_copy(bigint_a);
-  CmBigInt *copy_b = cm_bigint_create_copy(bigint_b);
-  CmBigInt *tmp = cm_bigint_alloc();
+  cm_bigint_t *res = cm_bigint_alloc();
+  cm_bigint_t *copy_a = cm_bigint_create_copy(bigint_a);
+  cm_bigint_t *copy_b = cm_bigint_create_copy(bigint_b);
+  cm_bigint_t *tmp = cm_bigint_alloc();
 
   while (!cm_bigint_is_zero(copy_b)) {
     cm_bigint_div_mod(NULL, tmp, copy_a, copy_b);
@@ -1106,8 +1106,8 @@ CmBigInt *cm_bigint_gcd(const CmBigInt *bigint_a, const CmBigInt *bigint_b) {
   return res;
 }
 
-void cm_bigint_div_mod(CmBigInt *quotient, CmBigInt *remainder,
-                       const CmBigInt *dividend, const CmBigInt *divider) {
+void cm_bigint_div_mod(cm_bigint_t *quotient, cm_bigint_t *remainder,
+                       const cm_bigint_t *dividend, const cm_bigint_t *divider) {
 
 #ifdef CM_DEBUG
   assert(!quotient && "Quotient num argument is NULL");
@@ -1131,8 +1131,8 @@ void cm_bigint_div_mod(CmBigInt *quotient, CmBigInt *remainder,
     return;
   }
 
-  CmBigInt *divider_copy = cm_bigint_create_copy(divider);
-  CmBigInt *one = cm_bigint_create_from_num(1);
+  cm_bigint_t *divider_copy = cm_bigint_create_copy(divider);
+  cm_bigint_t *one = cm_bigint_create_from_num(1);
 
   while (cm_bigint_greater_or_equal(remainder, divider_copy)) {
     size_t shift = 0;
@@ -1157,7 +1157,7 @@ void cm_bigint_div_mod(CmBigInt *quotient, CmBigInt *remainder,
   cm_bigint_free(divider_copy);
 }
 
-void cm_bigint_inc(CmBigInt *bigint_num) {
+void cm_bigint_inc(cm_bigint_t *bigint_num) {
 
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
@@ -1173,7 +1173,7 @@ void cm_bigint_inc(CmBigInt *bigint_num) {
   }
 }
 
-void cm_bigint_dec(CmBigInt *bigint_num) {
+void cm_bigint_dec(cm_bigint_t *bigint_num) {
 
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
@@ -1190,7 +1190,7 @@ void cm_bigint_dec(CmBigInt *bigint_num) {
   }
 }
 
-void cm_bigint_set(CmBigInt *bigint_num, const CmBigInt *setter) {
+void cm_bigint_set(cm_bigint_t *bigint_num, const cm_bigint_t *setter) {
 
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
@@ -1210,7 +1210,7 @@ void cm_bigint_set(CmBigInt *bigint_num, const CmBigInt *setter) {
   memcpy(bigint_num->data, setter->data, setter->size);
 }
 
-void cm_bigint_set_long(CmBigInt *bigint_num, long long setter) {
+void cm_bigint_set_long(cm_bigint_t *bigint_num, long long setter) {
 
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
@@ -1231,7 +1231,7 @@ void cm_bigint_set_long(CmBigInt *bigint_num, long long setter) {
   }
 }
 
-void cm_bigint_shrink_to_fit(CmBigInt *bigint_num) {
+void cm_bigint_shrink_to_fit(cm_bigint_t *bigint_num) {
 
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
@@ -1246,7 +1246,7 @@ void cm_bigint_shrink_to_fit(CmBigInt *bigint_num) {
   }
 }
 
-void cm_bigint_abs(CmBigInt *bigint_num) {
+void cm_bigint_abs(cm_bigint_t *bigint_num) {
 
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
@@ -1256,7 +1256,7 @@ void cm_bigint_abs(CmBigInt *bigint_num) {
   bigint_num->sign = '+';
 }
 
-void cm_bigint_negate(CmBigInt *bigint_num) {
+void cm_bigint_negate(cm_bigint_t *bigint_num) {
 
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
@@ -1269,7 +1269,7 @@ void cm_bigint_negate(CmBigInt *bigint_num) {
   bigint_num->sign = (bigint_num->sign == '+') ? '-' : '+';
 }
 
-bool cm_bigint_is_odd(const CmBigInt *bigint_num) {
+bool cm_bigint_is_odd(const cm_bigint_t *bigint_num) {
 
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
@@ -1279,11 +1279,11 @@ bool cm_bigint_is_odd(const CmBigInt *bigint_num) {
   return (bigint_num->data[0] - '0') & 0x1;
 }
 
-bool cm_bigint_is_even(const CmBigInt *bigint_num) {
+bool cm_bigint_is_even(const cm_bigint_t *bigint_num) {
   return !cm_bigint_is_odd(bigint_num);
 }
 
-char *cm_bigint_to_string(const CmBigInt *bigint_num) {
+char *cm_bigint_to_string(const cm_bigint_t *bigint_num) {
 
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
@@ -1311,7 +1311,7 @@ char *cm_bigint_to_string(const CmBigInt *bigint_num) {
   return str;
 }
 
-size_t cm_bigint_num_digits(const CmBigInt *bigint_num) {
+size_t cm_bigint_num_digits(const cm_bigint_t *bigint_num) {
 #ifdef CM_DEBUG
   assert(!bigint_num && "Bigint num argument is NULL");
   assert(!bigint_num->data && "Bigint num argument data is NULL");
@@ -1320,7 +1320,7 @@ size_t cm_bigint_num_digits(const CmBigInt *bigint_num) {
   return bigint_num->size;
 }
 
-void cm_bigint_free(CmBigInt *bigint_num) {
+void cm_bigint_free(cm_bigint_t *bigint_num) {
   free(bigint_num->data);
   free(bigint_num);
 }

@@ -4,9 +4,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-typedef struct CmVec2Double {
+typedef struct cm_dvec2_t {
   double x;
   double y;
-} CmVec2Double;
+} cm_dvec2_t;
 
 #endif

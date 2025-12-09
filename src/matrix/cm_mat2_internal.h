@@ -1,8 +1,8 @@
 #ifndef CM_MATRIX2_INTERNAL_H
 #define CM_MATRIX2_INTERNAL_H
 
-#define CM_GET_IDENTITY_MAT2 ((cm_matrix2){0.f, 1.f, 0.f, 1.f})
-#define CM_GET_ZERO_MAT2 ((cm_matrix2){0.f, 0.f, 0.f, 0.f})
+#define CM_GET_IDENTITY_MAT2 ((cm_mat2_t){0.f, 1.f, 0.f, 1.f})
+#define CM_GET_ZERO_MAT2 ((cm_mat2_t){0.f, 0.f, 0.f, 0.f})
 
 /* TODO:
  */
@@ -13,10 +13,10 @@
  * | data[2] data[3]|
  *
  */
-typedef struct cm_matrix2 {
+typedef struct cm_mat2_t {
   float m00, m01;
   float m10, m11;
-} cm_matrix2;
+} cm_mat2_t;
 
 
 #endif

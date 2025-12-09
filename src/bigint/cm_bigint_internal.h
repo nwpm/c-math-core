@@ -17,13 +17,13 @@
 // CmStatusCode cm_bigint_mod_pow(CmBigInt *num, const CmBigInt *exponent,
 //                               const CmBigInt *modulus);
 
-typedef struct CmBigInt {
+typedef struct cm_bigint_t {
 
   char sign;
   char *data;
   size_t size;
   size_t capacity;
 
-} CmBigInt;
+} cm_bigint_t;
 
 #endif

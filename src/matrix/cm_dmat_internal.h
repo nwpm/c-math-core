@@ -14,16 +14,16 @@
 // compration, expantion)
 
 /* Matrix double type */
-typedef struct CmMatrixDouble {
+typedef struct cm_dmat_t {
   size_t rows;
   size_t columns;
   double *data;
-} CmMatrixDouble;
+} cm_dmat_t;
 
 typedef double (*CmMatrixMapFunc)(double x);
 
 #ifdef CM_DEBUG
-void _cm_matrix_double_printf(const CmMatrixDouble *matrix);
+void _cm_matrix_double_printf(const cm_dmat_t *matrix);
 #endif
 
 #endif
