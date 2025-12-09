@@ -1,4 +1,5 @@
 #include "cm_dvec2_internal.h"
+#include "../../../include/cm_dvec2.h"
 #include <assert.h>
 #include <math.h>
 

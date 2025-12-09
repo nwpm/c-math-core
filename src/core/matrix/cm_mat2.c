@@ -1,4 +1,5 @@
 #include "cm_mat2_internal.h"
+#include "../../../include/cm_mat2.h"
 #include "../vectors/cm_vec2_internal.h"
 
 void cm_mat2_make(float *src, cm_mat2_t dest) {

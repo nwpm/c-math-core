@@ -1,4 +1,5 @@
 #include "../utils/cm_utils.h"
+#include "../../../include/cm_vec2.h"
 #include "cm_vec2_internal.h"
 
 // For sqrt
