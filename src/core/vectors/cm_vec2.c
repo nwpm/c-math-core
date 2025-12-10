@@ -11,8 +11,8 @@ void cm_vec2_copy(cm_vec2_t v, cm_vec2_t dest) {
 }
 
 void cm_vec2_zero(cm_vec2_t v) {
-  v.x = 0.f;
-  v.y = 0.f;
+  v.x = 0;
+  v.y = 0;
 }
 
 void cm_vec2_add(cm_vec2_t a, cm_vec2_t b, cm_vec2_t dest) {
