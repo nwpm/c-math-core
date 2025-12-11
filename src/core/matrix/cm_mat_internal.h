@@ -1,7 +1,7 @@
-#ifndef CM_MATRIX_DOUBLE_INTERNAL_H
-#define CM_MATRIX_DOUBLE_INTERNAL_H
+#ifndef CM_MATRIX_INTERNAL_H
+#define CM_MATRIX_INTERNAL_H
 
-#include <stdbool.h>
+#include "../../../include/cm_core/cm_types.h"
 #include <stddef.h>
 
 // TODO: cm_matrix_double_set_submatrix(dest, src, row_offset, col_offset)
@@ -14,13 +14,11 @@
 // compration, expantion)
 
 /* Matrix double type */
-typedef struct cm_dmat_t {
+typedef struct cm_mat_t {
   size_t rows;
   size_t columns;
-  double *data;
-} cm_dmat_t;
-
-typedef double (*CmMatrixMapFunc)(double x);
+  cm_real_t *data;
+} cm_mat_t;
 
 #ifdef CM_DEBUG
 void _cm_matrix_double_printf(const cm_dmat_t *matrix);
