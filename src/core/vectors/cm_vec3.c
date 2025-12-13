@@ -57,8 +57,33 @@ void cm_vec3_min(cm_vec3_t a, cm_vec3_t b, cm_vec3_t dest) {
   dest.z = (a.z >= b.z) ? b.z : a.z;
 }
 
-// TODO:
-void cm_vec3_rotate(cm_vec3_t vec, cm_real_t angle, cm_vec3_t dest);
+// NOTE: counterclockwise axis rotation, right-hand space
+void cm_vec3_rotate_x(cm_vec3_t vec, cm_real_t angle, cm_vec3_t dest) {
+  cm_real_t t_s = sin(angle);
+  cm_real_t t_c = cos(angle);
+
+  dest.x = vec.x;
+  dest.y = vec.y * t_c - vec.z * t_s;
+  dest.z = vec.y * t_s + vec.z * t_c;
+}
+
+void cm_vec3_rotate_y(cm_vec3_t vec, cm_real_t angle, cm_vec3_t dest) {
+  cm_real_t t_s = sin(angle);
+  cm_real_t t_c = cos(angle);
+
+  dest.x = vec.x * t_c + vec.z * t_s;
+  dest.y = vec.y;
+  dest.z = -vec.x * t_s + vec.z * t_c;
+}
+
+void cm_vec3_rotate_z(cm_vec3_t vec, cm_real_t angle, cm_vec3_t dest) {
+  cm_real_t t_s = sin(angle);
+  cm_real_t t_c = cos(angle);
+
+  dest.x = vec.x * t_c - vec.y * t_s;
+  dest.y = vec.x * t_s + vec.y * t_c;
+  dest.z = vec.z;
+}
 
 void cm_vec3_normalize(cm_vec3_t vec, cm_vec3_t dest) {
 
@@ -102,8 +127,7 @@ cm_real_t cm_vec3_angle(cm_vec3_t vec_a, cm_vec3_t vec_b) {
   return acos(angle);
 }
 
-void cm_vec3_project(cm_vec3_t proj_from, cm_vec3_t proj_to,
-                            cm_vec3_t dest) {
+void cm_vec3_project(cm_vec3_t proj_from, cm_vec3_t proj_to, cm_vec3_t dest) {
 
   cm_real_t dot_product = cm_vec3_dot(proj_from, proj_to);
   cm_real_t len_vec_to = cm_vec3_norm_squared(proj_to);
@@ -130,12 +154,9 @@ void cm_vec3_cross(cm_vec3_t vec_a, cm_vec3_t vec_b, cm_vec3_t dest) {
   dest.x = det_x;
   dest.y = det_y;
   dest.z = det_z;
-
 }
 
-bool cm_vec3_is_zero(cm_vec3_t vec) {
-  return !vec.x && !vec.y && !vec.z;
-}
+bool cm_vec3_is_zero(cm_vec3_t vec) { return !vec.x && !vec.y && !vec.z; }
 
 bool cm_vec3_is_equal(cm_vec3_t vec_a, cm_vec3_t vec_b) {
   return (vec_a.x == vec_b.x) && (vec_a.y == vec_b.y) && (vec_a.z == vec_b.z);
