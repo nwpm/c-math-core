@@ -1,8 +1,6 @@
 #ifndef CM_IVEC2_H
 #define CM_IVEC2_H
 
-#include <stdbool.h>
-
 typedef struct cm_ivec2_t cm_ivec2_t;
 
 void cm_ivec2_copy(cm_ivec2_t v, cm_ivec2_t dest);
