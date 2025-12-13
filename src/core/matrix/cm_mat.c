@@ -11,11 +11,6 @@
 #include <assert.h>
 #endif
 
-// TODO: make NULL check or not?
-// TODO: error handler
-// TODO: return codes only in debug build or return codes only in some
-// functiuons
-
 #ifdef CM_DEBUG
 void _cm_matrix_double_printf(const cm_mat_t *matrix) {
 
@@ -74,6 +69,7 @@ cm_mat_t *cm_mat_create_zero(size_t rows, size_t cols) {
   return matrix;
 }
 
+// NOTE: numeration from zero
 cm_mat_t *cm_mat_row(const cm_mat_t *source_matrix, size_t row) {
 
 #ifdef CM_DEBUG
@@ -91,6 +87,7 @@ cm_mat_t *cm_mat_row(const cm_mat_t *source_matrix, size_t row) {
   return row_matrix;
 }
 
+// NOTE: numeration from zero
 cm_mat_t *cm_mat_col(const cm_mat_t *source_matrix, size_t col) {
 
 #ifdef CM_DEBUG
@@ -109,6 +106,7 @@ cm_mat_t *cm_mat_col(const cm_mat_t *source_matrix, size_t col) {
   return col_matrix;
 }
 
+// NOTE: numeration from zero
 cm_mat_t *cm_mat_submatrix(const cm_mat_t *source_matrix, size_t row_start,
                            size_t row_end, size_t col_start, size_t col_end) {
 
@@ -154,13 +152,8 @@ cm_mat_t *cm_mat_create_identity(size_t size) {
 
   cm_mat_t *identity = cm_mat_create_zero(size, size);
 
-  for (size_t i = 0; i < identity->rows; ++i) {
-    for (size_t j = 0; j < identity->columns; ++j) {
-      if (i == j)
-        identity->data[i * identity->columns + j] = 1;
-      else
-        identity->data[i * identity->columns + j] = 0;
-    }
+  for (size_t i = 0; i < size * size; i += size + 1) {
+    identity->data[i] = 1;
   }
 
   return identity;
