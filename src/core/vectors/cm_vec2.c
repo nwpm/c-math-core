@@ -51,6 +51,7 @@ void cm_vec2_min(cm_vec2_t a, cm_vec2_t b, cm_vec2_t dest) {
   dest.y = (a.y >= b.y) ? b.y : a.y;
 }
 
+// NOTE: counterclockwise rotation
 void cm_vec2_rotate(cm_vec2_t vec, cm_real_t angle, cm_vec2_t dest) {
   cm_real_t t_c = cos(angle);
   cm_real_t t_s = sin(angle);
@@ -62,11 +63,6 @@ void cm_vec2_normalize(cm_vec2_t vec, cm_vec2_t dest) {
   cm_real_t vec_norm = cm_vec2_norm(vec);
   dest.x /= vec_norm;
   dest.y /= vec_norm;
-}
-
-void cm_vec2_perp(cm_vec2_t vec, cm_vec2_t dest) {
-  dest.x = (-vec.y * vec.y) / vec.x;
-  dest.y = vec.y;
 }
 
 void cm_vec2_project(cm_vec2_t proj_from, cm_vec2_t proj_to, cm_vec2_t dest) {

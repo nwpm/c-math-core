@@ -18,7 +18,6 @@ void cm_vec2_min(cm_vec2_t a, cm_vec2_t b, cm_vec2_t dest);
 void cm_vec2_rotate(cm_vec2_t vec, cm_real_t angle, cm_vec2_t dest);
 void cm_vec2_normalize(cm_vec2_t vec, cm_vec2_t dest);
 void cm_vec2_project(cm_vec2_t proj_from, cm_vec2_t proj_to, cm_vec2_t dest);
-void cm_vec2_perp(cm_vec2_t vec, cm_vec2_t dest);
 
 cm_real_t cm_vec2_dot(cm_vec2_t a, cm_vec2_t b);
 cm_real_t cm_vec2_cross(cm_vec2_t a, cm_vec2_t b);
