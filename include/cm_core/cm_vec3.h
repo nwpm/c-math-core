@@ -20,7 +20,6 @@ void cm_vec3_rotate_y(cm_vec3_t vec, cm_real_t angle, cm_vec3_t dest);
 void cm_vec3_rotate_z(cm_vec3_t vec, cm_real_t angle, cm_vec3_t dest);
 void cm_vec3_normalize(cm_vec3_t vec, cm_vec3_t dest);
 void cm_vec3_project(cm_vec3_t proj_from, cm_vec3_t proj_to, cm_vec3_t dest);
-void cm_vec3_perp(cm_vec3_t vec, cm_vec3_t dest);
 void cm_vec3_cross(cm_vec3_t a, cm_vec3_t b, cm_vec3_t dest);
 
 cm_real_t cm_vec3_dot(cm_vec3_t a, cm_vec3_t b);

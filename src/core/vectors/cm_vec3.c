@@ -138,13 +138,6 @@ void cm_vec3_project(cm_vec3_t proj_from, cm_vec3_t proj_to, cm_vec3_t dest) {
   dest.z = proj_to.z * scalar;
 }
 
-void cm_vec3_perp(cm_vec3_t vec, cm_vec3_t dest) {
-
-  dest.x = (-(vec.y * vec.y) - (vec.z * vec.z)) / vec.x;
-  dest.y = vec.y;
-  dest.z = vec.z;
-}
-
 void cm_vec3_cross(cm_vec3_t vec_a, cm_vec3_t vec_b, cm_vec3_t dest) {
 
   cm_real_t det_x = (vec_a.y * vec_b.z) - (vec_a.z * vec_b.y);
