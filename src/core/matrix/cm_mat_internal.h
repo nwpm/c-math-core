@@ -13,7 +13,16 @@
 // TODO: linear transfonmations(rotation, mirror, projection, shear, scale
 // compration, expantion)
 
-/* Matrix double type */
+/* Matrix real type
+ *
+ * Numeration for cols and rows from 1
+ *
+ *
+ *
+ *
+ *
+ */
+
 typedef struct cm_mat_t {
   size_t rows;
   size_t columns;

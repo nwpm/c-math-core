@@ -69,7 +69,6 @@ cm_mat_t *cm_mat_create_zero(size_t rows, size_t cols) {
   return matrix;
 }
 
-// NOTE: numeration from zero
 cm_mat_t *cm_mat_row(const cm_mat_t *source_matrix, size_t row) {
 
 #ifdef CM_DEBUG
@@ -80,14 +79,16 @@ cm_mat_t *cm_mat_row(const cm_mat_t *source_matrix, size_t row) {
 #endif
 
   cm_mat_t *row_matrix = cm_mat_alloc(1, source_matrix->columns);
+  row_matrix->columns = source_matrix->columns;
+  row_matrix->rows = 1;
 
-  memcpy(row_matrix->data, source_matrix->data + (row * source_matrix->columns),
+  memcpy(row_matrix->data,
+         source_matrix->data + ((row - 1) * source_matrix->columns),
          sizeof(cm_real_t) * source_matrix->columns);
 
   return row_matrix;
 }
 
-// NOTE: numeration from zero
 cm_mat_t *cm_mat_col(const cm_mat_t *source_matrix, size_t col) {
 
 #ifdef CM_DEBUG
@@ -99,14 +100,16 @@ cm_mat_t *cm_mat_col(const cm_mat_t *source_matrix, size_t col) {
 #endif
 
   cm_mat_t *col_matrix = cm_mat_alloc(source_matrix->rows, 1);
+  col_matrix->rows = source_matrix->rows;
+  col_matrix->columns = 1;
 
   for (size_t i = 0; i < source_matrix->rows; ++i)
-    col_matrix->data[i] = source_matrix->data[i * source_matrix->columns + col];
+    col_matrix->data[i] =
+        source_matrix->data[i * source_matrix->columns + (col - 1)];
 
   return col_matrix;
 }
 
-// NOTE: numeration from zero
 cm_mat_t *cm_mat_submatrix(const cm_mat_t *source_matrix, size_t row_start,
                            size_t row_end, size_t col_start, size_t col_end) {
 
@@ -121,15 +124,16 @@ cm_mat_t *cm_mat_submatrix(const cm_mat_t *source_matrix, size_t row_start,
          "Invalid submatrix position");
 #endif
 
-  cm_mat_t *submatrix =
-      cm_mat_alloc(row_end - row_start + 1, col_end - col_start + 1);
+  cm_mat_t *submatrix = cm_mat_alloc(row_end - row_start, col_end - col_start);
+  submatrix->rows = row_end - row_start;
+  submatrix->columns = col_end - col_start;
 
   size_t k = 0;
 
-  for (size_t i = row_start; i <= row_end; ++i, ++k) {
+  for (size_t i = row_start - 1; i < row_end; ++i, ++k) {
     size_t m = 0;
 
-    for (size_t j = col_start; j <= col_end; ++j, ++m) {
+    for (size_t j = col_start - 1; j < col_end; ++j, ++m) {
       submatrix->data[m + k * submatrix->columns] =
           source_matrix->data[j + i * source_matrix->columns];
     }
@@ -141,6 +145,8 @@ cm_mat_t *cm_mat_submatrix(const cm_mat_t *source_matrix, size_t row_start,
 cm_mat_t *cm_mat_create_diag(size_t size, cm_real_t init_val) {
 
   cm_mat_t *diag = cm_mat_create_zero(size, size);
+  diag->columns = size;
+  diag->rows = size;
 
   for (size_t i = 0; i < size; ++i)
     diag->data[i + i * size] = init_val;
@@ -149,14 +155,7 @@ cm_mat_t *cm_mat_create_diag(size_t size, cm_real_t init_val) {
 }
 
 cm_mat_t *cm_mat_create_identity(size_t size) {
-
-  cm_mat_t *identity = cm_mat_create_zero(size, size);
-
-  for (size_t i = 0; i < size * size; i += size + 1) {
-    identity->data[i] = 1;
-  }
-
-  return identity;
+  return cm_mat_create_diag(size, 1);
 }
 
 cm_mat_t *cm_mat_create_from_matrix(const cm_mat_t *orig_matrix) {
