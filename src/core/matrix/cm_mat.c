@@ -79,8 +79,6 @@ cm_mat_t *cm_mat_row(const cm_mat_t *source_matrix, size_t row) {
 #endif
 
   cm_mat_t *row_matrix = cm_mat_alloc(1, source_matrix->columns);
-  row_matrix->columns = source_matrix->columns;
-  row_matrix->rows = 1;
 
   memcpy(row_matrix->data,
          source_matrix->data + ((row - 1) * source_matrix->columns),
@@ -100,8 +98,6 @@ cm_mat_t *cm_mat_col(const cm_mat_t *source_matrix, size_t col) {
 #endif
 
   cm_mat_t *col_matrix = cm_mat_alloc(source_matrix->rows, 1);
-  col_matrix->rows = source_matrix->rows;
-  col_matrix->columns = 1;
 
   for (size_t i = 0; i < source_matrix->rows; ++i)
     col_matrix->data[i] =
@@ -125,9 +121,6 @@ cm_mat_t *cm_mat_submatrix(const cm_mat_t *source_matrix, size_t row_start,
 #endif
 
   cm_mat_t *submatrix = cm_mat_alloc(row_end - row_start, col_end - col_start);
-  submatrix->rows = row_end - row_start;
-  submatrix->columns = col_end - col_start;
-
   size_t k = 0;
 
   for (size_t i = row_start - 1; i < row_end; ++i, ++k) {
@@ -145,8 +138,6 @@ cm_mat_t *cm_mat_submatrix(const cm_mat_t *source_matrix, size_t row_start,
 cm_mat_t *cm_mat_create_diag(size_t size, cm_real_t init_val) {
 
   cm_mat_t *diag = cm_mat_create_zero(size, size);
-  diag->columns = size;
-  diag->rows = size;
 
   for (size_t i = 0; i < size; ++i)
     diag->data[i + i * size] = init_val;
@@ -166,12 +157,8 @@ cm_mat_t *cm_mat_create_from_matrix(const cm_mat_t *orig_matrix) {
 #endif
 
   cm_mat_t *copy_matrix = cm_mat_alloc(orig_matrix->rows, orig_matrix->columns);
-
-  for (size_t i = 0; i < copy_matrix->rows; ++i) {
-    memcpy(copy_matrix->data + copy_matrix->columns * i,
-           orig_matrix->data + orig_matrix->columns * i,
-           sizeof(cm_real_t) * orig_matrix->columns);
-  }
+  memcpy(copy_matrix->data, orig_matrix->data,
+         sizeof(cm_real_t) * orig_matrix->columns * orig_matrix->rows);
 
   return copy_matrix;
 }
@@ -186,9 +173,8 @@ cm_mat_t *cm_mat_create_from_array(const cm_real_t **arr, size_t rows,
   cm_mat_t *matrix = cm_mat_alloc(rows, cols);
 
   for (size_t i = 0; i < rows; ++i) {
-    for (size_t j = 0; j < cols; ++j) {
-      matrix->data[i * matrix->columns + j] = arr[i][j];
-    }
+    memcpy(matrix->data + i * matrix->columns, arr[i],
+           sizeof(cm_real_t) * cols);
   }
 
   return matrix;
