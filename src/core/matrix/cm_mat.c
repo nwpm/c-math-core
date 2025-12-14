@@ -197,14 +197,10 @@ void cm_mat_set_identity(cm_mat_t *matrix) {
          "Invalid matrix type, must be square");
 #endif
 
-  for (size_t i = 0; i < matrix->rows; ++i) {
-    for (size_t j = 0; j < matrix->columns; ++j) {
-      if (i == j)
-        matrix->data[i * matrix->columns + j] = 1.;
-      else
-        matrix->data[i * matrix->columns + j] = 0.;
-    }
-  }
+  memset(matrix->data, 0, sizeof(cm_real_t) * matrix->columns * matrix->rows);
+
+  for (size_t i = 0; i < matrix->rows; ++i)
+    matrix->data[i + i * matrix->columns] = 1;
 }
 
 void cm_mat_set_zero(cm_mat_t *matrix) {
@@ -234,7 +230,7 @@ void cm_mat_set_all(cm_mat_t *matrix, cm_real_t x) {
 }
 
 void cm_mat_set(cm_mat_t *matrix, size_t row, size_t col, cm_real_t x) {
-  matrix->data[row * matrix->columns + col] = x;
+  matrix->data[(row - 1) * matrix->columns + (col - 1)] = x;
 }
 
 /********************** Matrix operations **********************/
@@ -248,7 +244,7 @@ void cm_mat_scale_row(cm_mat_t *matrix, size_t row, size_t scale_by) {
 #endif
 
   for (size_t i = 0; i < matrix->columns; ++i)
-    matrix->data[i + row * matrix->columns] *= scale_by;
+    matrix->data[i + (row - 1) * matrix->columns] *= scale_by;
 }
 
 void cm_mat_swap(cm_mat_t **matrix_a, cm_mat_t **matrix_b) {
@@ -375,8 +371,6 @@ cm_real_t cm_mat_trace(const cm_mat_t *matrix) {
   return trace_out;
 }
 
-// NOTE: fine for small matrix
-// TODO: change get to direct data access
 cm_real_t cm_mat_det(const cm_mat_t *matrix) {
 
 #ifdef CM_DEBUG
@@ -391,79 +385,61 @@ cm_real_t cm_mat_det(const cm_mat_t *matrix) {
     return _cm_mat_det_less_3(matrix);
 
   cm_mat_t *copy_matrix = cm_mat_create_from_matrix(matrix);
-  cm_real_t *mult_constants = malloc(copy_matrix->columns * sizeof(cm_real_t));
 
-  int mult_const_index = 0;
-  int swap_number = 0;
+  int sign = 1;
+  cm_real_t det_out = 0;
 
-  for (size_t k = 0; k < copy_matrix->rows - 1; ++k) {
+  for (size_t i = 0; i < matrix->rows; ++i) {
 
-    cm_real_t pivot = copy_matrix->data[k * copy_matrix->columns + k];
+    size_t pivot = i;
+    cm_real_t max_elem = _cm_real_abs(matrix->data[i + i * matrix->columns]);
 
-    if (pivot == 0) {
-
-      bool find_non_zero = false;
-      void *buffer = malloc(copy_matrix->columns * sizeof(cm_real_t));
-
-      for (size_t i = k + 1; i < copy_matrix->rows && !find_non_zero; ++i) {
-        cm_real_t tmp = copy_matrix->data[i * copy_matrix->columns + k];
-        if (tmp != 0) {
-
-          find_non_zero = true;
-
-          memcpy(buffer, copy_matrix->data + (i * copy_matrix->columns),
-                 sizeof(cm_real_t) * copy_matrix->columns);
-
-          memmove(copy_matrix->data + (i * copy_matrix->columns),
-                  copy_matrix->data + (k * copy_matrix->columns),
-                  sizeof(cm_real_t) * copy_matrix->columns);
-
-          memmove(copy_matrix->data + (k * copy_matrix->columns), buffer,
-                  sizeof(cm_real_t) * copy_matrix->columns);
-
-          swap_number++;
-        }
-      }
-
-      free(buffer);
-
-      if (!find_non_zero) {
-        cm_mat_free(copy_matrix);
-        free(mult_constants);
-        return 0.;
+    for (size_t j = i + 1; j < matrix->rows; ++j) {
+      cm_real_t val = _cm_real_abs(matrix->data[i + j * matrix->columns]);
+      if (val > max_elem) {
+        max_elem = val;
+        pivot = j;
       }
     }
 
-    cm_mat_scale_row(copy_matrix, k, (1. / pivot));
+    if (_cm_real_equal(max_elem, 0)) {
+      cm_mat_free(copy_matrix);
+      return det_out;
+    }
 
-    mult_constants[mult_const_index++] = pivot;
+    if (pivot != i) {
+      void *buffer = malloc(copy_matrix->columns * sizeof(cm_real_t));
 
-    for (size_t i = k + 1; i < copy_matrix->rows; ++i) {
-      cm_real_t deleted = -copy_matrix->data[i * copy_matrix->columns + k];
-      for (size_t j = 0; j < copy_matrix->columns; ++j) {
-        cm_real_t a = copy_matrix->data[k * copy_matrix->columns + j];
-        cm_real_t b = copy_matrix->data[i * copy_matrix->columns + j];
-        cm_real_t set_elem = a * deleted + b;
+      memcpy(buffer, copy_matrix->data + (i * copy_matrix->columns),
+             sizeof(cm_real_t) * copy_matrix->columns);
 
-        cm_mat_set(copy_matrix, i, j, set_elem);
+      memmove(copy_matrix->data + (i * copy_matrix->columns),
+              copy_matrix->data + (pivot * copy_matrix->columns),
+              sizeof(cm_real_t) * copy_matrix->columns);
+
+      memmove(copy_matrix->data + (pivot * copy_matrix->columns), buffer,
+              sizeof(cm_real_t) * copy_matrix->columns);
+
+      free(buffer);
+      sign *= -sign;
+    }
+
+    for (size_t j = i + 1; j < matrix->rows; ++j) {
+      cm_real_t factor = matrix->data[i + j * matrix->columns] /
+                         matrix->data[i + i * matrix->columns];
+      for (size_t k = i; k < matrix->columns; ++k) {
+        matrix->data[k + j * matrix->columns] -=
+            factor * matrix->data[k + i * matrix->columns];
       }
     }
   }
 
-  cm_real_t det_out = 0.;
-  cm_real_t mult = (swap_number % 2 == 0) ? 1 : -1;
-  cm_real_t a =
-      copy_matrix->data[(copy_matrix->rows - 1) * copy_matrix->columns +
-                        (copy_matrix->rows - 1)];
-  det_out = mult * a;
-
-  for (int i = 0; i < mult_const_index; ++i)
-    det_out *= mult_constants[i];
+  for (size_t i = 0; i < matrix->columns; ++i) {
+    det_out *= matrix->data[i + i * matrix->columns];
+  }
 
   cm_mat_free(copy_matrix);
-  free(mult_constants);
-
-  return det_out;
+  return det_out * sign;
 }
 
 // TODO: if pivot 1e-20 unstable
