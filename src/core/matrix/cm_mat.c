@@ -43,8 +43,6 @@ static double _cm_mat_det_less_3(const cm_mat_t *matrix) {
   return det_out;
 }
 
-/********************** Allocations **********************/
-
 cm_mat_t *cm_mat_alloc(size_t rows, size_t cols) {
 
   cm_mat_t *matrix = malloc(sizeof(cm_mat_t));
@@ -80,8 +78,7 @@ cm_mat_t *cm_mat_row(const cm_mat_t *source_matrix, size_t row) {
 
   cm_mat_t *row_matrix = cm_mat_alloc(1, source_matrix->columns);
 
-  memcpy(row_matrix->data,
-         source_matrix->data + ((row - 1) * source_matrix->columns),
+  memcpy(row_matrix->data, source_matrix->data + (row * source_matrix->columns),
          sizeof(cm_real_t) * source_matrix->columns);
 
   return row_matrix;
@@ -100,8 +97,7 @@ cm_mat_t *cm_mat_col(const cm_mat_t *source_matrix, size_t col) {
   cm_mat_t *col_matrix = cm_mat_alloc(source_matrix->rows, 1);
 
   for (size_t i = 0; i < source_matrix->rows; ++i)
-    col_matrix->data[i] =
-        source_matrix->data[i * source_matrix->columns + (col - 1)];
+    col_matrix->data[i] = source_matrix->data[i * source_matrix->columns + col];
 
   return col_matrix;
 }
@@ -120,13 +116,14 @@ cm_mat_t *cm_mat_submatrix(const cm_mat_t *source_matrix, size_t row_start,
          "Invalid submatrix position");
 #endif
 
-  cm_mat_t *submatrix = cm_mat_alloc(row_end - row_start, col_end - col_start);
+  cm_mat_t *submatrix =
+      cm_mat_alloc(row_end - row_start + 1, col_end - col_start + 1);
   size_t k = 0;
 
-  for (size_t i = row_start - 1; i < row_end; ++i, ++k) {
+  for (size_t i = row_start; i < row_end; ++i, ++k) {
     size_t m = 0;
 
-    for (size_t j = col_start - 1; j < col_end; ++j, ++m) {
+    for (size_t j = col_start; j < col_end; ++j, ++m) {
       submatrix->data[m + k * submatrix->columns] =
           source_matrix->data[j + i * source_matrix->columns];
     }
@@ -756,10 +753,10 @@ void cm_mat_swap_rows(cm_mat_t *matrix, size_t row_a, size_t row_b) {
 
   cm_real_t *buffer = malloc(row_len);
 
-  memcpy(buffer, matrix->data + row_a * matrix->columns, row_len);
-  memmove(matrix->data + row_a * matrix->columns,
-          matrix->data + row_b * matrix->columns, row_len);
-  memmove(matrix->data + row_b * matrix->columns, buffer, row_len);
+  memcpy(buffer, matrix->data + (row_a - 1) * (matrix->columns - 1), row_len);
+  memmove(matrix->data + (row_a - 1) * (matrix->columns - 1),
+          matrix->data + (row_b - 1) * (matrix->columns - 1), row_len);
+  memmove(matrix->data + (row_b - 1) * (matrix->columns - 1), buffer, row_len);
 
   free(buffer);
 }
@@ -775,8 +772,8 @@ void cm_mat_scale_sum_rows(cm_mat_t *matrix, size_t row_scaled, size_t row_sum,
 #endif
 
   for (size_t i = 0; i < matrix->columns; ++i) {
-    matrix->data[i + row_sum * matrix->columns] +=
-        matrix->data[i + row_scaled * matrix->columns] * scale_by;
+    matrix->data[i + (row_sum - 1) * (matrix->columns - 1)] +=
+        matrix->data[i + (row_scaled - 1) * (matrix->columns - 1)] * scale_by;
   }
 }
 

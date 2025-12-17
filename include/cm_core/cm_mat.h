@@ -5,40 +5,118 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-/* Matrix cm_real_t type */
 typedef struct cm_mat_t cm_mat_t;
 typedef cm_real_t (*cm_mat_element_op)(cm_real_t x);
 
-/* Allocate row matrix with size Rows * Cols */
+/**
+ * @brief Allocates an uninitialized matrix of size rows × cols.
+ *
+ * @param rows Number of rows.
+ * @param cols Number of cols.
+ * @return A new matrix of size rows × cols.
+ *
+ * @note Elements of the matrix are uninitialized.
+ */
 cm_mat_t *cm_mat_alloc(size_t rows, size_t cols);
 
-/* Allocate zero matrix with size Rows * Cols */
+/**
+ * @brief Creates a zero matrix of size rows × cols.
+ *
+ * @param rows Number of rows.
+ * @param cols Number of columns.
+ * @return A new zero matrix of size rows × cols
+ *
+ * @note Allocates memory for a new matrix.
+ */
 cm_mat_t *cm_mat_create_zero(size_t rows, size_t cols);
 
-/* Create copy of source matrix */
-cm_mat_t *cm_mat_create_from_matrix(const cm_mat_t *orig_mat);
+/**
+ * @brief Creates a copy of the source matrix.
+ *
+ * @param source The matrix to copy.
+ * @return A new matrix that is a copy of the source matrix.
+ *
+ * @note Allocates memory for a new matrix.
+ */
+cm_mat_t *cm_mat_create_from_matrix(const cm_mat_t *source);
 
-/* Create matrix from cm_real_t array */
+/**
+ * @brief Create a new matrix from a 2D array of real numbers.
+ *
+ * @param arr Pointer to a 2D pointers array of real numbers.
+ * @param rows Number of rows in the array.
+ * @param cols Number of columns in the array.
+ * @return A new matrix created from the array.
+ *
+ * @note Allocates memory for a new matrix.
+ */
 cm_mat_t *cm_mat_create_from_array(const cm_real_t **arr, size_t rows,
                                    size_t cols);
 
-/* Create row vector from source matrix row */
-cm_mat_t *cm_mat_row(const cm_mat_t *source_mat, size_t row);
+/**
+ * @brief Creates a row matrix from a specific row of the source matrix.
+ *
+ * @param source The source matrix.
+ * @param row Index of the row to extract.
+ * @return A new matrix corresponding to the specified row.
+ *
+ * @note Allocates memory for a new matrix.
+ */
+cm_mat_t *cm_mat_row(const cm_mat_t *source, size_t row);
 
-/* Create column vector from source matrix col */
-cm_mat_t *cm_mat_col(const cm_mat_t *source_mat, size_t col);
+/**
+ * @brief Creates a column matrix from a specific column of the source matrix.
+ *
+ * @param source The source matrix.
+ * @param col Index of the column to extract.
+ * @return A new matrix corresponding to the specified column.
+ *
+ * @note Allocates memory for a new matrix.
+ */
+cm_mat_t *cm_mat_col(const cm_mat_t *source, size_t col);
 
-/* Extract submatrix from source matrix */
-cm_mat_t *cm_mat_submat(const cm_mat_t *source_matrix, size_t row_start,
+/**
+ * @brief Creates a matrix from a submatrix of the source matrix.
+ *
+ * @param source The source matrix.
+ * @param row_start Index of the first row of the submatrix.
+ * @param row_end Index of the last row of the submatrix.
+ * @param col_start Index of the first column of the submatrix.
+ * @param col_end Index of the last column of the submatrix.
+ * @return A new matrix corresponding to the specified submatrix.
+ *
+ * @note Allocates memory for a new matrix.
+ */
+cm_mat_t *cm_mat_submat(const cm_mat_t *source, size_t row_start,
                         size_t row_end, size_t col_start, size_t col_end);
 
-/* Create diagonal mat with size, and init by val */
-cm_mat_t *cm_mat_create_diag(size_t size, cm_real_t init_val);
+/**
+ * @brief Create a diagonal matrix of size n × n.
+ *
+ * @param n Number of rows and columns of the matrix.
+ * @param init_val Value to set on the main diagonal.
+ * @return A new diagonal matrix of size n × n.
+ *
+ * @note Allocates memory for a new matrix
+ */
+cm_mat_t *cm_mat_create_diag(size_t n, cm_real_t init_val);
 
-/* Create identity matrix with size */
-cm_mat_t *cm_mat_create_identity(size_t size);
+/**
+ * @brief Creates an identity matrix of size n × n.
+ *
+ * @param n Number of rows and columns of the matrix.
+ * @return A new identity matrix of size n × n.
+ *
+ * @note Allocates memory for a new matrix.
+ */
+cm_mat_t *cm_mat_create_identity(size_t n);
 
-/* Free allocated matrix */
+/**
+ * @brief Free the allocated matrix.
+ *
+ * @param mat Pointer to the matrix to free.
+ *
+ */
 void cm_mat_free(cm_mat_t *mat);
 
 /* Set current matrix identity */
