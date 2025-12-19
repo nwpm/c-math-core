@@ -227,7 +227,7 @@ void cm_mat_set_all(cm_mat_t *matrix, cm_real_t x) {
 }
 
 void cm_mat_set(cm_mat_t *matrix, size_t row, size_t col, cm_real_t x) {
-  matrix->data[(row - 1) * matrix->columns + (col - 1)] = x;
+  matrix->data[row * matrix->columns + col] = x;
 }
 
 /********************** Matrix operations **********************/
@@ -634,9 +634,6 @@ bool cm_mat_is_identity(const cm_mat_t *matrix) {
          "Invalid matrix type, must be square");
 #endif
 
-  size_t i = 0;
-  size_t j = 0;
-
   for (size_t i = 0; i < matrix->rows; ++i) {
     for (size_t j = 0; j < matrix->columns; ++j) {
       cm_real_t current_elem = matrix->data[i * matrix->columns + j];
@@ -887,4 +884,8 @@ void cm_mat_map(cm_mat_t *matrix, cm_mat_element_op map) {
 
   for (size_t i = 0; i < matrix->rows * matrix->columns; ++i)
     matrix->data[i] = map(matrix->data[i]);
+}
+
+cm_real_t cm_mat_get(const cm_mat_t *mat, size_t row, size_t col) {
+  return mat->data[col + mat->columns * row];
 }

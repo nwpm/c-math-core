@@ -23,11 +23,11 @@
  *
  */
 
-typedef struct cm_mat_t {
+struct cm_mat_t {
   size_t rows;
   size_t columns;
   cm_real_t *data;
-} cm_mat_t;
+};
 
 #ifdef CM_DEBUG
 void _cm_matrix_double_printf(const cm_dmat_t *matrix);
