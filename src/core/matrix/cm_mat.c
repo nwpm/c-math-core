@@ -1,6 +1,5 @@
 #include "../../../include/cm_core/cm_mat.h"
 #include "../utils/cm_utils.h"
-#include "cm_mat_internal.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -23,6 +22,20 @@ void _cm_matrix_double_printf(const cm_mat_t *matrix) {
 }
 #endif
 
+// TODO: cm_matrix_double_set_submatrix(dest, src, row_offset, col_offset)
+// TODO: resize
+// TODO: LU, QR, Cholesky
+// TODO: random_matrix(rows, cols, min, max)
+// TODO: fixed_matrix(3x3, 2x2, 4x4)
+// TODO: cm_matrix_double_from_txt
+// TODO: linear transfonmations(rotation, mirror, projection, shear, scale
+// compration, expantion)
+
+struct cm_mat_t {
+  size_t rows;
+  size_t columns;
+  cm_real_t *data;
+};
 static double _cm_mat_det_less_3(const cm_mat_t *matrix) {
 
   double det_out = 0.;
