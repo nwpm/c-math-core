@@ -1,30 +1,11 @@
-# === PATHS ===
+CORE_DIR = src/core
+CORE_TEST_DIR = test/core
 
-BUILD_DIR  = build
-BIN_DIR    = bin
+.PHONY: core tests
 
-UNITY_DIR   = test/Unity
-UNITY_BUILD = $(BUILD_DIR)/unity
+core:
+	$(MAKE) -C $(CORE_DIR)
 
-# === TARGETS ===
+tests:
+	$(MAKE) -C $(CORE_TEST_DIR)
 
-.PHONY: matrix mtest unity bclean
-
-matrix:
-	$(MAKE) -C src/matrix
-
-mtest:
-	$(MAKE) -C test/matrix
-
-unity: $(UNITY_BUILD)
-	cd $(UNITY_BUILD) && cmake ../../$(UNITY_DIR)
-	cd $(UNITY_BUILD) && make
-	find build/unity -mindepth 1 ! -name 'libunity.a' -exec rm -rf {} +
-
-bclean:
-	find $(BUILD_DIR) -mindepth 1 -maxdepth 1 -not -name 'unity' -exec rm -rf {} +
-
-# === RULES ===
-
-$(UNITY_BUILD):
-	mkdir -p $@
