@@ -902,3 +902,14 @@ void cm_mat_map(cm_mat_t *matrix, cm_mat_element_op map) {
 cm_real_t cm_mat_get(const cm_mat_t *mat, size_t row, size_t col) {
   return mat->data[col + mat->columns * row];
 }
+
+size_t cm_mat_rows(const cm_mat_t *mat){
+  return mat->rows;
+}
+size_t cm_mat_cols(const cm_mat_t *mat){
+  return mat->columns;
+}
+
+
+
+

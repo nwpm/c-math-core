@@ -386,4 +386,20 @@ cm_real_t cm_mat_get(const cm_mat_t *mat, size_t row, size_t col);
  */
 void cm_mat_set(cm_mat_t *mat, size_t row, size_t col, cm_real_t x);
 
+/**
+ * @brief Returns the number of rows in the matrix.
+ *
+ * @param mat Pointer to the matrix.
+ * @return The number of rows in the matrix.
+ */
+size_t cm_mat_rows(const cm_mat_t *mat);
+
+/**
+ * @brief Returns the number of columns in the matrix.
+ *
+ * @param mat Pointer to the matrix.
+ * @return The number of columns in the matrix.
+ */
+size_t cm_mat_cols(const cm_mat_t *mat);
+
 #endif
