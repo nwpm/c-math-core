@@ -1,6 +1,9 @@
 # === Compiler ===
 CC     = gcc
-CFLAGS = -g -O0 -fsanitize=address -Wall -Wextra -Wpedantic -std=c99
+CFLAGS = -Wall -Wextra -Wpedantic -std=c99
+
+DEBUG_FLAGS   = -g -O0 -fsanitize=address
+RELEASE_FLAGS = -O2
 
 # === PATHS ===
 
@@ -16,6 +19,15 @@ CORE_LIB = $(LIB_DIR)/libcm_core.a
 
 ALL_INCLUDES = $(PROJ_ROOT)/include/cm_core
 
+BUILD_TYPE ?= debug
+
+ifeq ($(BUILD_TYPE), debug)
+	CFLAGS    += $(DEBUG_FLAGS)
+else ifeq ($(BUILD_TYPE), release)
+	CLAGSS    += $(RELEASE_CFLAGS)
+else
+	$(error Unknown build type: $(BUILD_TYPE))
+endif
 # === TARGETS ===
 
 .PHONY: all clean install
