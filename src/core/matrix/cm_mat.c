@@ -115,8 +115,8 @@ cm_mat_t *cm_mat_col(const cm_mat_t *source_matrix, size_t col) {
   return col_matrix;
 }
 
-cm_mat_t *cm_mat_submatrix(const cm_mat_t *source_matrix, size_t row_start,
-                           size_t row_end, size_t col_start, size_t col_end) {
+cm_mat_t *cm_mat_submat(const cm_mat_t *source_matrix, size_t row_start,
+                        size_t row_end, size_t col_start, size_t col_end) {
 
 #ifdef CM_DEBUG
   assert(!source_matrix && "Matrix argument is NULL pointer");
@@ -133,10 +133,10 @@ cm_mat_t *cm_mat_submatrix(const cm_mat_t *source_matrix, size_t row_start,
       cm_mat_alloc(row_end - row_start + 1, col_end - col_start + 1);
   size_t k = 0;
 
-  for (size_t i = row_start; i < row_end; ++i, ++k) {
+  for (size_t i = row_start; i <= row_end; ++i, ++k) {
     size_t m = 0;
 
-    for (size_t j = col_start; j < col_end; ++j, ++m) {
+    for (size_t j = col_start; j <= col_end; ++j, ++m) {
       submatrix->data[m + k * submatrix->columns] =
           source_matrix->data[j + i * source_matrix->columns];
     }
@@ -903,13 +903,5 @@ cm_real_t cm_mat_get(const cm_mat_t *mat, size_t row, size_t col) {
   return mat->data[col + mat->columns * row];
 }
 
-size_t cm_mat_rows(const cm_mat_t *mat){
-  return mat->rows;
-}
-size_t cm_mat_cols(const cm_mat_t *mat){
-  return mat->columns;
-}
-
-
-
-
+size_t cm_mat_rows(const cm_mat_t *mat) { return mat->rows; }
+size_t cm_mat_cols(const cm_mat_t *mat) { return mat->columns; }
