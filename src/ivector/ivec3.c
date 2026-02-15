@@ -1,65 +1,106 @@
-#include "../utils/cm_utils.h"
-#include "../../../include/cm_core/cm_ivec3.h"
-#include "cm_ivec3_internal.h"
-
-// For sqrt
+#include "../../include/cmathcore/ivector3.h"
 #include <math.h>
 
-void cm_ivec2_copy(cm_ivec3_t v, cm_ivec3_t dest) {
-  dest.x = v.x;
-  dest.y = v.y;
+void cm_ivec3_init(cm_ivec3_t *v, int64_t x, int64_t y, int64_t z) {
+  v->x = x;
+  v->y = y;
+  v->z = z;
 }
 
-void cm_ivec2_zero(cm_ivec3_t v) {
-  v.x = 0;
-  v.y = 0;
+void cm_ivec3_copy(const cm_ivec3_t v, cm_ivec3_t *dest) {
+  dest->x = v.x;
+  dest->y = v.y;
+  dest->z = v.z;
 }
 
-void cm_ivec2_add(cm_ivec3_t a, cm_ivec3_t b, cm_ivec3_t dest) {
-  dest.x = a.x + b.x;
-  dest.y = a.y + b.y;
+void cm_ivec3_fill(cm_ivec3_t *v, int64_t val) {
+  v->x = val;
+  v->y = val;
+  v->z = val;
 }
 
-void cm_ivec2_sub(cm_ivec3_t a, cm_ivec3_t b, cm_ivec3_t dest) {
-  dest.x = a.x - b.y;
-  dest.y = a.x - b.y;
+void cm_ivec3_set_zero(cm_ivec3_t *v) {
+  v->x = 0;
+  v->y = 0;
+  v->z = 0;
 }
 
-void cm_ivec2_scale(cm_ivec3_t v, int s, cm_ivec3_t dest) {
-  dest.x = v.x * s;
-  dest.y = v.y * s;
+void cm_ivec3_add(const cm_ivec3_t a, const cm_ivec3_t b, cm_ivec3_t *res) {
+  res->x = a.x + b.x;
+  res->y = a.y + b.y;
+  res->z = a.z + b.z;
 }
 
-void cm_ivec2_fill(cm_ivec3_t v, int val) {
-  v.x = val;
-  v.y = val;
+void cm_ivec3_sub(const cm_ivec3_t a, const cm_ivec3_t b, cm_ivec3_t *res) {
+  res->x = a.x - b.y;
+  res->y = a.x - b.y;
+  res->z = a.x - b.y;
 }
 
-void cm_ivec2_abs(cm_ivec3_t v, cm_ivec3_t dest) {
-  dest.x = _cm_abs(v.x);
-  dest.y = _cm_abs(v.y);
+void cm_ivec3_scale(const cm_ivec3_t v, int64_t s, cm_ivec3_t *res) {
+  res->x = v.x * s;
+  res->y = v.y * s;
+  res->z = v.z * s;
 }
 
-void cm_ivec2_max(cm_ivec3_t a, cm_ivec3_t b, cm_ivec3_t dest) {
-  dest.x = (a.x >= b.x) ? a.x : b.x;
-  dest.y = (a.y >= b.y) ? a.y : b.y;
+void cm_ivec3_abs(const cm_ivec3_t v, cm_ivec3_t *res) {
+  res->x = ~INT64_MIN & v.x;
+  res->y = ~INT64_MIN & v.y;
+  res->z = ~INT64_MIN & v.z;
 }
 
-void cm_ivec2_min(cm_ivec3_t a, cm_ivec3_t b, cm_ivec3_t dest) {
-  dest.x = (a.x >= b.x) ? b.x : a.x;
-  dest.y = (a.y >= b.y) ? b.y : a.y;
+void cm_ivec3_add_inplace(cm_ivec3_t *a, const cm_ivec3_t b) {
+  a->x += b.x;
+  a->y += b.y;
+  a->z += b.z;
 }
 
-int cm_ivec2_dot(cm_ivec3_t a, cm_ivec3_t b) { return a.x * b.x + a.y * b.y; }
-
-int cm_ivec2_cross(cm_ivec3_t a, cm_ivec3_t b) { return a.x * b.y - a.y * b.x; }
-
-int cm_ivec2_dist_squared(cm_ivec3_t a, cm_ivec3_t b) {
-  int xd = a.x - b.x;
-  int yd = a.y - b.y;
-  return (xd * xd + yd * yd);
+void cm_ivec3_sub_inplace(cm_ivec3_t *a, const cm_ivec3_t b) {
+  a->x -= b.x;
+  a->y -= b.y;
+  a->z -= b.z;
 }
 
-float cm_ivec2_dist(cm_ivec3_t a, cm_ivec3_t b) {
-  return sqrt((float)cm_ivec2_dist_squared(a, b));
+void cm_ivec3_scale_inplace(cm_ivec3_t *v, int64_t s) {
+  v->x *= s;
+  v->y *= s;
+  v->z *= s;
+}
+
+void cm_ivec3_abs_inplace(cm_ivec3_t *v) {
+  v->x &= ~INT64_MIN;
+  v->y &= ~INT64_MIN;
+  v->z &= ~INT64_MIN;
+}
+
+float cm_ivec3_norm(const cm_ivec3_t v) {
+  return sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
+}
+
+float cm_ivec3_dot_angle(const cm_ivec3_t a, const cm_ivec3_t b, float angle) {
+  float a_norm = cm_ivec3_norm(a);
+  float b_norm = cm_ivec3_norm(b);
+
+  return a_norm * b_norm * cosf(angle);
+}
+
+int64_t cm_ivec3_dot(const cm_ivec3_t a, const cm_ivec3_t b) {
+  return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+void cm_ivec3_cross(const cm_ivec3_t a, const cm_ivec3_t b, cm_ivec3_t *res) {
+  res->x = a.y * b.z - a.z * b.y;
+  res->y = -(a.x * b.z - a.z * b.x);
+  res->z = a.x * b.y - a.y * b.x;
+}
+
+int64_t cm_ivec3_dist_squared(const cm_ivec3_t a, const cm_ivec3_t b) {
+  int64_t xd = a.x - b.x;
+  int64_t yd = a.y - b.y;
+  int64_t zd = a.z - b.z;
+  return (xd * xd + yd * yd + zd * zd);
+}
+
+float cm_ivec3_dist(const cm_ivec3_t a, const cm_ivec3_t b) {
+  return sqrt((float)cm_ivec3_dist_squared(a, b));
 }
