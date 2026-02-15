@@ -1,10 +1,12 @@
-CORE_DIR = src/core
-CORE_TEST_DIR = test/core
+MODULES = ivec
 
-.PHONY: core tests
+# === Source files ===
+IVEC_SRC = src/ivector
 
-core:
-	$(MAKE) -C $(CORE_DIR)
+.PHONY: ivec clean
+
+ivec:
+	$(MAKE) -C $(IVEC_SRC)
 
 tests:
 	$(MAKE) -C $(CORE_TEST_DIR)
