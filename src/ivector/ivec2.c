@@ -27,8 +27,8 @@ void cm_ivec2_add(const cm_ivec2_t a, const cm_ivec2_t b, cm_ivec2_t *res) {
 }
 
 void cm_ivec2_sub(const cm_ivec2_t a, const cm_ivec2_t b, cm_ivec2_t *res) {
-  res->x = a.x - b.y;
-  res->y = a.x - b.y;
+  res->x = a.x - b.x;
+  res->y = a.y - b.y;
 }
 
 void cm_ivec2_scale(const cm_ivec2_t v, int64_t s, cm_ivec2_t *res) {
