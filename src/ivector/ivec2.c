@@ -1,5 +1,4 @@
 #include "../../include/cmathcore/ivector2.h"
-#include <math.h>
 
 void cm_ivec2_init(cm_ivec2_t *v, int64_t x, int64_t y) {
   v->x = x;
