@@ -6,8 +6,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define EPS 1e-4f
-
 // Init tests
 void test_init_stack_one_elem(int64_t a, int64_t b) {
 
@@ -16,7 +14,7 @@ void test_init_stack_one_elem(int64_t a, int64_t b) {
 
   assert(a == cm_ivec2_get_x(v));
   assert(b == cm_ivec2_get_y(v));
-  printf("Init stack one element x:%ld y:%ld: OK\n", a, b);
+  printf("Init stack one element: v(%ld, %ld) -> OK\n", a, b);
 }
 
 void test_init_stack_array(int64_t a, int64_t b, int64_t size) {
@@ -28,7 +26,7 @@ void test_init_stack_array(int64_t a, int64_t b, int64_t size) {
     assert((a + i) == cm_ivec2_get_x(arr[i]));
     assert((b + i) == cm_ivec2_get_y(arr[i]));
   }
-  printf("Init stack array x:%ld y:%ld: OK\n", a, b);
+  printf("Init stack array size(%ld): v(%ld, %ld) -> OK\n", size, a, b);
 }
 
 void test_init_heap_one_elem(int64_t a, int64_t b) {
@@ -41,7 +39,7 @@ void test_init_heap_one_elem(int64_t a, int64_t b) {
 
   free(v);
 
-  printf("Init heap one element x:%ld y:%ld: OK\n", a, b);
+  printf("Init heap one element: v(%ld, %ld) -> OK\n", a, b);
 }
 
 void test_init_heap_array(int64_t a, int64_t b, int64_t size) {
@@ -53,8 +51,9 @@ void test_init_heap_array(int64_t a, int64_t b, int64_t size) {
     assert((a + i) == cm_ivec2_get_x(arr[i]));
     assert((b + i) == cm_ivec2_get_y(arr[i]));
   }
+
   free(arr);
-  printf("Init heap array x:%ld y:%ld: OK\n", a, b);
+  printf("Init heap array size(%ld): v(%ld, %ld) -> OK\n", size, a, b);
 }
 
 void run_init_tests() {
@@ -77,7 +76,7 @@ void test_copy(int64_t a, int64_t b) {
   assert(cm_ivec2_get_x(src) == cm_ivec2_get_x(dest));
   assert(cm_ivec2_get_y(src) == cm_ivec2_get_y(dest));
 
-  printf("Copy x:%ld y:%ld: OK\n", a, b);
+  printf("Copy: v(%ld, %ld) -> OK\n", a, b);
 }
 
 void run_copy_tests() {
@@ -95,7 +94,7 @@ void test_fill(int64_t val) {
   assert(cm_ivec2_get_x(v) == val);
   assert(cm_ivec2_get_y(v) == val);
 
-  printf("Fill val:%ld: OK\n", val);
+  printf("Fill with value %ld -> OK\n", val);
 }
 
 void run_fill_tests() {
@@ -133,7 +132,7 @@ void test_add(int64_t a1, int64_t b1, int64_t a2, int64_t b2, int64_t ra,
   assert(cm_ivec2_get_x(res) == ra);
   assert(cm_ivec2_get_y(res) == rb);
 
-  printf("Add v1x:%ld v1y:%ld, v2x:%ld v2y:%ld: OK\n", a1, b1, a2, b2);
+  printf("Add: v1(%ld, %ld), v2(%ld, %ld) -> OK\n", a1, b1, a2, b2);
 }
 
 void run_add_tests() {
@@ -159,7 +158,7 @@ void test_sub(int64_t a1, int64_t b1, int64_t a2, int64_t b2, int64_t ra,
   assert(cm_ivec2_get_x(res) == ra);
   assert(cm_ivec2_get_y(res) == rb);
 
-  printf("Sub v1x:%ld v1y:%ld, v2x:%ld v2y:%ld: OK\n", a1, b1, a2, b2);
+  printf("Sub: v1(%ld, %ld), v2(%ld, %ld) -> OK\n", a1, b1, a2, b2);
 }
 
 void run_sub_tests() {
@@ -182,7 +181,7 @@ void test_scale(int64_t a, int64_t b, int64_t s, int64_t ra, int64_t rb) {
   assert(cm_ivec2_get_x(res) == ra);
   assert(cm_ivec2_get_y(res) == rb);
 
-  printf("Scale x:%ld y:%ld, scale:%ld: OK\n", a, b, s);
+  printf("Scale with %ld: v(%ld, %ld) -> OK\n", s, a, b);
 }
 
 void run_scale_tests() {
@@ -205,7 +204,7 @@ void test_abs(int64_t a, int64_t b, int64_t ra, int64_t rb) {
   assert(res.x == ra);
   assert(res.y == rb);
 
-  printf("Abs x:%ld y:%ld: OK\n", a, b);
+  printf("Abs: v(%ld, %ld) -> OK\n", a, b);
 }
 
 void run_abs_tests() {
@@ -233,7 +232,7 @@ void test_add_inplace(int64_t a1, int64_t b1, int64_t a2, int64_t b2,
   assert(cm_ivec2_get_x(v1) == ra);
   assert(cm_ivec2_get_y(v1) == rb);
 
-  printf("Add inplace v1x:%ld v1y:%ld, v2x:%ld v2y:%ld: OK\n", a1, b1, a2, b2);
+  printf("Add inplace: v1(%ld, %ld), v2(%ld, %ld) -> OK\n", a1, b1, a2, b2);
 }
 
 void run_add_inplace_tests() {
@@ -258,7 +257,7 @@ void test_sub_inplace(int64_t a1, int64_t b1, int64_t a2, int64_t b2,
   assert(cm_ivec2_get_x(v1) == ra);
   assert(cm_ivec2_get_y(v1) == rb);
 
-  printf("Sub inplace v1x:%ld v1y:%ld, v2x:%ld v2y:%ld: OK\n", a1, b1, a2, b2);
+  printf("Sub inplace: v1(%ld, %ld), v2(%ld, %ld) -> OK\n", a1, b1, a2, b2);
 }
 
 void run_sub_inplace_tests() {
@@ -281,7 +280,7 @@ void test_scale_inplace(int64_t a, int64_t b, int64_t s, int64_t ra,
   assert(cm_ivec2_get_x(v) == ra);
   assert(cm_ivec2_get_y(v) == rb);
 
-  printf("Scale inplace x:%ld y:%ld, scale:%ld: OK\n", a, b, s);
+  printf("Scale inplace with %ld: v(%ld, %ld) -> OK\n", s, a, b);
 }
 
 void run_scale_inplace_tests() {
@@ -303,7 +302,7 @@ void test_abs_inplace(int64_t a, int64_t b, int64_t ra, int64_t rb) {
   assert(v.x == ra);
   assert(v.y == rb);
 
-  printf("Abs inplace x:%ld y:%ld: OK\n", a, b);
+  printf("Abs inplace: v(%ld, %ld) -> OK\n", a, b);
 }
 
 void run_abs_inplace_tests() {
@@ -327,7 +326,7 @@ void test_dot(int64_t a1, int64_t b1, int64_t a2, int64_t b2, int64_t res) {
 
   int64_t dot = cm_ivec2_dot(v1, v2);
   assert(res == dot);
-  printf("Dot x1:%ld y1:%ld x2:%ld, y2:%ld : OK\n", a1, b1, a2, b2);
+  printf("Dot: v1(%ld, %ld), v2(%ld, %ld) -> OK\n", a1, b1, a2, b2);
 }
 
 void run_dot_tests() {
@@ -349,7 +348,7 @@ void test_cross(int64_t a1, int64_t b1, int64_t a2, int64_t b2, int64_t res) {
 
   int64_t cross = cm_ivec2_cross(v1, v2);
   assert(res == cross);
-  printf("Cross x1:%ld y1:%ld x2:%ld, y2:%ld : OK\n", a1, b1, a2, b2);
+  printf("Cross: v1(%ld, %ld), v2(%ld, %ld) -> OK\n", a1, b1, a2, b2);
 }
 
 void run_cross_tests() {
@@ -372,8 +371,7 @@ void test_dist_squared(int64_t a1, int64_t b1, int64_t a2, int64_t b2,
 
   int64_t dist = cm_ivec2_dist_squared(v1, v2);
   assert(res == dist);
-  printf("Dist x1:%ld y1:%ld x2:%ld, y2:%ld : OK\n", a1, b1, a2, b2);
-
+  printf("Dist: v1(%ld, %ld), v2(%ld, %ld) -> OK\n", a1, b1, a2, b2);
 }
 
 void run_dist_tests() {
@@ -384,7 +382,6 @@ void run_dist_tests() {
   test_dist_squared(1, 1, -2, 2, 10);
   printf("Dist tests: OK\n\n");
 }
-
 
 int main() {
   run_init_tests();
