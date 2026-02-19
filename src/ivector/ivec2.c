@@ -37,8 +37,8 @@ void cm_ivec2_scale(const cm_ivec2_t v, int64_t s, cm_ivec2_t *res) {
 }
 
 void cm_ivec2_abs(const cm_ivec2_t v, cm_ivec2_t *res) {
-  res->x = ~INT64_MIN & v.x;
-  res->y = ~INT64_MIN & v.y;
+  res->x = (v.x == INT64_MIN) ? INT64_MIN : ((v.x < 0) ? -v.x : v.x);
+  res->y = (v.y == INT64_MIN) ? INT64_MIN : ((v.y < 0) ? -v.y : v.y);
 }
 
 void cm_ivec2_add_inplace(cm_ivec2_t *a, const cm_ivec2_t b) {
@@ -57,17 +57,8 @@ void cm_ivec2_scale_inplace(cm_ivec2_t *v, int64_t s) {
 }
 
 void cm_ivec2_abs_inplace(cm_ivec2_t *v) {
-  v->x &= ~INT64_MIN;
-  v->y &= ~INT64_MIN;
-}
-
-float cm_ivec2_norm(const cm_ivec2_t v) { return sqrtf(v.x * v.x + v.y * v.y); }
-
-float cm_ivec2_dot_angle(const cm_ivec2_t a, const cm_ivec2_t b, float angle) {
-  float a_norm = cm_ivec2_norm(a);
-  float b_norm = cm_ivec2_norm(b);
-
-  return a_norm * b_norm * cosf(angle);
+  v->x = (v->x == INT64_MIN) ? INT64_MIN : ((v->x < 0) ? -v->x : v->x);
+  v->y = (v->y == INT64_MIN) ? INT64_MIN : ((v->y < 0) ? -v->y : v->y);
 }
 
 int64_t cm_ivec2_dot(const cm_ivec2_t a, const cm_ivec2_t b) {
@@ -82,8 +73,4 @@ int64_t cm_ivec2_dist_squared(const cm_ivec2_t a, const cm_ivec2_t b) {
   int64_t xd = a.x - b.x;
   int64_t yd = a.y - b.y;
   return (xd * xd + yd * yd);
-}
-
-float cm_ivec2_dist(const cm_ivec2_t a, const cm_ivec2_t b) {
-  return sqrtf(cm_ivec2_dist_squared(a, b));
 }

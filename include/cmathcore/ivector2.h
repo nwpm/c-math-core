@@ -12,6 +12,7 @@
 // TODO: min, max compare without if
 // TODO: documentation
 // TODO: Square root without std math lib
+// TODO: Chebyshev distance or Manhattan distance
 
 typedef struct {
   int64_t x, y;
@@ -32,17 +33,14 @@ void cm_ivec2_sub_inplace(cm_ivec2_t *a, const cm_ivec2_t b);
 void cm_ivec2_scale_inplace(cm_ivec2_t *v, int64_t s);
 void cm_ivec2_abs_inplace(cm_ivec2_t *v);
 
-float cm_ivec2_norm(const cm_ivec2_t v);
-float cm_ivec2_dot_angle(const cm_ivec2_t a, const cm_ivec2_t b, float angle);
 int64_t cm_ivec2_dot(const cm_ivec2_t a, const cm_ivec2_t b);
 int64_t cm_ivec2_cross(const cm_ivec2_t a, const cm_ivec2_t b);
-
 int64_t cm_ivec2_dist_squared(const cm_ivec2_t a, const cm_ivec2_t b);
-float cm_ivec2_dist(const cm_ivec2_t a, const cm_ivec2_t b);
 
 static inline int64_t cm_ivec2_get_x(const cm_ivec2_t v) { return v.x; }
 static inline int64_t cm_ivec2_get_y(const cm_ivec2_t v) { return v.y; }
 
 static inline void cm_ivec2_set_x(cm_ivec2_t *v, int64_t val) { v->x = val; }
 static inline void cm_ivec2_set_y(cm_ivec2_t *v, int64_t val) { v->y = val; }
+
 #endif
