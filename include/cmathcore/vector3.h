@@ -1,36 +1,50 @@
-#ifndef CM_VEC3_DOUBLE_H
-#define CM_VEC3_DOUBLE_H
+#ifndef CM_VEC3_H
+#define CM_VEC3_H
 
 #include <stdbool.h>
-#include "cm_types.h"
 
-typedef struct cm_vec3_t cm_vec3_t;
+// NOTE: The module is designed to work in Euclidean 3D vector space.
 
-void cm_vec3_copy(cm_vec3_t v, cm_vec3_t dest);
-void cm_vec3_zero(cm_vec3_t v);
-void cm_vec3_add(cm_vec3_t a, cm_vec3_t b, cm_vec3_t dest);
-void cm_vec3_sub(cm_vec3_t a, cm_vec3_t b, cm_vec3_t dest);
-void cm_vec3_scale(cm_vec3_t v, cm_real_t s, cm_vec3_t dest);
-void cm_vec3_fill(cm_vec3_t v, cm_real_t val);
-void cm_vec3_abs(cm_vec3_t v, cm_vec3_t dest);
-void cm_vec3_max(cm_vec3_t a, cm_vec3_t b, cm_vec3_t dest);
-void cm_vec3_min(cm_vec3_t a, cm_vec3_t b, cm_vec3_t dest);
-void cm_vec3_rotate_x(cm_vec3_t vec, cm_real_t angle, cm_vec3_t dest);
-void cm_vec3_rotate_y(cm_vec3_t vec, cm_real_t angle, cm_vec3_t dest);
-void cm_vec3_rotate_z(cm_vec3_t vec, cm_real_t angle, cm_vec3_t dest);
-void cm_vec3_normalize(cm_vec3_t vec, cm_vec3_t dest);
-void cm_vec3_project(cm_vec3_t proj_from, cm_vec3_t proj_to, cm_vec3_t dest);
-void cm_vec3_cross(cm_vec3_t a, cm_vec3_t b, cm_vec3_t dest);
+typedef struct {
+  double x, y, z;
+} cm_vec3_t;
 
-cm_real_t cm_vec3_dot(cm_vec3_t a, cm_vec3_t b);
-cm_real_t cm_vec3_dist_squared(cm_vec3_t a, cm_vec3_t b);
-cm_real_t cm_vec3_dist(cm_vec3_t a, cm_vec3_t b);
+void cm_vec3_init(cm_vec3_t *v, double x, double y, double z);
+void cm_vec3_copy(const cm_vec3_t src, cm_vec3_t *dest);
+void cm_vec3_fill(cm_vec3_t *v, double val);
+void cm_vec3_set_zero(cm_vec3_t *v);
 
-cm_real_t cm_vec3_angle(cm_vec3_t vec_a, cm_vec3_t vec_b);
-cm_real_t cm_vec3_norm(cm_vec3_t vec);
-cm_real_t cm_vec3_norm_squared(cm_vec3_t vec);
+void cm_vec3_add(const cm_vec3_t a, const cm_vec3_t b, cm_vec3_t *res);
+void cm_vec3_sub(const cm_vec3_t a, const cm_vec3_t b, cm_vec3_t *res);
+void cm_vec3_scale(const cm_vec3_t v, double s, cm_vec3_t *res);
+void cm_vec3_abs(const cm_vec3_t v, cm_vec3_t *res);
 
-bool cm_vec3_is_zero(cm_vec3_t vec);
-bool cm_vec3_is_equal(cm_vec3_t vec_a, cm_vec3_t vec_b);
+void cm_vec3_add_inplace(cm_vec3_t *a, const cm_vec3_t b);
+void cm_vec3_sub_inplace(cm_vec3_t *a, const cm_vec3_t b);
+void cm_vec3_scale_inplace(cm_vec3_t *v, double s);
+void cm_vec3_abs_inplace(cm_vec3_t *v);
+
+double cm_vec3_dot(const cm_vec3_t a, const cm_vec3_t b);
+void cm_vec3_cross(const cm_vec3_t a, const cm_vec3_t b, cm_vec3_t* res);
+double cm_vec3_dist_squared(const cm_vec3_t a, const cm_vec3_t b);
+double cm_vec3_dist(const cm_vec3_t a, const cm_vec3_t b);
+
+void cm_vec3_normalize(const cm_vec3_t v, cm_vec3_t *res);
+void cm_vec3_normalize_inplace(cm_vec3_t* v);
+
+double cm_vec3_angle_between(const cm_vec3_t a, const cm_vec3_t b);
+double cm_vec3_norm(const cm_vec3_t v);
+double cm_vec3_norm_squared(const cm_vec3_t v);
+
+bool cm_vec3_is_zero(const cm_vec3_t v);
+bool cm_vec3_is_equal(const cm_vec3_t a, const cm_vec3_t b);
+
+static inline double cm_vec3_get_x(const cm_vec3_t v) { return v.x; }
+static inline double cm_vec3_get_y(const cm_vec3_t v) { return v.y; }
+static inline double cm_vec3_get_z(const cm_vec3_t v) { return v.z; }
+
+static inline void cm_vec3_set_x(cm_vec3_t *v, double val) { v->x = val; }
+static inline void cm_vec3_set_y(cm_vec3_t *v, double val) { v->y = val; }
+static inline void cm_vec3_set_z(cm_vec3_t *v, double val) { v->z = val; }
 
 #endif

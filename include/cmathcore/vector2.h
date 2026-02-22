@@ -2,33 +2,48 @@
 #define CM_VEC2_H
 
 #include <stdbool.h>
-#include "cm_types.h"
 
-typedef struct cm_vec2_t cm_vec2_t;
+// NOTE: The module is designed to work in Euclidean 2D vector space.
 
-void cm_vec2_copy(cm_vec2_t v, cm_vec2_t dest);
-void cm_vec2_zero(cm_vec2_t v);
-void cm_vec2_add(cm_vec2_t a, cm_vec2_t b, cm_vec2_t dest);
-void cm_vec2_sub(cm_vec2_t a, cm_vec2_t b, cm_vec2_t dest);
-void cm_vec2_scale(cm_vec2_t v, cm_real_t s, cm_vec2_t dest);
-void cm_vec2_fill(cm_vec2_t v, cm_real_t val);
-void cm_vec2_abs(cm_vec2_t v, cm_vec2_t dest);
-void cm_vec2_max(cm_vec2_t a, cm_vec2_t b, cm_vec2_t dest);
-void cm_vec2_min(cm_vec2_t a, cm_vec2_t b, cm_vec2_t dest);
-void cm_vec2_rotate(cm_vec2_t vec, cm_real_t angle, cm_vec2_t dest);
-void cm_vec2_normalize(cm_vec2_t vec, cm_vec2_t dest);
-void cm_vec2_project(cm_vec2_t proj_from, cm_vec2_t proj_to, cm_vec2_t dest);
+typedef struct {
+  double x, y;
+} cm_vec2_t;
 
-cm_real_t cm_vec2_dot(cm_vec2_t a, cm_vec2_t b);
-cm_real_t cm_vec2_cross(cm_vec2_t a, cm_vec2_t b);
-cm_real_t cm_vec2_dist_squared(cm_vec2_t a, cm_vec2_t b);
-cm_real_t cm_vec2_dist(cm_vec2_t a, cm_vec2_t b);
+void cm_vec2_init(cm_vec2_t *v, double x, double y);
+void cm_vec2_copy(const cm_vec2_t src, cm_vec2_t *dest);
+void cm_vec2_fill(cm_vec2_t *v, double val);
+void cm_vec2_set_zero(cm_vec2_t *v);
 
-cm_real_t cm_vec2_angle(cm_vec2_t vec_a, cm_vec2_t vec_b);
-cm_real_t cm_vec2_norm(cm_vec2_t vec);
-cm_real_t cm_vec2_norm_squared(cm_vec2_t vec);
+void cm_vec2_add(const cm_vec2_t a, const cm_vec2_t b, cm_vec2_t *res);
+void cm_vec2_sub(const cm_vec2_t a, const cm_vec2_t b, cm_vec2_t *res);
+void cm_vec2_scale(const cm_vec2_t v, double s, cm_vec2_t *res);
+void cm_vec2_abs(const cm_vec2_t v, cm_vec2_t *res);
 
-bool cm_vec2_is_zero(cm_vec2_t vec);
-bool cm_vec2_is_equal(cm_vec2_t vec_a, cm_vec2_t vec_b);
+void cm_vec2_add_inplace(cm_vec2_t *a, const cm_vec2_t b);
+void cm_vec2_sub_inplace(cm_vec2_t *a, const cm_vec2_t b);
+void cm_vec2_scale_inplace(cm_vec2_t *v, double s);
+void cm_vec2_abs_inplace(cm_vec2_t *v);
+
+double cm_vec2_dot(const cm_vec2_t a, const cm_vec2_t b);
+double cm_vec2_dot_angle(const cm_vec2_t a, const cm_vec2_t b, double angle);
+double cm_vec2_cross(const cm_vec2_t a, const cm_vec2_t b);
+double cm_vec2_dist_squared(const cm_vec2_t a, const cm_vec2_t b);
+double cm_vec2_dist(const cm_vec2_t a, const cm_vec2_t b);
+
+void cm_vec2_normalize(const cm_vec2_t v, cm_vec2_t *res);
+void cm_vec2_normalize_inplace(cm_vec2_t* v);
+
+double cm_vec2_angle_between(const cm_vec2_t a, const cm_vec2_t b);
+double cm_vec2_norm(const cm_vec2_t v);
+double cm_vec2_norm_squared(const cm_vec2_t v);
+
+bool cm_vec2_is_zero(const cm_vec2_t v);
+bool cm_vec2_is_equal(const cm_vec2_t a, const cm_vec2_t b);
+
+static inline double cm_vec2_get_x(const cm_vec2_t v) { return v.x; }
+static inline double cm_vec2_get_y(const cm_vec2_t v) { return v.y; }
+
+static inline void cm_vec2_set_x(cm_vec2_t *v, double val) { v->x = val; }
+static inline void cm_vec2_set_y(cm_vec2_t *v, double val) { v->y = val; }
 
 #endif
