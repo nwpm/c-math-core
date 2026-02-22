@@ -8,13 +8,6 @@
 
 #include <stdint.h>
 
-// TODO: SIMD optimization for module
-// TODO: support all int and float types(templates C++?)
-// TODO: min, max compare without if
-// TODO: documentation
-// TODO: Square root without std math lib
-// TODO: Chebyshev distance or Manhattan distance
-
 typedef struct cm_ivec3_t {
   int64_t x, y, z;
 } cm_ivec3_t;
