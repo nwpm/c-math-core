@@ -201,8 +201,8 @@ void test_abs(int64_t a, int64_t b, int64_t ra, int64_t rb) {
 
   cm_ivec2_abs(v, &res);
 
-  assert(res.x == ra);
-  assert(res.y == rb);
+  assert(cm_ivec2_get_x(res) == ra);
+  assert(cm_ivec2_get_y(res) == rb);
 
   printf("Abs: v(%ld, %ld) -> OK\n", a, b);
 }
@@ -299,8 +299,8 @@ void test_abs_inplace(int64_t a, int64_t b, int64_t ra, int64_t rb) {
 
   cm_ivec2_abs_inplace(&v);
 
-  assert(v.x == ra);
-  assert(v.y == rb);
+  assert(cm_ivec2_get_x(v) == ra);
+  assert(cm_ivec2_get_y(v) == rb);
 
   printf("Abs inplace: v(%ld, %ld) -> OK\n", a, b);
 }
@@ -399,5 +399,6 @@ int main() {
   run_dot_tests();
   run_cross_tests();
   run_dist_tests();
+  printf("\nAll tests passed.\n");
   return 0;
 }
