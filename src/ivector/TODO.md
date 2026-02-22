@@ -1,3 +1,5 @@
+# Ivec 2/3
+TODO: Add norm_squared
 TODO: SIMD optimization for module
 TODO: support all int and float types(templates C++?)
 TODO: documentation
