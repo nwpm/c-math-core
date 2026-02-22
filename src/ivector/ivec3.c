@@ -1,5 +1,4 @@
 #include "../../include/cmathcore/ivector3.h"
-#include <math.h>
 
 void cm_ivec3_init(cm_ivec3_t *v, int64_t x, int64_t y, int64_t z) {
   v->x = x;
@@ -32,9 +31,9 @@ void cm_ivec3_add(const cm_ivec3_t a, const cm_ivec3_t b, cm_ivec3_t *res) {
 }
 
 void cm_ivec3_sub(const cm_ivec3_t a, const cm_ivec3_t b, cm_ivec3_t *res) {
-  res->x = a.x - b.y;
-  res->y = a.x - b.y;
-  res->z = a.x - b.y;
+  res->x = a.x - b.x;
+  res->y = a.y - b.y;
+  res->z = a.z - b.z;
 }
 
 void cm_ivec3_scale(const cm_ivec3_t v, int64_t s, cm_ivec3_t *res) {
@@ -44,9 +43,9 @@ void cm_ivec3_scale(const cm_ivec3_t v, int64_t s, cm_ivec3_t *res) {
 }
 
 void cm_ivec3_abs(const cm_ivec3_t v, cm_ivec3_t *res) {
-  res->x = ~INT64_MIN & v.x;
-  res->y = ~INT64_MIN & v.y;
-  res->z = ~INT64_MIN & v.z;
+  res->x = (v.x == INT64_MIN) ? INT64_MIN : ((v.x < 0) ? -v.x : v.x);
+  res->y = (v.y == INT64_MIN) ? INT64_MIN : ((v.y < 0) ? -v.y : v.y);
+  res->z = (v.z == INT64_MIN) ? INT64_MIN : ((v.z < 0) ? -v.z : v.z);
 }
 
 void cm_ivec3_add_inplace(cm_ivec3_t *a, const cm_ivec3_t b) {
@@ -68,20 +67,9 @@ void cm_ivec3_scale_inplace(cm_ivec3_t *v, int64_t s) {
 }
 
 void cm_ivec3_abs_inplace(cm_ivec3_t *v) {
-  v->x &= ~INT64_MIN;
-  v->y &= ~INT64_MIN;
-  v->z &= ~INT64_MIN;
-}
-
-float cm_ivec3_norm(const cm_ivec3_t v) {
-  return sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
-}
-
-float cm_ivec3_dot_angle(const cm_ivec3_t a, const cm_ivec3_t b, float angle) {
-  float a_norm = cm_ivec3_norm(a);
-  float b_norm = cm_ivec3_norm(b);
-
-  return a_norm * b_norm * cosf(angle);
+  v->x = (v->x == INT64_MIN) ? INT64_MIN : ((v->x < 0) ? -v->x : v->x);
+  v->y = (v->y == INT64_MIN) ? INT64_MIN : ((v->y < 0) ? -v->y : v->y);
+  v->z = (v->z == INT64_MIN) ? INT64_MIN : ((v->z < 0) ? -v->z : v->z);
 }
 
 int64_t cm_ivec3_dot(const cm_ivec3_t a, const cm_ivec3_t b) {
@@ -99,8 +87,4 @@ int64_t cm_ivec3_dist_squared(const cm_ivec3_t a, const cm_ivec3_t b) {
   int64_t yd = a.y - b.y;
   int64_t zd = a.z - b.z;
   return (xd * xd + yd * yd + zd * zd);
-}
-
-float cm_ivec3_dist(const cm_ivec3_t a, const cm_ivec3_t b) {
-  return sqrt((float)cm_ivec3_dist_squared(a, b));
 }
