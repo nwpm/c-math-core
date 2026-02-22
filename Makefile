@@ -16,7 +16,12 @@ IVEC_TEST_DIR = $(IVEC_DIR)/tests
 VEC_DIR      = $(SRC_DIR)/vector
 VEC_TEST_DIR = $(VEC_DIR)/tests
 
-.PHONY: vectest vec ivectest ivec clean
+MAT_DIR      = $(SRC_DIR)/matrix
+MAT_TEST_DIR = $(MAT_DIR)/tests
+
+.PHONY: mattest mat vectest vec ivectest ivec clean
+
+all: ivec ivectest vec vectest mat mattest
 
 ivec:
 	$(MAKE) -C $(IVEC_DIR)
@@ -29,6 +34,12 @@ vec:
 
 vectest:
 	$(MAKE) -C $(VEC_TEST_DIR)
+
+mat:
+	$(MAKE) -C $(MAT_DIR)
+
+mattest:
+	$(MAKE) -C $(MAT_TEST_DIR)
 
 clean:
 	rm -r ./bin/*
