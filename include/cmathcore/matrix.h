@@ -1,12 +1,11 @@
 #ifndef CM_MATRIX_H
 #define CM_MATRIX_H
 
-#include "cm_types.h"
 #include <stdbool.h>
 #include <stddef.h>
 
 typedef struct cm_mat_t cm_mat_t;
-typedef cm_real_t (*cm_mat_element_op)(cm_real_t x);
+typedef double (*cm_mat_element_op)(double x);
 
 /**
  * @brief Allocates an uninitialized matrix of size rows × cols.
@@ -50,7 +49,7 @@ cm_mat_t *cm_mat_create_from_matrix(const cm_mat_t *source);
  *
  * @note Allocates memory for a new matrix.
  */
-cm_mat_t *cm_mat_create_from_array(const cm_real_t **arr, size_t rows,
+cm_mat_t *cm_mat_create_from_array(const double **arr, size_t rows,
                                    size_t cols);
 
 /**
@@ -99,7 +98,7 @@ cm_mat_t *cm_mat_submat(const cm_mat_t *source, size_t row_start,
  *
  * @note Allocates memory for a new matrix
  */
-cm_mat_t *cm_mat_create_diag(size_t n, cm_real_t init_val);
+cm_mat_t *cm_mat_create_diag(size_t n, double init_val);
 
 /**
  * @brief Creates an identity matrix of size n × n.
@@ -139,7 +138,7 @@ void cm_mat_set_zero(cm_mat_t *mat);
  * @param mat Pointer to the matrix to modify.
  * @param x   Value assigned to all matrix elements.
  */
-void cm_mat_set_all(cm_mat_t *mat, cm_real_t x);
+void cm_mat_set_all(cm_mat_t *mat, double x);
 
 /**
  * @brief Swaps two matrix pointers.
@@ -165,7 +164,7 @@ void cm_mat_transpose(cm_mat_t *mat);
  * @param mat Pointer to the matrix.
  * @return The largest element of the matrix.
  */
-cm_real_t cm_mat_max(const cm_mat_t *mat);
+double cm_mat_max(const cm_mat_t *mat);
 
 /**
  * @brief Returns the minimum element of the matrix.
@@ -173,7 +172,7 @@ cm_real_t cm_mat_max(const cm_mat_t *mat);
  * @param mat Pointer to the matrix.
  * @return The smallest element of the matrix.
  */
-cm_real_t cm_mat_min(const cm_mat_t *mat);
+double cm_mat_min(const cm_mat_t *mat);
 
 /**
  * @brief Computes the trace of the matrix.
@@ -181,7 +180,7 @@ cm_real_t cm_mat_min(const cm_mat_t *mat);
  * @param mat Pointer to the matrix.
  * @return The trace of the matrix.
  */
-cm_real_t cm_mat_trace(const cm_mat_t *mat);
+double cm_mat_trace(const cm_mat_t *mat);
 
 /**
  * @brief Calculates the determinant of the matrix.
@@ -190,7 +189,7 @@ cm_real_t cm_mat_trace(const cm_mat_t *mat);
  * @return The determinant of the matrix.
  *
  */
-cm_real_t cm_mat_det(const cm_mat_t *mat);
+double cm_mat_det(const cm_mat_t *mat);
 
 /**
  * @brief Checks whether the matrix is a null (zero) matrix.
@@ -244,7 +243,7 @@ void cm_mat_sub(cm_mat_t *mat_a, const cm_mat_t *mat_b);
  * @param mat_a Pointer to the matrix.
  * @param scale Scaling factor.
  */
-void cm_mat_scale(cm_mat_t *mat_a, cm_real_t scale);
+void cm_mat_scale(cm_mat_t *mat_a, double scale);
 
 /**
  * @brief Multiplies two matrices.
@@ -330,7 +329,7 @@ cm_mat_t *cm_mat_inverse(const cm_mat_t *orig_mat);
  *
  * @note Matrix must be square.
  */
-cm_real_t cm_mat_minor(const cm_mat_t *mat, size_t row, size_t col);
+double cm_mat_minor(const cm_mat_t *mat, size_t row, size_t col);
 
 /**
  * @brief Computes the cofactor of a matrix element.
@@ -342,7 +341,7 @@ cm_real_t cm_mat_minor(const cm_mat_t *mat, size_t row, size_t col);
  *
  * @note Matrix must be square.
  */
-cm_real_t cm_mat_cofactor(const cm_mat_t *mat, size_t row, size_t col);
+double cm_mat_cofactor(const cm_mat_t *mat, size_t row, size_t col);
 
 /**
  * @brief Computes the adjugate (adjoint) matrix.
@@ -364,7 +363,7 @@ cm_mat_t *cm_mat_adj(const cm_mat_t *mat);
  * @note The augmented matrix must have a valid form for the system.
  * @note If the system has no solutions 'res' - NULL.
  */
-void cm_mat_gauss(const cm_mat_t *augmented_mat, cm_real_t *res);
+void cm_mat_gauss(const cm_mat_t *augmented_mat, double *res);
 
 /**
  * @brief Gets an element of the matrix by indices.
@@ -374,7 +373,7 @@ void cm_mat_gauss(const cm_mat_t *augmented_mat, cm_real_t *res);
  * @param col Column index.
  * @return Value of the matrix element at (row, col).
  */
-cm_real_t cm_mat_get(const cm_mat_t *mat, size_t row, size_t col);
+double cm_mat_get(const cm_mat_t *mat, size_t row, size_t col);
 
 /**
  * @brief Sets an element of the matrix to a given value.
@@ -384,7 +383,7 @@ cm_real_t cm_mat_get(const cm_mat_t *mat, size_t row, size_t col);
  * @param col Column index.
  * @param x New value of the matrix element.
  */
-void cm_mat_set(cm_mat_t *mat, size_t row, size_t col, cm_real_t x);
+void cm_mat_set(cm_mat_t *mat, size_t row, size_t col, double x);
 
 /**
  * @brief Returns the number of rows in the matrix.
