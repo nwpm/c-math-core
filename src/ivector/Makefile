@@ -13,11 +13,17 @@ IVEC3_OBJ = $(BUILD_DIR)/ivec3.o
 
 ivec: $(TARGET_LIB)
 
-$(TARGET_LIB) : $(IVEC2_OBJ) $(IVEC3_OBJ)
+$(TARGET_LIB) : $(IVEC2_OBJ) $(IVEC3_OBJ) | $(LIBS_DIR)
 	ar crs $@ $^
 
-$(IVEC2_OBJ) : $(IVEC2_SRC)
+$(IVEC2_OBJ) : $(IVEC2_SRC) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(IVEC3_OBJ) : $(IVEC3_SRC)
+$(IVEC3_OBJ) : $(IVEC3_SRC) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR):
+	mkdir -p $@
+
+$(LIBS_DIR):
+	mkdir -p $@

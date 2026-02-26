@@ -13,11 +13,17 @@ VEC3_OBJ = $(BUILD_DIR)/vec3.o
 
 vec: $(TARGET_LIB)
 
-$(TARGET_LIB) : $(VEC2_OBJ) $(VEC3_OBJ)
+$(TARGET_LIB) : $(VEC2_OBJ) $(VEC3_OBJ) | $(LIBS_DIR)
 	ar crs $@ $^
 
-$(VEC2_OBJ) : $(VEC2_SRC)
+$(VEC2_OBJ) : $(VEC2_SRC) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(VEC3_OBJ) : $(VEC3_SRC)
+$(VEC3_OBJ) : $(VEC3_SRC) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR):
+	mkdir -p $@
+
+$(LIBS_DIR):
+	mkdir -p $@
