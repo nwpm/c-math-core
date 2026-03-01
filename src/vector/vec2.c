@@ -68,7 +68,7 @@ double cm_vec2_dot(const cm_vec2_t a, const cm_vec2_t b) {
 }
 
 double cm_vec2_dot_angle(const cm_vec2_t a, const cm_vec2_t b, double angle) {
-  return cm_vec2_norm(a) * cm_vec2_norm(b) * cos(angle);
+  return sqrt(cm_vec2_norm_squared(a) * cm_vec2_norm_squared(b)) * cos(angle);
 }
 
 double cm_vec2_cross(const cm_vec2_t a, const cm_vec2_t b) {
@@ -99,13 +99,10 @@ void cm_vec2_normalize_inplace(cm_vec2_t *v) {
 
 double cm_vec2_angle_between(const cm_vec2_t a, const cm_vec2_t b) {
 
-  double norm_vec_a = cm_vec2_norm(a);
-  double norm_vec_b = cm_vec2_norm(b);
-  double param_area = cm_vec2_cross(a, b);
+  double dot = cm_vec2_dot(a, b);
+  double det = cm_vec2_cross(a, b);
 
-  double angle = param_area / (norm_vec_a * norm_vec_b);
-
-  return asin(angle);
+  return atan2(det, dot);
 }
 
 double cm_vec2_norm(const cm_vec2_t v) { return sqrt(v.x * v.x + v.y * v.y); }
