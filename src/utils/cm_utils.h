@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-#define CM_EPS 1.0e-5
+#define CM_EPS 1e-12
 
 static inline double _cm_double_abs(double x) { return (x < 0. ? -x : x); }
 
@@ -12,7 +12,7 @@ static inline double _cm_double_max(double x, double y) {
 }
 
 static inline bool _cm_double_is_equal(double x, double y) {
-  return _cm_double_abs(x - y) <
+  return _cm_double_abs(x - y) <=
          CM_EPS * _cm_double_max(_cm_double_abs(x), _cm_double_abs(y));
 }
 
