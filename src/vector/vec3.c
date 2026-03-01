@@ -116,16 +116,12 @@ void cm_vec3_normalize_inplace(cm_vec3_t *v) {
 
 double cm_vec3_angle_between(const cm_vec3_t a, const cm_vec3_t b) {
 
-  double norm_vec_a = cm_vec3_norm(a);
-  double norm_vec_b = cm_vec3_norm(b);
+  double dot = cm_vec3_dot(a, b);
+  cm_vec3_t cross;
+  cm_vec3_cross(a, b, &cross);
+  double area = cm_vec3_norm(cross);
 
-  cm_vec3_t cross_vec;
-  cm_vec3_cross(a, b, &cross_vec);
-  double param_area = cm_vec3_norm(cross_vec);
-
-  double angle = param_area / (norm_vec_a * norm_vec_b);
-
-  return asin(angle);
+  return atan2(area, dot);
 }
 
 double cm_vec3_norm(const cm_vec3_t v) {
