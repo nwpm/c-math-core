@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 // NOTE: The module is designed to work in Euclidean 2D vector space.
+// NOTE: Angles are measured in radians
 
 typedef struct {
   double x, y;
@@ -26,6 +27,7 @@ void cm_vec2_abs_inplace(cm_vec2_t *v);
 
 double cm_vec2_dot(const cm_vec2_t a, const cm_vec2_t b);
 double cm_vec2_dot_angle(const cm_vec2_t a, const cm_vec2_t b, double angle);
+// NOTE: Pseudo-scalar product
 double cm_vec2_cross(const cm_vec2_t a, const cm_vec2_t b);
 double cm_vec2_dist_squared(const cm_vec2_t a, const cm_vec2_t b);
 double cm_vec2_dist(const cm_vec2_t a, const cm_vec2_t b);
