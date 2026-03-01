@@ -2,5 +2,6 @@
 #define CM_CONSTANTS_H
 
 #define CM_PI 3.14159265358979323846264338327950288
+#define CM_HALF_PI (CM_PI / 2.)
 
 #endif
