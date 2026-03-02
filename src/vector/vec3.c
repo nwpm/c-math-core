@@ -1,5 +1,5 @@
 #include "../../include/cmathcore/vector3.h"
-#include "../utils/cm_utils.h"
+#include "../utils/utils.h"
 
 #include <math.h>
 
