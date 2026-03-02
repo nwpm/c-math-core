@@ -4,26 +4,17 @@ include ./../common.mk
 TARGET_LIB = $(LIBS_DIR)/libvec.a
 
 # === Source files ===
-VEC2_SRC = ./vec2.c
-VEC3_SRC = ./vec3.c
+VEC_SRCS = $(wildcard $(VEC_DIR)/*.c)
 
 # === Object files ===
-VEC2_OBJ = $(BUILD_DIR)/vec2.o
-VEC3_OBJ = $(BUILD_DIR)/vec3.o
+VEC_OBJS = $(patsubst $(VEC_DIR)/%.c, $(BUILD_DIR)/%.o, $(VEC_SRCS))
 
 vec: $(TARGET_LIB)
 
-$(TARGET_LIB) : $(VEC2_OBJ) $(VEC3_OBJ) | $(LIBS_DIR)
+$(TARGET_LIB) : $(VEC_OBJS)
+	@mkdir -p $(LIBS_DIR)
 	ar crs $@ $^
 
-$(VEC2_OBJ) : $(VEC2_SRC) | $(BUILD_DIR)
+$(VEC_OBJS) : $(BUILD_DIR)/%.o : $(VEC_DIR)/%.c
+	@mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
-
-$(VEC3_OBJ) : $(VEC3_SRC) | $(BUILD_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(BUILD_DIR):
-	mkdir -p $@
-
-$(LIBS_DIR):
-	mkdir -p $@
