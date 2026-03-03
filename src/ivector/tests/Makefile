@@ -1,34 +1,23 @@
 include ../../common.mk
 
-# === Binary Targets ===
-IVEC2_TEST = $(BIN_DIR)/test_ivec2
-IVEC3_TEST = $(BIN_DIR)/test_ivec3
+# === Include Libs ===
+INCLUDE_LIBS   := -L$(LIBS_DIR) -livec -lm -lcriterion
 
 # === Source files ===
-IVEC2_TEST_SRC = ./test_ivec2.c
-IVEC3_TEST_SRC = ./test_ivec3.c
+IVEC_TEST_SRCS := $(wildcard $(IVEC_TEST_DIR)/*.c)
 
 # === Object Files ===
-IVEC2_TEST_OBJ = $(BUILD_DIR)/test_ivec2.o
-IVEC3_TEST_OBJ = $(BUILD_DIR)/test_ivec3.o
-IVEC2_OBJ      = $(BUILD_DIR)/ivec2.o
-IVEC3_OBJ      = $(BUILD_DIR)/ivec3.o
+IVEC_TEST_OBJS := $(patsubst $(IVEC_TEST_DIR)/%.c, $(BUILD_DIR)/%.o, $(IVEC_TEST_SRCS))
 
-all: ivec2t ivec3t
+# === Binary Targets ===
+IVEC_TEST_BINS := $(patsubst $(IVEC_TEST_DIR)/%.c, $(BIN_DIR)/%, $(IVEC_TEST_SRCS))
 
-ivec2t: $(IVEC2_TEST)
+ivect: $(IVEC_TEST_OBJS) $(IVEC_TEST_BINS)
 
-ivec3t: $(IVEC3_TEST)
+$(IVEC_TEST_BINS) : $(BIN_DIR)/% : $(BUILD_DIR)/%.o
+	@mkdir -p $(BIN_DIR)
+	$(CC) $(CFLAGS) $< -o $@ $(INCLUDE_LIBS)
 
-$(IVEC2_TEST) : $(IVEC2_TEST_OBJ) $(IVEC2_OBJ)
-	$(CC) $(CFLAGS) $^ -o $@
-
-$(IVEC2_TEST_OBJ) : $(IVEC2_TEST_SRC)
+$(IVEC_TEST_OBJS) : $(BUILD_DIR)/%.o : $(IVEC_TEST_DIR)/%.c
+	@mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
-
-$(IVEC3_TEST) : $(IVEC3_TEST_OBJ) $(IVEC3_OBJ)
-	$(CC) $(CFLAGS) $^ -o $@
-
-$(IVEC3_TEST_OBJ) : $(IVEC3_TEST_SRC)
-	$(CC) $(CFLAGS) -c $< -o $@
-
