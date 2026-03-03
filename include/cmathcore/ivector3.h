@@ -2,11 +2,13 @@
 #define CM_IVEC3_H
 
 #define CM_GET_ZERO_IVEC3 ((cm_ivec3_t){0, 0, 0})
-#define CM_GET_E1_IVEC3 ((cm_ivec3_t){1, 0, 0})
-#define CM_GET_E2_IVEC3 ((cm_ivec3_t){0, 1, 0})
-#define CM_GET_E3_IVEC3 ((cm_ivec3_t){0, 0, 1})
+#define CM_GET_X1_IVEC3 ((cm_ivec3_t){1, 0, 0})
+#define CM_GET_Y1_IVEC3 ((cm_ivec3_t){0, 1, 0})
+#define CM_GET_Z1_IVEC3 ((cm_ivec3_t){0, 0, 1})
 
 #include <stdint.h>
+
+// NOTE: The module is designed to work in Euclidean 3D vector space.
 
 typedef struct cm_ivec3_t {
   int64_t x, y, z;
