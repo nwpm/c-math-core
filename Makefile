@@ -29,6 +29,7 @@ export MAT_DIR
 export BIGINT_DIR
 
 export VEC_TEST_DIR
+export IVEC_TEST_DIR
 
 .PHONY: mat vec ivec tests clean
 
