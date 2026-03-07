@@ -49,7 +49,7 @@ cm_mat_t *cm_mat_create_from_matrix(const cm_mat_t *source);
  *
  * @note Allocates memory for a new matrix.
  */
-cm_mat_t *cm_mat_create_from_array(const double **arr, size_t rows,
+cm_mat_t *cm_mat_create_from_array(double **arr, size_t rows,
                                    size_t cols);
 
 /**
