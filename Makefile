@@ -30,6 +30,7 @@ export BIGINT_DIR
 
 export VEC_TEST_DIR
 export IVEC_TEST_DIR
+export MAT_TEST_DIR
 
 .PHONY: mat vec ivec tests clean
 
@@ -52,6 +53,9 @@ ivectest:
 
 vectest:
 	$(MAKE) -C $(VEC_TEST_DIR)
+
+mattest:
+	$(MAKE) -C $(MAT_TEST_DIR)
 
 clean:
 	rm -rf $(BUILD_DIR)/*
