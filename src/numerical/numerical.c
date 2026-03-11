@@ -20,3 +20,12 @@ double cm_sqrt(double x) {
 }
 
 double cm_rsqrt(double x) { return 1 / cm_sqrt(x); }
+
+bool cm_is_zero(double x, double eps){
+  return cm_is_equal(x, 0., eps);
+}
+
+bool cm_is_equal(double a, double b, double eps){
+  return _cm_double_abs(a - b) <=
+         eps * _cm_double_max(_cm_double_abs(a), _cm_double_abs(b));
+}
