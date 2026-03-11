@@ -1,7 +1,7 @@
 #ifndef CM_GEOMETRY2D_H
 #define CM_GEOMETRY2D_H
 
-#include "cm_vec2.h"
+#include "vector2.h"
 
 typedef struct cm_line2d_t cm_line2d_t;
 typedef struct cm_ray2d_t cm_ray2d_t;
@@ -13,13 +13,13 @@ typedef struct CmTriangle2D CmTriangle2D;
 /* Line */
 
 /* Create 2d line from two points */
-cm_line2d_t cm_line2d_from_points(cm_vec2_t a, cm_vec2_t b);
+void cm_line2d_from_points(cm_vec2_t a, cm_vec2_t b, cm_line2d_t* res);
 
 /* Get distance from 2d line to point */
 double cm_line2d_distance_point(cm_line2d_t l, cm_vec2_t p);
 
 /* Get the intersection point of a perpendicular and a line */
-cm_vec2_t cm_line2d_project_point(cm_line2d_t l, cm_vec2_t p);
+void cm_line2d_project_point(cm_line2d_t l, cm_vec2_t p, cm_vec2_t* res);
 
 /* Get intersection point of 2 lines */
 bool cm_line2d_intersect_line(cm_line2d_t l1, cm_line2d_t l2, cm_vec2_t *out);
