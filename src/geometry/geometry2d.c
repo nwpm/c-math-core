@@ -13,49 +13,7 @@
 // TODO: cm_aabb_intersect_circle
 // TODO: cm_aabb_merge
 
-typedef struct cm_ray2d_t {
-
-  cm_vec2_t origin;
-  cm_vec2_t direction;
-
-} cm_ray2d_t;
-
-typedef struct cm_segment2d_t {
-
-  cm_vec2_t a;
-  cm_vec2_t b;
-
-} cm_segment2d_t;
-
-typedef struct cm_circle2d_t {
-
-  cm_vec2_t center;
-  double radius;
-
-} cm_circle2d_t;
-
-typedef struct cm_aabb2d_t {
-
-  cm_vec2_t min;
-  cm_vec2_t max;
-
-} cm_aabb2d_t;
-
-typedef struct cm_triangle2d_t {
-
-  cm_vec2_t a;
-  cm_vec2_t b;
-  cm_vec2_t c;
-} cm_triangle2d_t;
-
 /********************** Line **********************/
-
-typedef struct cm_line2d_t {
-
-  cm_vec2_t origin;
-  cm_vec2_t direction;
-
-} cm_line2d_t;
 
 // NOTE: point A is origin and point b - a is direction
 void cm_line2d_from_points(cm_vec2_t a, cm_vec2_t b, cm_line2d_t *res) {
@@ -98,13 +56,14 @@ bool cm_line2d_intersect_line(cm_line2d_t l1, cm_line2d_t l2, cm_vec2_t *out) {
 
   double det = (l1.direction.x * (-l2.direction.y)) -
                (l1.direction.y * (-l2.direction.x));
-  if (_cm_double_equal(det, 0.)) {
-    out = NULL;
+
+  if (_cm_double_is_equal(det, 0.)) {
     return false;
   }
 
-  double t = -(l2.direction.y * (l2.origin.x - l1.origin.x)) +
-             (l2.direction.x * (l2.origin.y - l1.origin.y));
+  double t = (-(l2.direction.y * (l2.origin.x - l1.origin.x)) +
+              (l2.direction.x * (l2.origin.y - l1.origin.y))) /
+             det;
 
   out->x = l1.origin.x + t * l1.direction.x;
   out->y = l1.origin.y + t * l1.direction.y;
@@ -112,24 +71,22 @@ bool cm_line2d_intersect_line(cm_line2d_t l1, cm_line2d_t l2, cm_vec2_t *out) {
   return true;
 }
 
-bool cm_line2d_intersect_circle(cm_line2d_t l, CmCircle2D c, cm_vec2_t *out1,
+bool cm_line2d_intersect_circle(cm_line2d_t l, cm_circle2d_t c, cm_vec2_t *out1,
                                 cm_vec2_t *out2) {
 
   cm_vec2_t m = {l.origin.x - c.center.x, l.origin.y - c.center.y};
 
-  double a = cm_vec2_double_dot(l.direction, l.direction);
-  double b = 2 * cm_vec2_double_dot(m, l.direction);
-  double e = cm_vec2_double_dot(m, m) - (c.radius * c.radius);
-  double d = (b * b) - (4 * a * e);
+  double a = cm_vec2_dot(l.direction, l.direction);
+  double b = 2 * cm_vec2_dot(m, l.direction);
+  double e = cm_vec2_dot(m, m) - (c.radius * c.radius);
+  double d = (b * b) - (4. * a * e);
 
-  if (d < 0) {
-    out1 = NULL;
-    out2 = NULL;
+  if (d < 0.) {
     return false;
   }
 
-  double t1 = (-b + sqrt(d)) / (2 * a);
-  double t2 = (-b - sqrt(d)) / (2 * a);
+  double t1 = (-b + sqrt(d)) / (2. * a);
+  double t2 = (-b - sqrt(d)) / (2. * a);
 
   out1->x = l.origin.x + t1 * l.direction.x;
   out1->y = l.origin.y + t1 * l.direction.y;
@@ -140,34 +97,44 @@ bool cm_line2d_intersect_circle(cm_line2d_t l, CmCircle2D c, cm_vec2_t *out1,
   return true;
 }
 
-bool cm_line2d_intersect_aabb(CmAABB2D box, cm_line2d_t line, cm_vec2_t *out1,
-                              cm_vec2_t *out2);
+bool cm_line2d_intersect_aabb(cm_aabb2d_t box, cm_line2d_t line,
+                              cm_vec2_t *out1, cm_vec2_t *out2);
 
 /********************** Ray **********************/
 
-CmRay2D cm_ray2d_from_points(cm_vec2_t origin, cm_vec2_t through) {
-  return (CmRay2D){origin, {through.x - origin.x, through.y - origin.y}};
+void cm_ray2d_from_points(cm_vec2_t origin, cm_vec2_t through,
+                          cm_ray2d_t *res) {
+  res->origin.x = origin.x;
+  res->origin.y = origin.y;
+
+  res->direction.x = through.x - origin.x;
+  res->direction.y = through.y - origin.y;
 }
 
 // NOTE t >= 0
-cm_vec2_t cm_ray2d_point(CmRay2D r, double t) {
-  return cm_vec2_double_sum(r.origin, cm_vec2_double_scale(r.direction, t));
+void cm_ray2d_point(cm_ray2d_t r, double t, cm_vec2_t *res) {
+
+  res->x = r.origin.x + t * r.direction.x;
+  res->y = r.origin.y + t * r.direction.y;
 }
 
-double cm_ray2d_distance_point(CmRay2D r, cm_vec2_t p) {
+double cm_ray2d_distance_point(cm_ray2d_t r, cm_vec2_t p) {
 
   cm_vec2_t w = {p.x - r.origin.x, p.y - r.origin.y};
+  cm_vec2_t proj;
+  cm_vec2_t distance;
 
-  double dot = cm_vec2_double_dot(w, r.direction);
-  double direct_square = cm_vec2_double_norm_squared(r.direction);
+  double dot = cm_vec2_dot(w, r.direction);
+  double direct_square = cm_vec2_norm_squared(r.direction);
+  double t = dot / direct_square;
 
-  cm_vec2_t distance = cm_vec2_double_sub(
-      w, cm_vec2_double_scale(r.direction, dot / direct_square));
+  cm_vec2_init(&proj, t * r.direction.x, t * r.direction.y);
+  cm_vec2_sub(w, proj, &distance);
 
-  return cm_vec2_double_norm(distance);
+  return cm_vec2_norm(distance);
 }
 
-bool cm_ray2d_intersect_line(CmRay2D r, cm_line2d_t l, cm_vec2_t *out) {
+bool cm_ray2d_intersect_line(cm_ray2d_t r, cm_line2d_t l, cm_vec2_t *out) {
 
   double det =
       (r.direction.y * l.direction.x) - (r.direction.x * l.direction.y);
@@ -191,7 +158,7 @@ bool cm_ray2d_intersect_line(CmRay2D r, cm_line2d_t l, cm_vec2_t *out) {
   return true;
 }
 
-bool cm_ray2d_intersect_segment(CmRay2D r, CmSegment2D s, cm_vec2_t *out) {
+bool cm_ray2d_intersect_segment(cm_ray2d_t r, CmSegment2D s, cm_vec2_t *out) {
 
   cm_vec2_t direct_segment = {s.b.x - s.a.x, s.b.y - s.a.y};
 
@@ -219,7 +186,7 @@ bool cm_ray2d_intersect_segment(CmRay2D r, CmSegment2D s, cm_vec2_t *out) {
   return true;
 }
 
-bool cm_ray2d_intersect_circle(CmRay2D r, CmCircle2D c, cm_vec2_t *out1,
+bool cm_ray2d_intersect_circle(cm_ray2d_t r, cm_circle2d_t c, cm_vec2_t *out1,
                                cm_vec2_t *out2) {
 
   cm_vec2_t m = {r.origin.x - c.center.x, r.origin.y - c.center.y};
@@ -300,8 +267,8 @@ bool cm_segment2d_intersect_segment(CmSegment2D s1, CmSegment2D s2,
   return true;
 }
 
-bool cm_segment2d_intersect_circle(CmSegment2D s, CmCircle2D c, cm_vec2_t *out1,
-                                   cm_vec2_t *out2) {
+bool cm_segment2d_intersect_circle(CmSegment2D s, cm_circle2d_t c,
+                                   cm_vec2_t *out1, cm_vec2_t *out2) {
 
   cm_vec2_t m = {s.a.x - c.center.x, s.a.y - c.center.y};
   cm_vec2_t direct = {s.a.x - s.b.x, s.a.y - s.b.y};
@@ -335,18 +302,18 @@ cm_vec2_t cm_segment2d_midpoint(CmSegment2D s) {
 
 /********************** Circle **********************/
 
-CmCircle2D cm_circle2d_make(cm_vec2_t center, double r) {
-  return (CmCircle2D){center, r};
+cm_circle2d_t cm_circle2d_make(cm_vec2_t center, double r) {
+  return (cm_circle2d_t){center, r};
 }
 
-bool cm_circle2d_contains_point(CmCircle2D c, cm_vec2_t p) {
+bool cm_circle2d_contains_point(cm_circle2d_t c, cm_vec2_t p) {
   double v = cm_vec2_double_norm_squared(
       (cm_vec2_t){p.x - c.center.x, p.y - c.center.y});
   return _cm_double_equal(v, c.radius * c.radius);
 }
 
-bool cm_circle2d_intersect_circle(CmCircle2D c1, CmCircle2D c2, cm_vec2_t *out1,
-                                  cm_vec2_t *out2) {
+bool cm_circle2d_intersect_circle(cm_circle2d_t c1, cm_circle2d_t c2,
+                                  cm_vec2_t *out1, cm_vec2_t *out2) {
 
   cm_vec2_t centers_vec = {c1.center.x - c2.center.x,
                            c1.center.y - c2.center.y};
@@ -416,7 +383,7 @@ bool cm_triangle2d_contains_point(CmTriangle2D t, cm_vec2_t p) {
   return false;
 }
 
-CmCircle2D cm_triangle2d_circumcircle(CmTriangle2D t) {
+cm_circle2d_t cm_triangle2d_circumcircle(CmTriangle2D t) {
 
   double det = 2 * (t.a.x * (t.b.y - t.c.y) + t.b.x * (t.c.y - t.a.y) +
                     t.c.x * (t.a.y - t.b.y));
@@ -438,10 +405,10 @@ CmCircle2D cm_triangle2d_circumcircle(CmTriangle2D t) {
   double rad =
       cm_vec2_double_norm((cm_vec2_t){t.a.x - center.x, t.a.y - center.y});
 
-  return (CmCircle2D){center, rad};
+  return (cm_circle2d_t){center, rad};
 }
 
-CmCircle2D cm_triangle2d_incircle(CmTriangle2D t) {
+cm_circle2d_t cm_triangle2d_incircle(CmTriangle2D t) {
 
   cm_vec2_t v_ab = {t.b.x - t.a.x, t.b.y - t.a.y};
   cm_vec2_t v_bc = {t.c.x - t.b.x, t.c.y - t.b.y};
@@ -460,16 +427,16 @@ CmCircle2D cm_triangle2d_incircle(CmTriangle2D t) {
   double half_per = perim / 2.;
   double rad = trig_area / half_per;
 
-  return (CmCircle2D){center, rad};
+  return (cm_circle2d_t){center, rad};
 }
 
 /********************** AABB **********************/
 
-CmAABB2D cm_aabb2d_from_points(cm_vec2_t a, cm_vec2_t b) {
-  return (CmAABB2D){a, b};
+cm_aabb2d_t cm_aabb2d_from_points(cm_vec2_t a, cm_vec2_t b) {
+  return (cm_aabb2d_t){a, b};
 }
 
-bool cm_aabb2d_contains_point(CmAABB2D b, cm_vec2_t p) {
+bool cm_aabb2d_contains_point(cm_aabb2d_t b, cm_vec2_t p) {
 
   if ((p.x >= b.min.x && p.x <= b.max.x) && (p.y >= b.min.y && p.y <= b.max.y))
     return true;
@@ -477,7 +444,7 @@ bool cm_aabb2d_contains_point(CmAABB2D b, cm_vec2_t p) {
   return true;
 }
 
-double cm_aabb2d_area(CmAABB2D b) {
+double cm_aabb2d_area(cm_aabb2d_t b) {
 
   cm_vec2_t third_vert = {b.min.x, b.max.y};
 
@@ -493,7 +460,7 @@ double cm_aabb2d_area(CmAABB2D b) {
  * 2 - left
  * 3 - right
  */
-CmSegment2D cm_aabb2d_edge(CmAABB2D b, int index) {
+CmSegment2D cm_aabb2d_edge(cm_aabb2d_t b, int index) {
 
   switch (index) {
   case 0:
@@ -508,8 +475,8 @@ CmSegment2D cm_aabb2d_edge(CmAABB2D b, int index) {
   return (CmSegment2D){0};
 }
 
-cm_vec2_t cm_aabb2d_center(CmAABB2D b) {
+cm_vec2_t cm_aabb2d_center(cm_aabb2d_t b) {
   return (cm_vec2_t){(b.max.x + b.min.x) / 2, (b.max.y + b.min.y) / 2};
 }
 
-void cm_aabb2d_expand(CmAABB2D b, cm_vec2_t new_max) { b.max = new_max; }
+void cm_aabb2d_expand(cm_aabb2d_t b, cm_vec2_t new_max) { b.max = new_max; }

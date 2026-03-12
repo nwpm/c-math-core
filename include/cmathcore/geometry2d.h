@@ -3,25 +3,60 @@
 
 #include "vector2.h"
 
-typedef struct cm_line2d_t cm_line2d_t;
-typedef struct cm_ray2d_t cm_ray2d_t;
-typedef struct cm_segment2d_t cm_segment2d_t;
-typedef struct cm_circle2d_t cm_circle2d_t;
-typedef struct CmAABB2D CmAABB2D;
-typedef struct CmTriangle2D CmTriangle2D;
+typedef struct cm_line2d_t {
+
+  cm_vec2_t origin;
+  cm_vec2_t direction;
+
+} cm_line2d_t;
+
+typedef struct cm_circle2d_t {
+
+  cm_vec2_t center;
+  double radius;
+
+} cm_circle2d_t;
+
+typedef struct cm_ray2d_t {
+
+  cm_vec2_t origin;
+  cm_vec2_t direction;
+
+} cm_ray2d_t;
+
+typedef struct cm_segment2d_t {
+
+  cm_vec2_t a;
+  cm_vec2_t b;
+
+} cm_segment2d_t;
+
+typedef struct cm_aabb2d_t {
+
+  cm_vec2_t min;
+  cm_vec2_t max;
+
+} cm_aabb2d_t;
+
+typedef struct cm_triangle2d_t {
+
+  cm_vec2_t a;
+  cm_vec2_t b;
+  cm_vec2_t c;
+} cm_triangle2d_t;
 
 /* Line */
 
 /* Create 2d line from two points */
-void cm_line2d_from_points(cm_vec2_t a, cm_vec2_t b, cm_line2d_t* res);
+void cm_line2d_from_points(cm_vec2_t a, cm_vec2_t b, cm_line2d_t *res);
 
 /* Get distance from 2d line to point */
 double cm_line2d_distance_point(cm_line2d_t l, cm_vec2_t p);
 
 /* Get the intersection point of a perpendicular and a line */
-void cm_line2d_project_point(cm_line2d_t l, cm_vec2_t p, cm_vec2_t* res);
+void cm_line2d_project_point(cm_line2d_t l, cm_vec2_t p, cm_vec2_t *res);
 
-/* Get intersection point of 2 lines */
+/* Get intersection point of 2 lines (use Cramer's rule) */
 bool cm_line2d_intersect_line(cm_line2d_t l1, cm_line2d_t l2, cm_vec2_t *out);
 
 /* Get intersection points of line and circle */
@@ -29,18 +64,18 @@ bool cm_line2d_intersect_circle(cm_line2d_t l, cm_circle2d_t c, cm_vec2_t *out1,
                                 cm_vec2_t *out2);
 
 /* TODO: Get intersection points of line and aabb */
-bool cm_line2d_intersect_aabb(CmAABB2D box, cm_line2d_t line, cm_vec2_t *out1,
-                              cm_vec2_t *out2);
+bool cm_line2d_intersect_aabb(cm_aabb2d_t box, cm_line2d_t line,
+                              cm_vec2_t *out1, cm_vec2_t *out2);
 
 /* Ray */
 
 /* Create 2d ray by origin and direction */
-cm_ray2d_t cm_ray2d_from_points(cm_vec2_t origin, cm_vec2_t through);
+void cm_ray2d_from_points(cm_vec2_t origin, cm_vec2_t through, cm_ray2d_t* res);
 
-/* Get point on the ray */
-cm_vec2_t cm_ray2d_point(cm_ray2d_t r, double t);
+/* Get point on the ray (t >= 0) */
+void cm_ray2d_point(cm_ray2d_t r, double t, cm_vec2_t* res);
 
-/* Get distance from 2d line to point */
+/* Get distance from 2d ray to point */
 double cm_ray2d_distance_point(cm_ray2d_t r, cm_vec2_t p);
 
 /* Get intersection point of ray and line */
@@ -54,7 +89,7 @@ bool cm_ray2d_intersect_circle(cm_ray2d_t r, cm_circle2d_t c, cm_vec2_t *out1,
                                cm_vec2_t *out2);
 
 /* TODO: Get intersection points of ray and aabb */
-bool cm_ray2d_intersect_aabb(CmAABB2D box, cm_ray2d_t r, cm_vec2_t *out1,
+bool cm_ray2d_intersect_aabb(cm_aabb2d_t box, cm_ray2d_t r, cm_vec2_t *out1,
                              cm_vec2_t *out2);
 
 /* Segment */
@@ -80,7 +115,7 @@ bool cm_segment2d_intersect_circle(cm_segment2d_t s, cm_circle2d_t c,
                                    cm_vec2_t *out1, cm_vec2_t *out2);
 
 /* TODO: Get intersection points of segment and aabb */
-bool cm_segment2d_intersect_aabb(CmAABB2D box, cm_segment2d_t s,
+bool cm_segment2d_intersect_aabb(cm_aabb2d_t box, cm_segment2d_t s,
                                  cm_vec2_t *out1, cm_vec2_t *out2);
 
 /* Circle */
@@ -102,48 +137,47 @@ bool cm_circle2d_intersect_circle(cm_circle2d_t c1, cm_circle2d_t c2,
                                   cm_vec2_t *out1, cm_vec2_t *out2);
 
 /* TODO: Get intersection point of circle and aabb */
-bool cm_circle2d_intersect_aabb(cm_circle2d_t c, CmAABB2D ab, cm_vec2_t *out1,
-                                cm_vec2_t *out2);
+bool cm_circle2d_intersect_aabb(cm_circle2d_t c, cm_aabb2d_t ab,
+                                cm_vec2_t *out1, cm_vec2_t *out2);
 
 /* Triangle */
 
 /* Create triangle */
-CmTriangle2D cm_triangle2d_make(cm_vec2_t p1, cm_vec2_t p2,
-                                cm_vec2_t p3);
+cm_triangle2d_t cm_triangle2d_make(cm_vec2_t p1, cm_vec2_t p2, cm_vec2_t p3);
 
 /* Get area of triangle */
-double cm_triangle2d_area(CmTriangle2D t);
+double cm_triangle2d_area(cm_triangle2d_t t);
 
 /* Get triangle centroid */
-cm_vec2_t cm_triangle2d_centroid(CmTriangle2D t);
+cm_vec2_t cm_triangle2d_centroid(cm_triangle2d_t t);
 
 /* Check if a given point belongs to a triangle */
-bool cm_triangle2d_contains_point(CmTriangle2D t, cm_vec2_t p);
+bool cm_triangle2d_contains_point(cm_triangle2d_t t, cm_vec2_t p);
 
 /* Get circumcircle of triangle */
-cm_circle2d_t cm_triangle2d_circumcircle(CmTriangle2D t);
+cm_circle2d_t cm_triangle2d_circumcircle(cm_triangle2d_t t);
 
 /* Get incircle of triangle */
-cm_circle2d_t cm_triangle2d_incircle(CmTriangle2D t);
+cm_circle2d_t cm_triangle2d_incircle(cm_triangle2d_t t);
 
 /* Axis-aligned bounding box */
 
 /* Create AABB from min - a and max - b points */
-CmAABB2D cm_aabb2d_from_points(cm_vec2_t a, cm_vec2_t b);
+cm_aabb2d_t cm_aabb2d_from_points(cm_vec2_t a, cm_vec2_t b);
 
 /* Check if a given point belongs to a AABB */
-bool cm_aabb2d_contains_point(CmAABB2D b, cm_vec2_t p);
+bool cm_aabb2d_contains_point(cm_aabb2d_t b, cm_vec2_t p);
 
 /* Get AABB area */
-double cm_aabb2d_area(CmAABB2D b);
+double cm_aabb2d_area(cm_aabb2d_t b);
 
 /* Get AABB edge */
-cm_segment2d_t cm_aabb2d_edge(CmAABB2D b, int index);
+cm_segment2d_t cm_aabb2d_edge(cm_aabb2d_t b, int index);
 
 /* Get AABB center */
-cm_vec2_t cm_aabb2d_center(CmAABB2D b);
+cm_vec2_t cm_aabb2d_center(cm_aabb2d_t b);
 
 /* Expand AABB border */
-void cm_aabb2d_expand(CmAABB2D b, cm_vec2_t new_max);
+void cm_aabb2d_expand(cm_aabb2d_t b, cm_vec2_t new_max);
 
 #endif
